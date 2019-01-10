@@ -65,15 +65,17 @@ public class AdAssetFeedSpecImage extends APINode {
   private String mUrl = null;
   @SerializedName("url_tags")
   private String mUrlTags = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdAssetFeedSpecImage() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdAssetFeedSpecImage loadJSON(String json, APIContext context) {
+  public static AdAssetFeedSpecImage loadJSON(String json, APIContext context, String header) {
     AdAssetFeedSpecImage adAssetFeedSpecImage = getGson().fromJson(json, AdAssetFeedSpecImage.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -90,11 +92,12 @@ public class AdAssetFeedSpecImage extends APINode {
     }
     adAssetFeedSpecImage.context = context;
     adAssetFeedSpecImage.rawValue = json;
+    adAssetFeedSpecImage.header = header;
     return adAssetFeedSpecImage;
   }
 
-  public static APINodeList<AdAssetFeedSpecImage> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdAssetFeedSpecImage> adAssetFeedSpecImages = new APINodeList<AdAssetFeedSpecImage>(request, json);
+  public static APINodeList<AdAssetFeedSpecImage> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdAssetFeedSpecImage> adAssetFeedSpecImages = new APINodeList<AdAssetFeedSpecImage>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -105,7 +108,7 @@ public class AdAssetFeedSpecImage extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adAssetFeedSpecImages.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adAssetFeedSpecImages.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adAssetFeedSpecImages;
       } else if (result.isJsonObject()) {
@@ -130,7 +133,7 @@ public class AdAssetFeedSpecImage extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adAssetFeedSpecImages.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adAssetFeedSpecImages.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -141,13 +144,13 @@ public class AdAssetFeedSpecImage extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adAssetFeedSpecImages.add(loadJSON(entry.getValue().toString(), context));
+                  adAssetFeedSpecImages.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adAssetFeedSpecImages.add(loadJSON(obj.toString(), context));
+              adAssetFeedSpecImages.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adAssetFeedSpecImages;
@@ -155,7 +158,7 @@ public class AdAssetFeedSpecImage extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adAssetFeedSpecImages.add(loadJSON(entry.getValue().toString(), context));
+              adAssetFeedSpecImages.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adAssetFeedSpecImages;
         } else {
@@ -174,7 +177,7 @@ public class AdAssetFeedSpecImage extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adAssetFeedSpecImages.add(loadJSON(value.toString(), context));
+              adAssetFeedSpecImages.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -186,7 +189,7 @@ public class AdAssetFeedSpecImage extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adAssetFeedSpecImages.clear();
-          adAssetFeedSpecImages.add(loadJSON(json, context));
+          adAssetFeedSpecImages.add(loadJSON(json, context, header));
           return adAssetFeedSpecImages;
         }
       }
@@ -270,6 +273,15 @@ public class AdAssetFeedSpecImage extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AdAssetFeedSpecImage setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -292,6 +304,7 @@ public class AdAssetFeedSpecImage extends APINode {
     this.mImageCrops = instance.mImageCrops;
     this.mUrl = instance.mUrl;
     this.mUrlTags = instance.mUrlTags;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -299,8 +312,8 @@ public class AdAssetFeedSpecImage extends APINode {
 
   public static APIRequest.ResponseParser<AdAssetFeedSpecImage> getParser() {
     return new APIRequest.ResponseParser<AdAssetFeedSpecImage>() {
-      public APINodeList<AdAssetFeedSpecImage> parseResponse(String response, APIContext context, APIRequest<AdAssetFeedSpecImage> request) throws MalformedResponseException {
-        return AdAssetFeedSpecImage.parseResponse(response, context, request);
+      public APINodeList<AdAssetFeedSpecImage> parseResponse(String response, APIContext context, APIRequest<AdAssetFeedSpecImage> request, String header) throws MalformedResponseException {
+        return AdAssetFeedSpecImage.parseResponse(response, context, request, header);
       }
     };
   }

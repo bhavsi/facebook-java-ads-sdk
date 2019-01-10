@@ -63,15 +63,17 @@ public class ProductCatalogProductSetsBatch extends APINode {
   private String mHandle = null;
   @SerializedName("status")
   private String mStatus = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public ProductCatalogProductSetsBatch() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static ProductCatalogProductSetsBatch loadJSON(String json, APIContext context) {
+  public static ProductCatalogProductSetsBatch loadJSON(String json, APIContext context, String header) {
     ProductCatalogProductSetsBatch productCatalogProductSetsBatch = getGson().fromJson(json, ProductCatalogProductSetsBatch.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -88,11 +90,12 @@ public class ProductCatalogProductSetsBatch extends APINode {
     }
     productCatalogProductSetsBatch.context = context;
     productCatalogProductSetsBatch.rawValue = json;
+    productCatalogProductSetsBatch.header = header;
     return productCatalogProductSetsBatch;
   }
 
-  public static APINodeList<ProductCatalogProductSetsBatch> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<ProductCatalogProductSetsBatch> productCatalogProductSetsBatchs = new APINodeList<ProductCatalogProductSetsBatch>(request, json);
+  public static APINodeList<ProductCatalogProductSetsBatch> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<ProductCatalogProductSetsBatch> productCatalogProductSetsBatchs = new APINodeList<ProductCatalogProductSetsBatch>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -103,7 +106,7 @@ public class ProductCatalogProductSetsBatch extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          productCatalogProductSetsBatchs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          productCatalogProductSetsBatchs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return productCatalogProductSetsBatchs;
       } else if (result.isJsonObject()) {
@@ -128,7 +131,7 @@ public class ProductCatalogProductSetsBatch extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              productCatalogProductSetsBatchs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              productCatalogProductSetsBatchs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -139,13 +142,13 @@ public class ProductCatalogProductSetsBatch extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  productCatalogProductSetsBatchs.add(loadJSON(entry.getValue().toString(), context));
+                  productCatalogProductSetsBatchs.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              productCatalogProductSetsBatchs.add(loadJSON(obj.toString(), context));
+              productCatalogProductSetsBatchs.add(loadJSON(obj.toString(), context, header));
             }
           }
           return productCatalogProductSetsBatchs;
@@ -153,7 +156,7 @@ public class ProductCatalogProductSetsBatch extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              productCatalogProductSetsBatchs.add(loadJSON(entry.getValue().toString(), context));
+              productCatalogProductSetsBatchs.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return productCatalogProductSetsBatchs;
         } else {
@@ -172,7 +175,7 @@ public class ProductCatalogProductSetsBatch extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              productCatalogProductSetsBatchs.add(loadJSON(value.toString(), context));
+              productCatalogProductSetsBatchs.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -184,7 +187,7 @@ public class ProductCatalogProductSetsBatch extends APINode {
 
           // Sixth, check if it's pure JsonObject
           productCatalogProductSetsBatchs.clear();
-          productCatalogProductSetsBatchs.add(loadJSON(json, context));
+          productCatalogProductSetsBatchs.add(loadJSON(json, context, header));
           return productCatalogProductSetsBatchs;
         }
       }
@@ -249,6 +252,15 @@ public class ProductCatalogProductSetsBatch extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public ProductCatalogProductSetsBatch setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -270,6 +282,7 @@ public class ProductCatalogProductSetsBatch extends APINode {
     this.mErrorsTotalCount = instance.mErrorsTotalCount;
     this.mHandle = instance.mHandle;
     this.mStatus = instance.mStatus;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -277,8 +290,8 @@ public class ProductCatalogProductSetsBatch extends APINode {
 
   public static APIRequest.ResponseParser<ProductCatalogProductSetsBatch> getParser() {
     return new APIRequest.ResponseParser<ProductCatalogProductSetsBatch>() {
-      public APINodeList<ProductCatalogProductSetsBatch> parseResponse(String response, APIContext context, APIRequest<ProductCatalogProductSetsBatch> request) throws MalformedResponseException {
-        return ProductCatalogProductSetsBatch.parseResponse(response, context, request);
+      public APINodeList<ProductCatalogProductSetsBatch> parseResponse(String response, APIContext context, APIRequest<ProductCatalogProductSetsBatch> request, String header) throws MalformedResponseException {
+        return ProductCatalogProductSetsBatch.parseResponse(response, context, request, header);
       }
     };
   }

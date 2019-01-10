@@ -113,15 +113,17 @@ public class AdAccountRoas extends APINode {
   private Double mYield7d = null;
   @SerializedName("yield_90d")
   private Double mYield90d = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdAccountRoas() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdAccountRoas loadJSON(String json, APIContext context) {
+  public static AdAccountRoas loadJSON(String json, APIContext context, String header) {
     AdAccountRoas adAccountRoas = getGson().fromJson(json, AdAccountRoas.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -138,11 +140,12 @@ public class AdAccountRoas extends APINode {
     }
     adAccountRoas.context = context;
     adAccountRoas.rawValue = json;
+    adAccountRoas.header = header;
     return adAccountRoas;
   }
 
-  public static APINodeList<AdAccountRoas> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdAccountRoas> adAccountRoass = new APINodeList<AdAccountRoas>(request, json);
+  public static APINodeList<AdAccountRoas> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdAccountRoas> adAccountRoass = new APINodeList<AdAccountRoas>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -153,7 +156,7 @@ public class AdAccountRoas extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adAccountRoass.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adAccountRoass.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adAccountRoass;
       } else if (result.isJsonObject()) {
@@ -178,7 +181,7 @@ public class AdAccountRoas extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adAccountRoass.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adAccountRoass.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -189,13 +192,13 @@ public class AdAccountRoas extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adAccountRoass.add(loadJSON(entry.getValue().toString(), context));
+                  adAccountRoass.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adAccountRoass.add(loadJSON(obj.toString(), context));
+              adAccountRoass.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adAccountRoass;
@@ -203,7 +206,7 @@ public class AdAccountRoas extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adAccountRoass.add(loadJSON(entry.getValue().toString(), context));
+              adAccountRoass.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adAccountRoass;
         } else {
@@ -222,7 +225,7 @@ public class AdAccountRoas extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adAccountRoass.add(loadJSON(value.toString(), context));
+              adAccountRoass.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -234,7 +237,7 @@ public class AdAccountRoas extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adAccountRoass.clear();
-          adAccountRoass.add(loadJSON(json, context));
+          adAccountRoass.add(loadJSON(json, context, header));
           return adAccountRoass;
         }
       }
@@ -524,80 +527,16 @@ public class AdAccountRoas extends APINode {
     return this;
   }
 
-
-
-  public static enum EnumFields {
-      @SerializedName("adgroup_id")
-      VALUE_ADGROUP_ID("adgroup_id"),
-      @SerializedName("arpu_180d")
-      VALUE_ARPU_180D("arpu_180d"),
-      @SerializedName("arpu_1d")
-      VALUE_ARPU_1D("arpu_1d"),
-      @SerializedName("arpu_30d")
-      VALUE_ARPU_30D("arpu_30d"),
-      @SerializedName("arpu_365d")
-      VALUE_ARPU_365D("arpu_365d"),
-      @SerializedName("arpu_3d")
-      VALUE_ARPU_3D("arpu_3d"),
-      @SerializedName("arpu_7d")
-      VALUE_ARPU_7D("arpu_7d"),
-      @SerializedName("arpu_90d")
-      VALUE_ARPU_90D("arpu_90d"),
-      @SerializedName("campaign_group_id")
-      VALUE_CAMPAIGN_GROUP_ID("campaign_group_id"),
-      @SerializedName("campaign_id")
-      VALUE_CAMPAIGN_ID("campaign_id"),
-      @SerializedName("date_start")
-      VALUE_DATE_START("date_start"),
-      @SerializedName("date_stop")
-      VALUE_DATE_STOP("date_stop"),
-      @SerializedName("installs")
-      VALUE_INSTALLS("installs"),
-      @SerializedName("revenue")
-      VALUE_REVENUE("revenue"),
-      @SerializedName("revenue_180d")
-      VALUE_REVENUE_180D("revenue_180d"),
-      @SerializedName("revenue_1d")
-      VALUE_REVENUE_1D("revenue_1d"),
-      @SerializedName("revenue_30d")
-      VALUE_REVENUE_30D("revenue_30d"),
-      @SerializedName("revenue_365d")
-      VALUE_REVENUE_365D("revenue_365d"),
-      @SerializedName("revenue_3d")
-      VALUE_REVENUE_3D("revenue_3d"),
-      @SerializedName("revenue_7d")
-      VALUE_REVENUE_7D("revenue_7d"),
-      @SerializedName("revenue_90d")
-      VALUE_REVENUE_90D("revenue_90d"),
-      @SerializedName("spend")
-      VALUE_SPEND("spend"),
-      @SerializedName("yield_180d")
-      VALUE_YIELD_180D("yield_180d"),
-      @SerializedName("yield_1d")
-      VALUE_YIELD_1D("yield_1d"),
-      @SerializedName("yield_30d")
-      VALUE_YIELD_30D("yield_30d"),
-      @SerializedName("yield_365d")
-      VALUE_YIELD_365D("yield_365d"),
-      @SerializedName("yield_3d")
-      VALUE_YIELD_3D("yield_3d"),
-      @SerializedName("yield_7d")
-      VALUE_YIELD_7D("yield_7d"),
-      @SerializedName("yield_90d")
-      VALUE_YIELD_90D("yield_90d"),
-      NULL(null);
-
-      private String value;
-
-      private EnumFields(String value) {
-        this.value = value;
-      }
-
-      @Override
-      public String toString() {
-        return value;
-      }
+  public String getFieldId() {
+    return mId;
   }
+
+  public AdAccountRoas setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
+
 
 
   synchronized /*package*/ static Gson getGson() {
@@ -643,6 +582,7 @@ public class AdAccountRoas extends APINode {
     this.mYield3d = instance.mYield3d;
     this.mYield7d = instance.mYield7d;
     this.mYield90d = instance.mYield90d;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -650,8 +590,8 @@ public class AdAccountRoas extends APINode {
 
   public static APIRequest.ResponseParser<AdAccountRoas> getParser() {
     return new APIRequest.ResponseParser<AdAccountRoas>() {
-      public APINodeList<AdAccountRoas> parseResponse(String response, APIContext context, APIRequest<AdAccountRoas> request) throws MalformedResponseException {
-        return AdAccountRoas.parseResponse(response, context, request);
+      public APINodeList<AdAccountRoas> parseResponse(String response, APIContext context, APIRequest<AdAccountRoas> request, String header) throws MalformedResponseException {
+        return AdAccountRoas.parseResponse(response, context, request, header);
       }
     };
   }

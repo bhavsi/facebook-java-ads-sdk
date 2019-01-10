@@ -57,15 +57,17 @@ import com.facebook.ads.sdk.APIException.MalformedResponseException;
 public class AdCreativeTextData extends APINode {
   @SerializedName("message")
   private String mMessage = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdCreativeTextData() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdCreativeTextData loadJSON(String json, APIContext context) {
+  public static AdCreativeTextData loadJSON(String json, APIContext context, String header) {
     AdCreativeTextData adCreativeTextData = getGson().fromJson(json, AdCreativeTextData.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -82,11 +84,12 @@ public class AdCreativeTextData extends APINode {
     }
     adCreativeTextData.context = context;
     adCreativeTextData.rawValue = json;
+    adCreativeTextData.header = header;
     return adCreativeTextData;
   }
 
-  public static APINodeList<AdCreativeTextData> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdCreativeTextData> adCreativeTextDatas = new APINodeList<AdCreativeTextData>(request, json);
+  public static APINodeList<AdCreativeTextData> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdCreativeTextData> adCreativeTextDatas = new APINodeList<AdCreativeTextData>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -97,7 +100,7 @@ public class AdCreativeTextData extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adCreativeTextDatas.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adCreativeTextDatas.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adCreativeTextDatas;
       } else if (result.isJsonObject()) {
@@ -122,7 +125,7 @@ public class AdCreativeTextData extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adCreativeTextDatas.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adCreativeTextDatas.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -133,13 +136,13 @@ public class AdCreativeTextData extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adCreativeTextDatas.add(loadJSON(entry.getValue().toString(), context));
+                  adCreativeTextDatas.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adCreativeTextDatas.add(loadJSON(obj.toString(), context));
+              adCreativeTextDatas.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adCreativeTextDatas;
@@ -147,7 +150,7 @@ public class AdCreativeTextData extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adCreativeTextDatas.add(loadJSON(entry.getValue().toString(), context));
+              adCreativeTextDatas.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adCreativeTextDatas;
         } else {
@@ -166,7 +169,7 @@ public class AdCreativeTextData extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adCreativeTextDatas.add(loadJSON(value.toString(), context));
+              adCreativeTextDatas.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -178,7 +181,7 @@ public class AdCreativeTextData extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adCreativeTextDatas.clear();
-          adCreativeTextDatas.add(loadJSON(json, context));
+          adCreativeTextDatas.add(loadJSON(json, context, header));
           return adCreativeTextDatas;
         }
       }
@@ -216,6 +219,15 @@ public class AdCreativeTextData extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AdCreativeTextData setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -234,6 +246,7 @@ public class AdCreativeTextData extends APINode {
 
   public AdCreativeTextData copyFrom(AdCreativeTextData instance) {
     this.mMessage = instance.mMessage;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -241,8 +254,8 @@ public class AdCreativeTextData extends APINode {
 
   public static APIRequest.ResponseParser<AdCreativeTextData> getParser() {
     return new APIRequest.ResponseParser<AdCreativeTextData>() {
-      public APINodeList<AdCreativeTextData> parseResponse(String response, APIContext context, APIRequest<AdCreativeTextData> request) throws MalformedResponseException {
-        return AdCreativeTextData.parseResponse(response, context, request);
+      public APINodeList<AdCreativeTextData> parseResponse(String response, APIContext context, APIRequest<AdCreativeTextData> request, String header) throws MalformedResponseException {
+        return AdCreativeTextData.parseResponse(response, context, request, header);
       }
     };
   }

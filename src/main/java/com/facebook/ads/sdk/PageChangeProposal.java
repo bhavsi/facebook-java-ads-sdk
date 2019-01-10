@@ -78,6 +78,7 @@ public class PageChangeProposal extends APINode {
 
   public PageChangeProposal(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -96,19 +97,17 @@ public class PageChangeProposal extends APINode {
   }
 
   public static PageChangeProposal fetchById(String id, APIContext context) throws APIException {
-    PageChangeProposal pageChangeProposal =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return pageChangeProposal;
   }
 
   public static ListenableFuture<PageChangeProposal> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<PageChangeProposal> pageChangeProposal =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return pageChangeProposal;
   }
 
   public static APINodeList<PageChangeProposal> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -121,12 +120,11 @@ public class PageChangeProposal extends APINode {
   }
 
   public static ListenableFuture<APINodeList<PageChangeProposal>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<PageChangeProposal>> pageChangeProposal =
+    return
       new APIRequest(context, "", "/", "GET", PageChangeProposal.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return pageChangeProposal;
   }
 
   private String getPrefixedId() {
@@ -136,7 +134,7 @@ public class PageChangeProposal extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static PageChangeProposal loadJSON(String json, APIContext context) {
+  public static PageChangeProposal loadJSON(String json, APIContext context, String header) {
     PageChangeProposal pageChangeProposal = getGson().fromJson(json, PageChangeProposal.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -153,11 +151,12 @@ public class PageChangeProposal extends APINode {
     }
     pageChangeProposal.context = context;
     pageChangeProposal.rawValue = json;
+    pageChangeProposal.header = header;
     return pageChangeProposal;
   }
 
-  public static APINodeList<PageChangeProposal> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<PageChangeProposal> pageChangeProposals = new APINodeList<PageChangeProposal>(request, json);
+  public static APINodeList<PageChangeProposal> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<PageChangeProposal> pageChangeProposals = new APINodeList<PageChangeProposal>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -168,7 +167,7 @@ public class PageChangeProposal extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          pageChangeProposals.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          pageChangeProposals.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return pageChangeProposals;
       } else if (result.isJsonObject()) {
@@ -193,7 +192,7 @@ public class PageChangeProposal extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              pageChangeProposals.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              pageChangeProposals.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -204,13 +203,13 @@ public class PageChangeProposal extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  pageChangeProposals.add(loadJSON(entry.getValue().toString(), context));
+                  pageChangeProposals.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              pageChangeProposals.add(loadJSON(obj.toString(), context));
+              pageChangeProposals.add(loadJSON(obj.toString(), context, header));
             }
           }
           return pageChangeProposals;
@@ -218,7 +217,7 @@ public class PageChangeProposal extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              pageChangeProposals.add(loadJSON(entry.getValue().toString(), context));
+              pageChangeProposals.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return pageChangeProposals;
         } else {
@@ -237,7 +236,7 @@ public class PageChangeProposal extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              pageChangeProposals.add(loadJSON(value.toString(), context));
+              pageChangeProposals.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -249,7 +248,7 @@ public class PageChangeProposal extends APINode {
 
           // Sixth, check if it's pure JsonObject
           pageChangeProposals.clear();
-          pageChangeProposals.add(loadJSON(json, context));
+          pageChangeProposals.add(loadJSON(json, context, header));
           return pageChangeProposals;
         }
       }
@@ -335,8 +334,8 @@ public class PageChangeProposal extends APINode {
     };
 
     @Override
-    public PageChangeProposal parseResponse(String response) throws APIException {
-      return PageChangeProposal.parseResponse(response, getContext(), this).head();
+    public PageChangeProposal parseResponse(String response, String header) throws APIException {
+      return PageChangeProposal.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -346,7 +345,8 @@ public class PageChangeProposal extends APINode {
 
     @Override
     public PageChangeProposal execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -357,10 +357,10 @@ public class PageChangeProposal extends APINode {
     public ListenableFuture<PageChangeProposal> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, PageChangeProposal>() {
-           public PageChangeProposal apply(String result) {
+        new Function<ResponseWrapper, PageChangeProposal>() {
+           public PageChangeProposal apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -481,8 +481,8 @@ public class PageChangeProposal extends APINode {
     };
 
     @Override
-    public PageChangeProposal parseResponse(String response) throws APIException {
-      return PageChangeProposal.parseResponse(response, getContext(), this).head();
+    public PageChangeProposal parseResponse(String response, String header) throws APIException {
+      return PageChangeProposal.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -492,7 +492,8 @@ public class PageChangeProposal extends APINode {
 
     @Override
     public PageChangeProposal execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -503,10 +504,10 @@ public class PageChangeProposal extends APINode {
     public ListenableFuture<PageChangeProposal> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, PageChangeProposal>() {
-           public PageChangeProposal apply(String result) {
+        new Function<ResponseWrapper, PageChangeProposal>() {
+           public PageChangeProposal apply(ResponseWrapper result) {
              try {
-               return APIRequestUpdate.this.parseResponse(result);
+               return APIRequestUpdate.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -607,8 +608,8 @@ public class PageChangeProposal extends APINode {
 
   public static APIRequest.ResponseParser<PageChangeProposal> getParser() {
     return new APIRequest.ResponseParser<PageChangeProposal>() {
-      public APINodeList<PageChangeProposal> parseResponse(String response, APIContext context, APIRequest<PageChangeProposal> request) throws MalformedResponseException {
-        return PageChangeProposal.parseResponse(response, context, request);
+      public APINodeList<PageChangeProposal> parseResponse(String response, APIContext context, APIRequest<PageChangeProposal> request, String header) throws MalformedResponseException {
+        return PageChangeProposal.parseResponse(response, context, request, header);
       }
     };
   }

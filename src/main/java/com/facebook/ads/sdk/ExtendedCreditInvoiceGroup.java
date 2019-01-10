@@ -78,6 +78,7 @@ public class ExtendedCreditInvoiceGroup extends APINode {
 
   public ExtendedCreditInvoiceGroup(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -96,19 +97,17 @@ public class ExtendedCreditInvoiceGroup extends APINode {
   }
 
   public static ExtendedCreditInvoiceGroup fetchById(String id, APIContext context) throws APIException {
-    ExtendedCreditInvoiceGroup extendedCreditInvoiceGroup =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return extendedCreditInvoiceGroup;
   }
 
   public static ListenableFuture<ExtendedCreditInvoiceGroup> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<ExtendedCreditInvoiceGroup> extendedCreditInvoiceGroup =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return extendedCreditInvoiceGroup;
   }
 
   public static APINodeList<ExtendedCreditInvoiceGroup> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -121,12 +120,11 @@ public class ExtendedCreditInvoiceGroup extends APINode {
   }
 
   public static ListenableFuture<APINodeList<ExtendedCreditInvoiceGroup>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<ExtendedCreditInvoiceGroup>> extendedCreditInvoiceGroup =
+    return
       new APIRequest(context, "", "/", "GET", ExtendedCreditInvoiceGroup.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return extendedCreditInvoiceGroup;
   }
 
   private String getPrefixedId() {
@@ -136,7 +134,7 @@ public class ExtendedCreditInvoiceGroup extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static ExtendedCreditInvoiceGroup loadJSON(String json, APIContext context) {
+  public static ExtendedCreditInvoiceGroup loadJSON(String json, APIContext context, String header) {
     ExtendedCreditInvoiceGroup extendedCreditInvoiceGroup = getGson().fromJson(json, ExtendedCreditInvoiceGroup.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -153,11 +151,12 @@ public class ExtendedCreditInvoiceGroup extends APINode {
     }
     extendedCreditInvoiceGroup.context = context;
     extendedCreditInvoiceGroup.rawValue = json;
+    extendedCreditInvoiceGroup.header = header;
     return extendedCreditInvoiceGroup;
   }
 
-  public static APINodeList<ExtendedCreditInvoiceGroup> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<ExtendedCreditInvoiceGroup> extendedCreditInvoiceGroups = new APINodeList<ExtendedCreditInvoiceGroup>(request, json);
+  public static APINodeList<ExtendedCreditInvoiceGroup> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<ExtendedCreditInvoiceGroup> extendedCreditInvoiceGroups = new APINodeList<ExtendedCreditInvoiceGroup>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -168,7 +167,7 @@ public class ExtendedCreditInvoiceGroup extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          extendedCreditInvoiceGroups.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          extendedCreditInvoiceGroups.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return extendedCreditInvoiceGroups;
       } else if (result.isJsonObject()) {
@@ -193,7 +192,7 @@ public class ExtendedCreditInvoiceGroup extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              extendedCreditInvoiceGroups.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              extendedCreditInvoiceGroups.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -204,13 +203,13 @@ public class ExtendedCreditInvoiceGroup extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  extendedCreditInvoiceGroups.add(loadJSON(entry.getValue().toString(), context));
+                  extendedCreditInvoiceGroups.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              extendedCreditInvoiceGroups.add(loadJSON(obj.toString(), context));
+              extendedCreditInvoiceGroups.add(loadJSON(obj.toString(), context, header));
             }
           }
           return extendedCreditInvoiceGroups;
@@ -218,7 +217,7 @@ public class ExtendedCreditInvoiceGroup extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              extendedCreditInvoiceGroups.add(loadJSON(entry.getValue().toString(), context));
+              extendedCreditInvoiceGroups.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return extendedCreditInvoiceGroups;
         } else {
@@ -237,7 +236,7 @@ public class ExtendedCreditInvoiceGroup extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              extendedCreditInvoiceGroups.add(loadJSON(value.toString(), context));
+              extendedCreditInvoiceGroups.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -249,7 +248,7 @@ public class ExtendedCreditInvoiceGroup extends APINode {
 
           // Sixth, check if it's pure JsonObject
           extendedCreditInvoiceGroups.clear();
-          extendedCreditInvoiceGroups.add(loadJSON(json, context));
+          extendedCreditInvoiceGroups.add(loadJSON(json, context, header));
           return extendedCreditInvoiceGroups;
         }
       }
@@ -339,8 +338,8 @@ public class ExtendedCreditInvoiceGroup extends APINode {
     };
 
     @Override
-    public APINodeList<APINode> parseResponse(String response) throws APIException {
-      return APINode.parseResponse(response, getContext(), this);
+    public APINodeList<APINode> parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header);
     }
 
     @Override
@@ -350,7 +349,8 @@ public class ExtendedCreditInvoiceGroup extends APINode {
 
     @Override
     public APINodeList<APINode> execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
       return lastResponse;
     }
 
@@ -361,10 +361,10 @@ public class ExtendedCreditInvoiceGroup extends APINode {
     public ListenableFuture<APINodeList<APINode>> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINodeList<APINode>>() {
-           public APINodeList<APINode> apply(String result) {
+        new Function<ResponseWrapper, APINodeList<APINode>>() {
+           public APINodeList<APINode> apply(ResponseWrapper result) {
              try {
-               return APIRequestDeleteAdAccounts.this.parseResponse(result);
+               return APIRequestDeleteAdAccounts.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -446,6 +446,8 @@ public class ExtendedCreditInvoiceGroup extends APINode {
     public static final String[] FIELDS = {
       "account_id",
       "account_status",
+      "ad_account_creation_request",
+      "ad_account_promotable_objects",
       "age",
       "agency_client_declaration",
       "amount_spent",
@@ -462,6 +464,7 @@ public class ExtendedCreditInvoiceGroup extends APINode {
       "capabilities",
       "created_time",
       "currency",
+      "direct_deals_tos_accepted",
       "disable_reason",
       "end_advertiser",
       "end_advertiser_name",
@@ -475,6 +478,7 @@ public class ExtendedCreditInvoiceGroup extends APINode {
       "io_number",
       "is_attribution_spec_system_default",
       "is_direct_deals_enabled",
+      "is_in_3ds_authorization_enabled_market",
       "is_in_middle_of_local_entity_migration",
       "is_notifications_enabled",
       "is_personal",
@@ -488,7 +492,6 @@ public class ExtendedCreditInvoiceGroup extends APINode {
       "offsite_pixels_tos_accepted",
       "owner",
       "partner",
-      "rate_limit_reset_time",
       "rf_spec",
       "show_checkout_experience",
       "spend_cap",
@@ -504,8 +507,8 @@ public class ExtendedCreditInvoiceGroup extends APINode {
     };
 
     @Override
-    public APINodeList<AdAccount> parseResponse(String response) throws APIException {
-      return AdAccount.parseResponse(response, getContext(), this);
+    public APINodeList<AdAccount> parseResponse(String response, String header) throws APIException {
+      return AdAccount.parseResponse(response, getContext(), this, header);
     }
 
     @Override
@@ -515,7 +518,8 @@ public class ExtendedCreditInvoiceGroup extends APINode {
 
     @Override
     public APINodeList<AdAccount> execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
       return lastResponse;
     }
 
@@ -526,10 +530,10 @@ public class ExtendedCreditInvoiceGroup extends APINode {
     public ListenableFuture<APINodeList<AdAccount>> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINodeList<AdAccount>>() {
-           public APINodeList<AdAccount> apply(String result) {
+        new Function<ResponseWrapper, APINodeList<AdAccount>>() {
+           public APINodeList<AdAccount> apply(ResponseWrapper result) {
              try {
-               return APIRequestGetAdAccounts.this.parseResponse(result);
+               return APIRequestGetAdAccounts.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -603,6 +607,20 @@ public class ExtendedCreditInvoiceGroup extends APINode {
     }
     public APIRequestGetAdAccounts requestAccountStatusField (boolean value) {
       this.requestField("account_status", value);
+      return this;
+    }
+    public APIRequestGetAdAccounts requestAdAccountCreationRequestField () {
+      return this.requestAdAccountCreationRequestField(true);
+    }
+    public APIRequestGetAdAccounts requestAdAccountCreationRequestField (boolean value) {
+      this.requestField("ad_account_creation_request", value);
+      return this;
+    }
+    public APIRequestGetAdAccounts requestAdAccountPromotableObjectsField () {
+      return this.requestAdAccountPromotableObjectsField(true);
+    }
+    public APIRequestGetAdAccounts requestAdAccountPromotableObjectsField (boolean value) {
+      this.requestField("ad_account_promotable_objects", value);
       return this;
     }
     public APIRequestGetAdAccounts requestAgeField () {
@@ -717,6 +735,13 @@ public class ExtendedCreditInvoiceGroup extends APINode {
       this.requestField("currency", value);
       return this;
     }
+    public APIRequestGetAdAccounts requestDirectDealsTosAcceptedField () {
+      return this.requestDirectDealsTosAcceptedField(true);
+    }
+    public APIRequestGetAdAccounts requestDirectDealsTosAcceptedField (boolean value) {
+      this.requestField("direct_deals_tos_accepted", value);
+      return this;
+    }
     public APIRequestGetAdAccounts requestDisableReasonField () {
       return this.requestDisableReasonField(true);
     }
@@ -808,6 +833,13 @@ public class ExtendedCreditInvoiceGroup extends APINode {
       this.requestField("is_direct_deals_enabled", value);
       return this;
     }
+    public APIRequestGetAdAccounts requestIsIn3dsAuthorizationEnabledMarketField () {
+      return this.requestIsIn3dsAuthorizationEnabledMarketField(true);
+    }
+    public APIRequestGetAdAccounts requestIsIn3dsAuthorizationEnabledMarketField (boolean value) {
+      this.requestField("is_in_3ds_authorization_enabled_market", value);
+      return this;
+    }
     public APIRequestGetAdAccounts requestIsInMiddleOfLocalEntityMigrationField () {
       return this.requestIsInMiddleOfLocalEntityMigrationField(true);
     }
@@ -897,13 +929,6 @@ public class ExtendedCreditInvoiceGroup extends APINode {
     }
     public APIRequestGetAdAccounts requestPartnerField (boolean value) {
       this.requestField("partner", value);
-      return this;
-    }
-    public APIRequestGetAdAccounts requestRateLimitResetTimeField () {
-      return this.requestRateLimitResetTimeField(true);
-    }
-    public APIRequestGetAdAccounts requestRateLimitResetTimeField (boolean value) {
-      this.requestField("rate_limit_reset_time", value);
       return this;
     }
     public APIRequestGetAdAccounts requestRfSpecField () {
@@ -1006,8 +1031,8 @@ public class ExtendedCreditInvoiceGroup extends APINode {
     };
 
     @Override
-    public APINode parseResponse(String response) throws APIException {
-      return APINode.parseResponse(response, getContext(), this).head();
+    public APINode parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -1017,7 +1042,8 @@ public class ExtendedCreditInvoiceGroup extends APINode {
 
     @Override
     public APINode execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -1028,10 +1054,10 @@ public class ExtendedCreditInvoiceGroup extends APINode {
     public ListenableFuture<APINode> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINode>() {
-           public APINode apply(String result) {
+        new Function<ResponseWrapper, APINode>() {
+           public APINode apply(ResponseWrapper result) {
              try {
-               return APIRequestDelete.this.parseResponse(result);
+               return APIRequestDelete.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -1115,8 +1141,8 @@ public class ExtendedCreditInvoiceGroup extends APINode {
     };
 
     @Override
-    public ExtendedCreditInvoiceGroup parseResponse(String response) throws APIException {
-      return ExtendedCreditInvoiceGroup.parseResponse(response, getContext(), this).head();
+    public ExtendedCreditInvoiceGroup parseResponse(String response, String header) throws APIException {
+      return ExtendedCreditInvoiceGroup.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -1126,7 +1152,8 @@ public class ExtendedCreditInvoiceGroup extends APINode {
 
     @Override
     public ExtendedCreditInvoiceGroup execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -1137,10 +1164,10 @@ public class ExtendedCreditInvoiceGroup extends APINode {
     public ListenableFuture<ExtendedCreditInvoiceGroup> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, ExtendedCreditInvoiceGroup>() {
-           public ExtendedCreditInvoiceGroup apply(String result) {
+        new Function<ResponseWrapper, ExtendedCreditInvoiceGroup>() {
+           public ExtendedCreditInvoiceGroup apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -1254,16 +1281,16 @@ public class ExtendedCreditInvoiceGroup extends APINode {
       return lastResponse;
     }
     public static final String[] PARAMS = {
-      "emails",
       "name",
+      "emails",
     };
 
     public static final String[] FIELDS = {
     };
 
     @Override
-    public ExtendedCreditInvoiceGroup parseResponse(String response) throws APIException {
-      return ExtendedCreditInvoiceGroup.parseResponse(response, getContext(), this).head();
+    public ExtendedCreditInvoiceGroup parseResponse(String response, String header) throws APIException {
+      return ExtendedCreditInvoiceGroup.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -1273,7 +1300,8 @@ public class ExtendedCreditInvoiceGroup extends APINode {
 
     @Override
     public ExtendedCreditInvoiceGroup execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -1284,10 +1312,10 @@ public class ExtendedCreditInvoiceGroup extends APINode {
     public ListenableFuture<ExtendedCreditInvoiceGroup> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, ExtendedCreditInvoiceGroup>() {
-           public ExtendedCreditInvoiceGroup apply(String result) {
+        new Function<ResponseWrapper, ExtendedCreditInvoiceGroup>() {
+           public ExtendedCreditInvoiceGroup apply(ResponseWrapper result) {
              try {
-               return APIRequestUpdate.this.parseResponse(result);
+               return APIRequestUpdate.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -1313,17 +1341,17 @@ public class ExtendedCreditInvoiceGroup extends APINode {
     }
 
 
+    public APIRequestUpdate setName (String name) {
+      this.setParam("name", name);
+      return this;
+    }
+
     public APIRequestUpdate setEmails (List<String> emails) {
       this.setParam("emails", emails);
       return this;
     }
     public APIRequestUpdate setEmails (String emails) {
       this.setParam("emails", emails);
-      return this;
-    }
-
-    public APIRequestUpdate setName (String name) {
-      this.setParam("name", name);
       return this;
     }
 
@@ -1393,8 +1421,8 @@ public class ExtendedCreditInvoiceGroup extends APINode {
 
   public static APIRequest.ResponseParser<ExtendedCreditInvoiceGroup> getParser() {
     return new APIRequest.ResponseParser<ExtendedCreditInvoiceGroup>() {
-      public APINodeList<ExtendedCreditInvoiceGroup> parseResponse(String response, APIContext context, APIRequest<ExtendedCreditInvoiceGroup> request) throws MalformedResponseException {
-        return ExtendedCreditInvoiceGroup.parseResponse(response, context, request);
+      public APINodeList<ExtendedCreditInvoiceGroup> parseResponse(String response, APIContext context, APIRequest<ExtendedCreditInvoiceGroup> request, String header) throws MalformedResponseException {
+        return ExtendedCreditInvoiceGroup.parseResponse(response, context, request, header);
       }
     };
   }

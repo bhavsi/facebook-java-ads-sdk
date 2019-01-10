@@ -56,20 +56,22 @@ import com.facebook.ads.sdk.APIException.MalformedResponseException;
  */
 public class AdsPixelStatsResult extends APINode {
   @SerializedName("aggregation")
-  private EnumAggregation mAggregation = null;
+  private String mAggregation = null;
   @SerializedName("data")
   private List<AdsPixelStats> mData = null;
   @SerializedName("start_time")
   private String mStartTime = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdsPixelStatsResult() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdsPixelStatsResult loadJSON(String json, APIContext context) {
+  public static AdsPixelStatsResult loadJSON(String json, APIContext context, String header) {
     AdsPixelStatsResult adsPixelStatsResult = getGson().fromJson(json, AdsPixelStatsResult.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -86,11 +88,12 @@ public class AdsPixelStatsResult extends APINode {
     }
     adsPixelStatsResult.context = context;
     adsPixelStatsResult.rawValue = json;
+    adsPixelStatsResult.header = header;
     return adsPixelStatsResult;
   }
 
-  public static APINodeList<AdsPixelStatsResult> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdsPixelStatsResult> adsPixelStatsResults = new APINodeList<AdsPixelStatsResult>(request, json);
+  public static APINodeList<AdsPixelStatsResult> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdsPixelStatsResult> adsPixelStatsResults = new APINodeList<AdsPixelStatsResult>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -101,7 +104,7 @@ public class AdsPixelStatsResult extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adsPixelStatsResults.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adsPixelStatsResults.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adsPixelStatsResults;
       } else if (result.isJsonObject()) {
@@ -126,7 +129,7 @@ public class AdsPixelStatsResult extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adsPixelStatsResults.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adsPixelStatsResults.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -137,13 +140,13 @@ public class AdsPixelStatsResult extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adsPixelStatsResults.add(loadJSON(entry.getValue().toString(), context));
+                  adsPixelStatsResults.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adsPixelStatsResults.add(loadJSON(obj.toString(), context));
+              adsPixelStatsResults.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adsPixelStatsResults;
@@ -151,7 +154,7 @@ public class AdsPixelStatsResult extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adsPixelStatsResults.add(loadJSON(entry.getValue().toString(), context));
+              adsPixelStatsResults.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adsPixelStatsResults;
         } else {
@@ -170,7 +173,7 @@ public class AdsPixelStatsResult extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adsPixelStatsResults.add(loadJSON(value.toString(), context));
+              adsPixelStatsResults.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -182,7 +185,7 @@ public class AdsPixelStatsResult extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adsPixelStatsResults.clear();
-          adsPixelStatsResults.add(loadJSON(json, context));
+          adsPixelStatsResults.add(loadJSON(json, context, header));
           return adsPixelStatsResults;
         }
       }
@@ -211,11 +214,11 @@ public class AdsPixelStatsResult extends APINode {
   }
 
 
-  public EnumAggregation getFieldAggregation() {
+  public String getFieldAggregation() {
     return mAggregation;
   }
 
-  public AdsPixelStatsResult setFieldAggregation(EnumAggregation value) {
+  public AdsPixelStatsResult setFieldAggregation(String value) {
     this.mAggregation = value;
     return this;
   }
@@ -243,6 +246,15 @@ public class AdsPixelStatsResult extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AdsPixelStatsResult setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
   public static enum EnumAggregation {
@@ -258,12 +270,26 @@ public class AdsPixelStatsResult extends APINode {
       VALUE_EVENT("event"),
       @SerializedName("host")
       VALUE_HOST("host"),
+      @SerializedName("people_reached")
+      VALUE_PEOPLE_REACHED("people_reached"),
+      @SerializedName("pii_keys")
+      VALUE_PII_KEYS("pii_keys"),
+      @SerializedName("pii_lift")
+      VALUE_PII_LIFT("pii_lift"),
       @SerializedName("pixel_fire")
       VALUE_PIXEL_FIRE("pixel_fire"),
+      @SerializedName("event_detection_method")
+      VALUE_EVENT_DETECTION_METHOD("event_detection_method"),
       @SerializedName("url")
       VALUE_URL("url"),
+      @SerializedName("event_value_count")
+      VALUE_EVENT_VALUE_COUNT("event_value_count"),
+      @SerializedName("url_by_rule")
+      VALUE_URL_BY_RULE("url_by_rule"),
       @SerializedName("event_total_counts")
       VALUE_EVENT_TOTAL_COUNTS("event_total_counts"),
+      @SerializedName("event_source")
+      VALUE_EVENT_SOURCE("event_source"),
       NULL(null);
 
       private String value;
@@ -296,6 +322,7 @@ public class AdsPixelStatsResult extends APINode {
     this.mAggregation = instance.mAggregation;
     this.mData = instance.mData;
     this.mStartTime = instance.mStartTime;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -303,8 +330,8 @@ public class AdsPixelStatsResult extends APINode {
 
   public static APIRequest.ResponseParser<AdsPixelStatsResult> getParser() {
     return new APIRequest.ResponseParser<AdsPixelStatsResult>() {
-      public APINodeList<AdsPixelStatsResult> parseResponse(String response, APIContext context, APIRequest<AdsPixelStatsResult> request) throws MalformedResponseException {
-        return AdsPixelStatsResult.parseResponse(response, context, request);
+      public APINodeList<AdsPixelStatsResult> parseResponse(String response, APIContext context, APIRequest<AdsPixelStatsResult> request, String header) throws MalformedResponseException {
+        return AdsPixelStatsResult.parseResponse(response, context, request, header);
       }
     };
   }

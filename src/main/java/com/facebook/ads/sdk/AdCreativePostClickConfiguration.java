@@ -59,15 +59,17 @@ public class AdCreativePostClickConfiguration extends APINode {
   private String mPostClickItemDescription = null;
   @SerializedName("post_click_item_headline")
   private String mPostClickItemHeadline = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdCreativePostClickConfiguration() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdCreativePostClickConfiguration loadJSON(String json, APIContext context) {
+  public static AdCreativePostClickConfiguration loadJSON(String json, APIContext context, String header) {
     AdCreativePostClickConfiguration adCreativePostClickConfiguration = getGson().fromJson(json, AdCreativePostClickConfiguration.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -84,11 +86,12 @@ public class AdCreativePostClickConfiguration extends APINode {
     }
     adCreativePostClickConfiguration.context = context;
     adCreativePostClickConfiguration.rawValue = json;
+    adCreativePostClickConfiguration.header = header;
     return adCreativePostClickConfiguration;
   }
 
-  public static APINodeList<AdCreativePostClickConfiguration> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdCreativePostClickConfiguration> adCreativePostClickConfigurations = new APINodeList<AdCreativePostClickConfiguration>(request, json);
+  public static APINodeList<AdCreativePostClickConfiguration> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdCreativePostClickConfiguration> adCreativePostClickConfigurations = new APINodeList<AdCreativePostClickConfiguration>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -99,7 +102,7 @@ public class AdCreativePostClickConfiguration extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adCreativePostClickConfigurations.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adCreativePostClickConfigurations.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adCreativePostClickConfigurations;
       } else if (result.isJsonObject()) {
@@ -124,7 +127,7 @@ public class AdCreativePostClickConfiguration extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adCreativePostClickConfigurations.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adCreativePostClickConfigurations.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -135,13 +138,13 @@ public class AdCreativePostClickConfiguration extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adCreativePostClickConfigurations.add(loadJSON(entry.getValue().toString(), context));
+                  adCreativePostClickConfigurations.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adCreativePostClickConfigurations.add(loadJSON(obj.toString(), context));
+              adCreativePostClickConfigurations.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adCreativePostClickConfigurations;
@@ -149,7 +152,7 @@ public class AdCreativePostClickConfiguration extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adCreativePostClickConfigurations.add(loadJSON(entry.getValue().toString(), context));
+              adCreativePostClickConfigurations.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adCreativePostClickConfigurations;
         } else {
@@ -168,7 +171,7 @@ public class AdCreativePostClickConfiguration extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adCreativePostClickConfigurations.add(loadJSON(value.toString(), context));
+              adCreativePostClickConfigurations.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -180,7 +183,7 @@ public class AdCreativePostClickConfiguration extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adCreativePostClickConfigurations.clear();
-          adCreativePostClickConfigurations.add(loadJSON(json, context));
+          adCreativePostClickConfigurations.add(loadJSON(json, context, header));
           return adCreativePostClickConfigurations;
         }
       }
@@ -227,6 +230,15 @@ public class AdCreativePostClickConfiguration extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AdCreativePostClickConfiguration setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -246,6 +258,7 @@ public class AdCreativePostClickConfiguration extends APINode {
   public AdCreativePostClickConfiguration copyFrom(AdCreativePostClickConfiguration instance) {
     this.mPostClickItemDescription = instance.mPostClickItemDescription;
     this.mPostClickItemHeadline = instance.mPostClickItemHeadline;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -253,8 +266,8 @@ public class AdCreativePostClickConfiguration extends APINode {
 
   public static APIRequest.ResponseParser<AdCreativePostClickConfiguration> getParser() {
     return new APIRequest.ResponseParser<AdCreativePostClickConfiguration>() {
-      public APINodeList<AdCreativePostClickConfiguration> parseResponse(String response, APIContext context, APIRequest<AdCreativePostClickConfiguration> request) throws MalformedResponseException {
-        return AdCreativePostClickConfiguration.parseResponse(response, context, request);
+      public APINodeList<AdCreativePostClickConfiguration> parseResponse(String response, APIContext context, APIRequest<AdCreativePostClickConfiguration> request, String header) throws MalformedResponseException {
+        return AdCreativePostClickConfiguration.parseResponse(response, context, request, header);
       }
     };
   }

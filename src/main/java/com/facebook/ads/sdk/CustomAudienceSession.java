@@ -71,15 +71,17 @@ public class CustomAudienceSession extends APINode {
   private String mStage = null;
   @SerializedName("start_time")
   private String mStartTime = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public CustomAudienceSession() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static CustomAudienceSession loadJSON(String json, APIContext context) {
+  public static CustomAudienceSession loadJSON(String json, APIContext context, String header) {
     CustomAudienceSession customAudienceSession = getGson().fromJson(json, CustomAudienceSession.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -96,11 +98,12 @@ public class CustomAudienceSession extends APINode {
     }
     customAudienceSession.context = context;
     customAudienceSession.rawValue = json;
+    customAudienceSession.header = header;
     return customAudienceSession;
   }
 
-  public static APINodeList<CustomAudienceSession> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<CustomAudienceSession> customAudienceSessions = new APINodeList<CustomAudienceSession>(request, json);
+  public static APINodeList<CustomAudienceSession> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<CustomAudienceSession> customAudienceSessions = new APINodeList<CustomAudienceSession>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -111,7 +114,7 @@ public class CustomAudienceSession extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          customAudienceSessions.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          customAudienceSessions.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return customAudienceSessions;
       } else if (result.isJsonObject()) {
@@ -136,7 +139,7 @@ public class CustomAudienceSession extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              customAudienceSessions.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              customAudienceSessions.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -147,13 +150,13 @@ public class CustomAudienceSession extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  customAudienceSessions.add(loadJSON(entry.getValue().toString(), context));
+                  customAudienceSessions.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              customAudienceSessions.add(loadJSON(obj.toString(), context));
+              customAudienceSessions.add(loadJSON(obj.toString(), context, header));
             }
           }
           return customAudienceSessions;
@@ -161,7 +164,7 @@ public class CustomAudienceSession extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              customAudienceSessions.add(loadJSON(entry.getValue().toString(), context));
+              customAudienceSessions.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return customAudienceSessions;
         } else {
@@ -180,7 +183,7 @@ public class CustomAudienceSession extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              customAudienceSessions.add(loadJSON(value.toString(), context));
+              customAudienceSessions.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -192,7 +195,7 @@ public class CustomAudienceSession extends APINode {
 
           // Sixth, check if it's pure JsonObject
           customAudienceSessions.clear();
-          customAudienceSessions.add(loadJSON(json, context));
+          customAudienceSessions.add(loadJSON(json, context, header));
           return customAudienceSessions;
         }
       }
@@ -293,6 +296,15 @@ public class CustomAudienceSession extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public CustomAudienceSession setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -318,6 +330,7 @@ public class CustomAudienceSession extends APINode {
     this.mSessionId = instance.mSessionId;
     this.mStage = instance.mStage;
     this.mStartTime = instance.mStartTime;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -325,8 +338,8 @@ public class CustomAudienceSession extends APINode {
 
   public static APIRequest.ResponseParser<CustomAudienceSession> getParser() {
     return new APIRequest.ResponseParser<CustomAudienceSession>() {
-      public APINodeList<CustomAudienceSession> parseResponse(String response, APIContext context, APIRequest<CustomAudienceSession> request) throws MalformedResponseException {
-        return CustomAudienceSession.parseResponse(response, context, request);
+      public APINodeList<CustomAudienceSession> parseResponse(String response, APIContext context, APIRequest<CustomAudienceSession> request, String header) throws MalformedResponseException {
+        return CustomAudienceSession.parseResponse(response, context, request, header);
       }
     };
   }

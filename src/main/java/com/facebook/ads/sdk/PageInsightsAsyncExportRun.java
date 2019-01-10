@@ -84,6 +84,7 @@ public class PageInsightsAsyncExportRun extends APINode {
 
   public PageInsightsAsyncExportRun(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -102,19 +103,17 @@ public class PageInsightsAsyncExportRun extends APINode {
   }
 
   public static PageInsightsAsyncExportRun fetchById(String id, APIContext context) throws APIException {
-    PageInsightsAsyncExportRun pageInsightsAsyncExportRun =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return pageInsightsAsyncExportRun;
   }
 
   public static ListenableFuture<PageInsightsAsyncExportRun> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<PageInsightsAsyncExportRun> pageInsightsAsyncExportRun =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return pageInsightsAsyncExportRun;
   }
 
   public static APINodeList<PageInsightsAsyncExportRun> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -127,12 +126,11 @@ public class PageInsightsAsyncExportRun extends APINode {
   }
 
   public static ListenableFuture<APINodeList<PageInsightsAsyncExportRun>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<PageInsightsAsyncExportRun>> pageInsightsAsyncExportRun =
+    return
       new APIRequest(context, "", "/", "GET", PageInsightsAsyncExportRun.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return pageInsightsAsyncExportRun;
   }
 
   private String getPrefixedId() {
@@ -142,7 +140,7 @@ public class PageInsightsAsyncExportRun extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static PageInsightsAsyncExportRun loadJSON(String json, APIContext context) {
+  public static PageInsightsAsyncExportRun loadJSON(String json, APIContext context, String header) {
     PageInsightsAsyncExportRun pageInsightsAsyncExportRun = getGson().fromJson(json, PageInsightsAsyncExportRun.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -159,11 +157,12 @@ public class PageInsightsAsyncExportRun extends APINode {
     }
     pageInsightsAsyncExportRun.context = context;
     pageInsightsAsyncExportRun.rawValue = json;
+    pageInsightsAsyncExportRun.header = header;
     return pageInsightsAsyncExportRun;
   }
 
-  public static APINodeList<PageInsightsAsyncExportRun> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<PageInsightsAsyncExportRun> pageInsightsAsyncExportRuns = new APINodeList<PageInsightsAsyncExportRun>(request, json);
+  public static APINodeList<PageInsightsAsyncExportRun> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<PageInsightsAsyncExportRun> pageInsightsAsyncExportRuns = new APINodeList<PageInsightsAsyncExportRun>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -174,7 +173,7 @@ public class PageInsightsAsyncExportRun extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          pageInsightsAsyncExportRuns.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          pageInsightsAsyncExportRuns.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return pageInsightsAsyncExportRuns;
       } else if (result.isJsonObject()) {
@@ -199,7 +198,7 @@ public class PageInsightsAsyncExportRun extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              pageInsightsAsyncExportRuns.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              pageInsightsAsyncExportRuns.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -210,13 +209,13 @@ public class PageInsightsAsyncExportRun extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  pageInsightsAsyncExportRuns.add(loadJSON(entry.getValue().toString(), context));
+                  pageInsightsAsyncExportRuns.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              pageInsightsAsyncExportRuns.add(loadJSON(obj.toString(), context));
+              pageInsightsAsyncExportRuns.add(loadJSON(obj.toString(), context, header));
             }
           }
           return pageInsightsAsyncExportRuns;
@@ -224,7 +223,7 @@ public class PageInsightsAsyncExportRun extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              pageInsightsAsyncExportRuns.add(loadJSON(entry.getValue().toString(), context));
+              pageInsightsAsyncExportRuns.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return pageInsightsAsyncExportRuns;
         } else {
@@ -243,7 +242,7 @@ public class PageInsightsAsyncExportRun extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              pageInsightsAsyncExportRuns.add(loadJSON(value.toString(), context));
+              pageInsightsAsyncExportRuns.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -255,7 +254,7 @@ public class PageInsightsAsyncExportRun extends APINode {
 
           // Sixth, check if it's pure JsonObject
           pageInsightsAsyncExportRuns.clear();
-          pageInsightsAsyncExportRuns.add(loadJSON(json, context));
+          pageInsightsAsyncExportRuns.add(loadJSON(json, context, header));
           return pageInsightsAsyncExportRuns;
         }
       }
@@ -281,6 +280,10 @@ public class PageInsightsAsyncExportRun extends APINode {
   @Override
   public String toString() {
     return getGson().toJson(this);
+  }
+
+  public APIRequestDeleteInsightsExports deleteInsightsExports() {
+    return new APIRequestDeleteInsightsExports(this.getPrefixedId().toString(), context);
   }
 
   public APIRequestGet get() {
@@ -326,6 +329,110 @@ public class PageInsightsAsyncExportRun extends APINode {
 
 
 
+  public static class APIRequestDeleteInsightsExports extends APIRequest<APINode> {
+
+    APINodeList<APINode> lastResponse = null;
+    @Override
+    public APINodeList<APINode> getLastResponse() {
+      return lastResponse;
+    }
+    public static final String[] PARAMS = {
+    };
+
+    public static final String[] FIELDS = {
+    };
+
+    @Override
+    public APINodeList<APINode> parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header);
+    }
+
+    @Override
+    public APINodeList<APINode> execute() throws APIException {
+      return execute(new HashMap<String, Object>());
+    }
+
+    @Override
+    public APINodeList<APINode> execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
+      return lastResponse;
+    }
+
+    public ListenableFuture<APINodeList<APINode>> executeAsync() throws APIException {
+      return executeAsync(new HashMap<String, Object>());
+    };
+
+    public ListenableFuture<APINodeList<APINode>> executeAsync(Map<String, Object> extraParams) throws APIException {
+      return Futures.transform(
+        executeAsyncInternal(extraParams),
+        new Function<ResponseWrapper, APINodeList<APINode>>() {
+           public APINodeList<APINode> apply(ResponseWrapper result) {
+             try {
+               return APIRequestDeleteInsightsExports.this.parseResponse(result.getBody(), result.getHeader());
+             } catch (Exception e) {
+               throw new RuntimeException(e);
+             }
+           }
+         }
+      );
+    };
+
+    public APIRequestDeleteInsightsExports(String nodeId, APIContext context) {
+      super(context, nodeId, "/insights_exports", "DELETE", Arrays.asList(PARAMS));
+    }
+
+    @Override
+    public APIRequestDeleteInsightsExports setParam(String param, Object value) {
+      setParamInternal(param, value);
+      return this;
+    }
+
+    @Override
+    public APIRequestDeleteInsightsExports setParams(Map<String, Object> params) {
+      setParamsInternal(params);
+      return this;
+    }
+
+
+    public APIRequestDeleteInsightsExports requestAllFields () {
+      return this.requestAllFields(true);
+    }
+
+    public APIRequestDeleteInsightsExports requestAllFields (boolean value) {
+      for (String field : FIELDS) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestDeleteInsightsExports requestFields (List<String> fields) {
+      return this.requestFields(fields, true);
+    }
+
+    @Override
+    public APIRequestDeleteInsightsExports requestFields (List<String> fields, boolean value) {
+      for (String field : fields) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestDeleteInsightsExports requestField (String field) {
+      this.requestField(field, true);
+      return this;
+    }
+
+    @Override
+    public APIRequestDeleteInsightsExports requestField (String field, boolean value) {
+      this.requestFieldInternal(field, value);
+      return this;
+    }
+
+  }
+
   public static class APIRequestGet extends APIRequest<PageInsightsAsyncExportRun> {
 
     PageInsightsAsyncExportRun lastResponse = null;
@@ -349,8 +456,8 @@ public class PageInsightsAsyncExportRun extends APINode {
     };
 
     @Override
-    public PageInsightsAsyncExportRun parseResponse(String response) throws APIException {
-      return PageInsightsAsyncExportRun.parseResponse(response, getContext(), this).head();
+    public PageInsightsAsyncExportRun parseResponse(String response, String header) throws APIException {
+      return PageInsightsAsyncExportRun.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -360,7 +467,8 @@ public class PageInsightsAsyncExportRun extends APINode {
 
     @Override
     public PageInsightsAsyncExportRun execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -371,10 +479,10 @@ public class PageInsightsAsyncExportRun extends APINode {
     public ListenableFuture<PageInsightsAsyncExportRun> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, PageInsightsAsyncExportRun>() {
-           public PageInsightsAsyncExportRun apply(String result) {
+        new Function<ResponseWrapper, PageInsightsAsyncExportRun>() {
+           public PageInsightsAsyncExportRun apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -532,8 +640,8 @@ public class PageInsightsAsyncExportRun extends APINode {
 
   public static APIRequest.ResponseParser<PageInsightsAsyncExportRun> getParser() {
     return new APIRequest.ResponseParser<PageInsightsAsyncExportRun>() {
-      public APINodeList<PageInsightsAsyncExportRun> parseResponse(String response, APIContext context, APIRequest<PageInsightsAsyncExportRun> request) throws MalformedResponseException {
-        return PageInsightsAsyncExportRun.parseResponse(response, context, request);
+      public APINodeList<PageInsightsAsyncExportRun> parseResponse(String response, APIContext context, APIRequest<PageInsightsAsyncExportRun> request, String header) throws MalformedResponseException {
+        return PageInsightsAsyncExportRun.parseResponse(response, context, request, header);
       }
     };
   }

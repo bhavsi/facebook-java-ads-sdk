@@ -61,17 +61,21 @@ public class CheckBatchRequestStatus extends APINode {
   private Long mErrorsTotalCount = null;
   @SerializedName("handle")
   private String mHandle = null;
+  @SerializedName("invalid_item_ids")
+  private List<String> mInvalidItemIds = null;
   @SerializedName("status")
   private String mStatus = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public CheckBatchRequestStatus() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static CheckBatchRequestStatus loadJSON(String json, APIContext context) {
+  public static CheckBatchRequestStatus loadJSON(String json, APIContext context, String header) {
     CheckBatchRequestStatus checkBatchRequestStatus = getGson().fromJson(json, CheckBatchRequestStatus.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -88,11 +92,12 @@ public class CheckBatchRequestStatus extends APINode {
     }
     checkBatchRequestStatus.context = context;
     checkBatchRequestStatus.rawValue = json;
+    checkBatchRequestStatus.header = header;
     return checkBatchRequestStatus;
   }
 
-  public static APINodeList<CheckBatchRequestStatus> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<CheckBatchRequestStatus> checkBatchRequestStatuss = new APINodeList<CheckBatchRequestStatus>(request, json);
+  public static APINodeList<CheckBatchRequestStatus> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<CheckBatchRequestStatus> checkBatchRequestStatuss = new APINodeList<CheckBatchRequestStatus>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -103,7 +108,7 @@ public class CheckBatchRequestStatus extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          checkBatchRequestStatuss.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          checkBatchRequestStatuss.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return checkBatchRequestStatuss;
       } else if (result.isJsonObject()) {
@@ -128,7 +133,7 @@ public class CheckBatchRequestStatus extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              checkBatchRequestStatuss.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              checkBatchRequestStatuss.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -139,13 +144,13 @@ public class CheckBatchRequestStatus extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  checkBatchRequestStatuss.add(loadJSON(entry.getValue().toString(), context));
+                  checkBatchRequestStatuss.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              checkBatchRequestStatuss.add(loadJSON(obj.toString(), context));
+              checkBatchRequestStatuss.add(loadJSON(obj.toString(), context, header));
             }
           }
           return checkBatchRequestStatuss;
@@ -153,7 +158,7 @@ public class CheckBatchRequestStatus extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              checkBatchRequestStatuss.add(loadJSON(entry.getValue().toString(), context));
+              checkBatchRequestStatuss.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return checkBatchRequestStatuss;
         } else {
@@ -172,7 +177,7 @@ public class CheckBatchRequestStatus extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              checkBatchRequestStatuss.add(loadJSON(value.toString(), context));
+              checkBatchRequestStatuss.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -184,7 +189,7 @@ public class CheckBatchRequestStatus extends APINode {
 
           // Sixth, check if it's pure JsonObject
           checkBatchRequestStatuss.clear();
-          checkBatchRequestStatuss.add(loadJSON(json, context));
+          checkBatchRequestStatuss.add(loadJSON(json, context, header));
           return checkBatchRequestStatuss;
         }
       }
@@ -240,12 +245,30 @@ public class CheckBatchRequestStatus extends APINode {
     return this;
   }
 
+  public List<String> getFieldInvalidItemIds() {
+    return mInvalidItemIds;
+  }
+
+  public CheckBatchRequestStatus setFieldInvalidItemIds(List<String> value) {
+    this.mInvalidItemIds = value;
+    return this;
+  }
+
   public String getFieldStatus() {
     return mStatus;
   }
 
   public CheckBatchRequestStatus setFieldStatus(String value) {
     this.mStatus = value;
+    return this;
+  }
+
+  public String getFieldId() {
+    return mId;
+  }
+
+  public CheckBatchRequestStatus setFieldId(String value) {
+    this.mId = value;
     return this;
   }
 
@@ -269,7 +292,9 @@ public class CheckBatchRequestStatus extends APINode {
     this.mErrors = instance.mErrors;
     this.mErrorsTotalCount = instance.mErrorsTotalCount;
     this.mHandle = instance.mHandle;
+    this.mInvalidItemIds = instance.mInvalidItemIds;
     this.mStatus = instance.mStatus;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -277,8 +302,8 @@ public class CheckBatchRequestStatus extends APINode {
 
   public static APIRequest.ResponseParser<CheckBatchRequestStatus> getParser() {
     return new APIRequest.ResponseParser<CheckBatchRequestStatus>() {
-      public APINodeList<CheckBatchRequestStatus> parseResponse(String response, APIContext context, APIRequest<CheckBatchRequestStatus> request) throws MalformedResponseException {
-        return CheckBatchRequestStatus.parseResponse(response, context, request);
+      public APINodeList<CheckBatchRequestStatus> parseResponse(String response, APIContext context, APIRequest<CheckBatchRequestStatus> request, String header) throws MalformedResponseException {
+        return CheckBatchRequestStatus.parseResponse(response, context, request, header);
       }
     };
   }

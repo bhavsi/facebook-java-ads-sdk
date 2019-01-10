@@ -73,19 +73,23 @@ public class AdCreativeLinkDataChildAttachment extends APINode {
   private String mPicture = null;
   @SerializedName("place_data")
   private AdCreativePlaceData mPlaceData = null;
+  @SerializedName("referral_id")
+  private String mReferralId = null;
   @SerializedName("static_card")
   private Boolean mStaticCard = null;
   @SerializedName("video_id")
   private String mVideoId = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdCreativeLinkDataChildAttachment() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdCreativeLinkDataChildAttachment loadJSON(String json, APIContext context) {
+  public static AdCreativeLinkDataChildAttachment loadJSON(String json, APIContext context, String header) {
     AdCreativeLinkDataChildAttachment adCreativeLinkDataChildAttachment = getGson().fromJson(json, AdCreativeLinkDataChildAttachment.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -102,11 +106,12 @@ public class AdCreativeLinkDataChildAttachment extends APINode {
     }
     adCreativeLinkDataChildAttachment.context = context;
     adCreativeLinkDataChildAttachment.rawValue = json;
+    adCreativeLinkDataChildAttachment.header = header;
     return adCreativeLinkDataChildAttachment;
   }
 
-  public static APINodeList<AdCreativeLinkDataChildAttachment> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdCreativeLinkDataChildAttachment> adCreativeLinkDataChildAttachments = new APINodeList<AdCreativeLinkDataChildAttachment>(request, json);
+  public static APINodeList<AdCreativeLinkDataChildAttachment> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdCreativeLinkDataChildAttachment> adCreativeLinkDataChildAttachments = new APINodeList<AdCreativeLinkDataChildAttachment>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -117,7 +122,7 @@ public class AdCreativeLinkDataChildAttachment extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adCreativeLinkDataChildAttachments.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adCreativeLinkDataChildAttachments.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adCreativeLinkDataChildAttachments;
       } else if (result.isJsonObject()) {
@@ -142,7 +147,7 @@ public class AdCreativeLinkDataChildAttachment extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adCreativeLinkDataChildAttachments.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adCreativeLinkDataChildAttachments.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -153,13 +158,13 @@ public class AdCreativeLinkDataChildAttachment extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adCreativeLinkDataChildAttachments.add(loadJSON(entry.getValue().toString(), context));
+                  adCreativeLinkDataChildAttachments.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adCreativeLinkDataChildAttachments.add(loadJSON(obj.toString(), context));
+              adCreativeLinkDataChildAttachments.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adCreativeLinkDataChildAttachments;
@@ -167,7 +172,7 @@ public class AdCreativeLinkDataChildAttachment extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adCreativeLinkDataChildAttachments.add(loadJSON(entry.getValue().toString(), context));
+              adCreativeLinkDataChildAttachments.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adCreativeLinkDataChildAttachments;
         } else {
@@ -186,7 +191,7 @@ public class AdCreativeLinkDataChildAttachment extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adCreativeLinkDataChildAttachments.add(loadJSON(value.toString(), context));
+              adCreativeLinkDataChildAttachments.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -198,7 +203,7 @@ public class AdCreativeLinkDataChildAttachment extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adCreativeLinkDataChildAttachments.clear();
-          adCreativeLinkDataChildAttachments.add(loadJSON(json, context));
+          adCreativeLinkDataChildAttachments.add(loadJSON(json, context, header));
           return adCreativeLinkDataChildAttachments;
         }
       }
@@ -323,6 +328,15 @@ public class AdCreativeLinkDataChildAttachment extends APINode {
     this.mPlaceData = AdCreativePlaceData.getGson().fromJson(value, type);
     return this;
   }
+  public String getFieldReferralId() {
+    return mReferralId;
+  }
+
+  public AdCreativeLinkDataChildAttachment setFieldReferralId(String value) {
+    this.mReferralId = value;
+    return this;
+  }
+
   public Boolean getFieldStaticCard() {
     return mStaticCard;
   }
@@ -338,6 +352,15 @@ public class AdCreativeLinkDataChildAttachment extends APINode {
 
   public AdCreativeLinkDataChildAttachment setFieldVideoId(String value) {
     this.mVideoId = value;
+    return this;
+  }
+
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AdCreativeLinkDataChildAttachment setFieldId(String value) {
+    this.mId = value;
     return this;
   }
 
@@ -367,8 +390,10 @@ public class AdCreativeLinkDataChildAttachment extends APINode {
     this.mName = instance.mName;
     this.mPicture = instance.mPicture;
     this.mPlaceData = instance.mPlaceData;
+    this.mReferralId = instance.mReferralId;
     this.mStaticCard = instance.mStaticCard;
     this.mVideoId = instance.mVideoId;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -376,8 +401,8 @@ public class AdCreativeLinkDataChildAttachment extends APINode {
 
   public static APIRequest.ResponseParser<AdCreativeLinkDataChildAttachment> getParser() {
     return new APIRequest.ResponseParser<AdCreativeLinkDataChildAttachment>() {
-      public APINodeList<AdCreativeLinkDataChildAttachment> parseResponse(String response, APIContext context, APIRequest<AdCreativeLinkDataChildAttachment> request) throws MalformedResponseException {
-        return AdCreativeLinkDataChildAttachment.parseResponse(response, context, request);
+      public APINodeList<AdCreativeLinkDataChildAttachment> parseResponse(String response, APIContext context, APIRequest<AdCreativeLinkDataChildAttachment> request, String header) throws MalformedResponseException {
+        return AdCreativeLinkDataChildAttachment.parseResponse(response, context, request, header);
       }
     };
   }

@@ -59,6 +59,8 @@ public class ReachFrequencySpec extends APINode {
   private List<String> mCountries = null;
   @SerializedName("default_creation_data")
   private Object mDefaultCreationData = null;
+  @SerializedName("global_io_max_campaign_duration")
+  private Long mGlobalIoMaxCampaignDuration = null;
   @SerializedName("max_campaign_duration")
   private Object mMaxCampaignDuration = null;
   @SerializedName("max_days_to_finish")
@@ -69,15 +71,19 @@ public class ReachFrequencySpec extends APINode {
   private Object mMinCampaignDuration = null;
   @SerializedName("min_reach_limits")
   private Object mMinReachLimits = null;
+  @SerializedName("supports_video_view_benchmark_per_country")
+  private Object mSupportsVideoViewBenchmarkPerCountry = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public ReachFrequencySpec() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static ReachFrequencySpec loadJSON(String json, APIContext context) {
+  public static ReachFrequencySpec loadJSON(String json, APIContext context, String header) {
     ReachFrequencySpec reachFrequencySpec = getGson().fromJson(json, ReachFrequencySpec.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -94,11 +100,12 @@ public class ReachFrequencySpec extends APINode {
     }
     reachFrequencySpec.context = context;
     reachFrequencySpec.rawValue = json;
+    reachFrequencySpec.header = header;
     return reachFrequencySpec;
   }
 
-  public static APINodeList<ReachFrequencySpec> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<ReachFrequencySpec> reachFrequencySpecs = new APINodeList<ReachFrequencySpec>(request, json);
+  public static APINodeList<ReachFrequencySpec> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<ReachFrequencySpec> reachFrequencySpecs = new APINodeList<ReachFrequencySpec>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -109,7 +116,7 @@ public class ReachFrequencySpec extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          reachFrequencySpecs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          reachFrequencySpecs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return reachFrequencySpecs;
       } else if (result.isJsonObject()) {
@@ -134,7 +141,7 @@ public class ReachFrequencySpec extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              reachFrequencySpecs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              reachFrequencySpecs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -145,13 +152,13 @@ public class ReachFrequencySpec extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  reachFrequencySpecs.add(loadJSON(entry.getValue().toString(), context));
+                  reachFrequencySpecs.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              reachFrequencySpecs.add(loadJSON(obj.toString(), context));
+              reachFrequencySpecs.add(loadJSON(obj.toString(), context, header));
             }
           }
           return reachFrequencySpecs;
@@ -159,7 +166,7 @@ public class ReachFrequencySpec extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              reachFrequencySpecs.add(loadJSON(entry.getValue().toString(), context));
+              reachFrequencySpecs.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return reachFrequencySpecs;
         } else {
@@ -178,7 +185,7 @@ public class ReachFrequencySpec extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              reachFrequencySpecs.add(loadJSON(value.toString(), context));
+              reachFrequencySpecs.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -190,7 +197,7 @@ public class ReachFrequencySpec extends APINode {
 
           // Sixth, check if it's pure JsonObject
           reachFrequencySpecs.clear();
-          reachFrequencySpecs.add(loadJSON(json, context));
+          reachFrequencySpecs.add(loadJSON(json, context, header));
           return reachFrequencySpecs;
         }
       }
@@ -234,6 +241,15 @@ public class ReachFrequencySpec extends APINode {
 
   public ReachFrequencySpec setFieldDefaultCreationData(Object value) {
     this.mDefaultCreationData = value;
+    return this;
+  }
+
+  public Long getFieldGlobalIoMaxCampaignDuration() {
+    return mGlobalIoMaxCampaignDuration;
+  }
+
+  public ReachFrequencySpec setFieldGlobalIoMaxCampaignDuration(Long value) {
+    this.mGlobalIoMaxCampaignDuration = value;
     return this;
   }
 
@@ -282,6 +298,24 @@ public class ReachFrequencySpec extends APINode {
     return this;
   }
 
+  public Object getFieldSupportsVideoViewBenchmarkPerCountry() {
+    return mSupportsVideoViewBenchmarkPerCountry;
+  }
+
+  public ReachFrequencySpec setFieldSupportsVideoViewBenchmarkPerCountry(Object value) {
+    this.mSupportsVideoViewBenchmarkPerCountry = value;
+    return this;
+  }
+
+  public String getFieldId() {
+    return mId;
+  }
+
+  public ReachFrequencySpec setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -301,11 +335,14 @@ public class ReachFrequencySpec extends APINode {
   public ReachFrequencySpec copyFrom(ReachFrequencySpec instance) {
     this.mCountries = instance.mCountries;
     this.mDefaultCreationData = instance.mDefaultCreationData;
+    this.mGlobalIoMaxCampaignDuration = instance.mGlobalIoMaxCampaignDuration;
     this.mMaxCampaignDuration = instance.mMaxCampaignDuration;
     this.mMaxDaysToFinish = instance.mMaxDaysToFinish;
     this.mMaxPauseWithoutPredictionRerun = instance.mMaxPauseWithoutPredictionRerun;
     this.mMinCampaignDuration = instance.mMinCampaignDuration;
     this.mMinReachLimits = instance.mMinReachLimits;
+    this.mSupportsVideoViewBenchmarkPerCountry = instance.mSupportsVideoViewBenchmarkPerCountry;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -313,8 +350,8 @@ public class ReachFrequencySpec extends APINode {
 
   public static APIRequest.ResponseParser<ReachFrequencySpec> getParser() {
     return new APIRequest.ResponseParser<ReachFrequencySpec>() {
-      public APINodeList<ReachFrequencySpec> parseResponse(String response, APIContext context, APIRequest<ReachFrequencySpec> request) throws MalformedResponseException {
-        return ReachFrequencySpec.parseResponse(response, context, request);
+      public APINodeList<ReachFrequencySpec> parseResponse(String response, APIContext context, APIRequest<ReachFrequencySpec> request, String header) throws MalformedResponseException {
+        return ReachFrequencySpec.parseResponse(response, context, request, header);
       }
     };
   }

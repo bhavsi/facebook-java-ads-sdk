@@ -56,7 +56,7 @@ import com.facebook.ads.sdk.APIException.MalformedResponseException;
  */
 public class VideoCopyrightRule extends APINode {
   @SerializedName("condition_groups")
-  private List<Object> mConditionGroups = null;
+  private List<VideoCopyrightConditionGroup> mConditionGroups = null;
   @SerializedName("copyrights")
   private List<String> mCopyrights = null;
   @SerializedName("created_date")
@@ -80,6 +80,7 @@ public class VideoCopyrightRule extends APINode {
 
   public VideoCopyrightRule(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -98,19 +99,17 @@ public class VideoCopyrightRule extends APINode {
   }
 
   public static VideoCopyrightRule fetchById(String id, APIContext context) throws APIException {
-    VideoCopyrightRule videoCopyrightRule =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return videoCopyrightRule;
   }
 
   public static ListenableFuture<VideoCopyrightRule> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<VideoCopyrightRule> videoCopyrightRule =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return videoCopyrightRule;
   }
 
   public static APINodeList<VideoCopyrightRule> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -123,12 +122,11 @@ public class VideoCopyrightRule extends APINode {
   }
 
   public static ListenableFuture<APINodeList<VideoCopyrightRule>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<VideoCopyrightRule>> videoCopyrightRule =
+    return
       new APIRequest(context, "", "/", "GET", VideoCopyrightRule.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return videoCopyrightRule;
   }
 
   private String getPrefixedId() {
@@ -138,7 +136,7 @@ public class VideoCopyrightRule extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static VideoCopyrightRule loadJSON(String json, APIContext context) {
+  public static VideoCopyrightRule loadJSON(String json, APIContext context, String header) {
     VideoCopyrightRule videoCopyrightRule = getGson().fromJson(json, VideoCopyrightRule.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -155,11 +153,12 @@ public class VideoCopyrightRule extends APINode {
     }
     videoCopyrightRule.context = context;
     videoCopyrightRule.rawValue = json;
+    videoCopyrightRule.header = header;
     return videoCopyrightRule;
   }
 
-  public static APINodeList<VideoCopyrightRule> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<VideoCopyrightRule> videoCopyrightRules = new APINodeList<VideoCopyrightRule>(request, json);
+  public static APINodeList<VideoCopyrightRule> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<VideoCopyrightRule> videoCopyrightRules = new APINodeList<VideoCopyrightRule>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -170,7 +169,7 @@ public class VideoCopyrightRule extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          videoCopyrightRules.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          videoCopyrightRules.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return videoCopyrightRules;
       } else if (result.isJsonObject()) {
@@ -195,7 +194,7 @@ public class VideoCopyrightRule extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              videoCopyrightRules.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              videoCopyrightRules.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -206,13 +205,13 @@ public class VideoCopyrightRule extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  videoCopyrightRules.add(loadJSON(entry.getValue().toString(), context));
+                  videoCopyrightRules.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              videoCopyrightRules.add(loadJSON(obj.toString(), context));
+              videoCopyrightRules.add(loadJSON(obj.toString(), context, header));
             }
           }
           return videoCopyrightRules;
@@ -220,7 +219,7 @@ public class VideoCopyrightRule extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              videoCopyrightRules.add(loadJSON(entry.getValue().toString(), context));
+              videoCopyrightRules.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return videoCopyrightRules;
         } else {
@@ -239,7 +238,7 @@ public class VideoCopyrightRule extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              videoCopyrightRules.add(loadJSON(value.toString(), context));
+              videoCopyrightRules.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -251,7 +250,7 @@ public class VideoCopyrightRule extends APINode {
 
           // Sixth, check if it's pure JsonObject
           videoCopyrightRules.clear();
-          videoCopyrightRules.add(loadJSON(json, context));
+          videoCopyrightRules.add(loadJSON(json, context, header));
           return videoCopyrightRules;
         }
       }
@@ -288,7 +287,7 @@ public class VideoCopyrightRule extends APINode {
   }
 
 
-  public List<Object> getFieldConditionGroups() {
+  public List<VideoCopyrightConditionGroup> getFieldConditionGroups() {
     return mConditionGroups;
   }
 
@@ -335,8 +334,8 @@ public class VideoCopyrightRule extends APINode {
     };
 
     @Override
-    public APINode parseResponse(String response) throws APIException {
-      return APINode.parseResponse(response, getContext(), this).head();
+    public APINode parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -346,7 +345,8 @@ public class VideoCopyrightRule extends APINode {
 
     @Override
     public APINode execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -357,10 +357,10 @@ public class VideoCopyrightRule extends APINode {
     public ListenableFuture<APINode> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINode>() {
-           public APINode apply(String result) {
+        new Function<ResponseWrapper, APINode>() {
+           public APINode apply(ResponseWrapper result) {
              try {
-               return APIRequestDelete.this.parseResponse(result);
+               return APIRequestDelete.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -445,8 +445,8 @@ public class VideoCopyrightRule extends APINode {
     };
 
     @Override
-    public VideoCopyrightRule parseResponse(String response) throws APIException {
-      return VideoCopyrightRule.parseResponse(response, getContext(), this).head();
+    public VideoCopyrightRule parseResponse(String response, String header) throws APIException {
+      return VideoCopyrightRule.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -456,7 +456,8 @@ public class VideoCopyrightRule extends APINode {
 
     @Override
     public VideoCopyrightRule execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -467,10 +468,10 @@ public class VideoCopyrightRule extends APINode {
     public ListenableFuture<VideoCopyrightRule> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, VideoCopyrightRule>() {
-           public VideoCopyrightRule apply(String result) {
+        new Function<ResponseWrapper, VideoCopyrightRule>() {
+           public VideoCopyrightRule apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -633,8 +634,8 @@ public class VideoCopyrightRule extends APINode {
 
   public static APIRequest.ResponseParser<VideoCopyrightRule> getParser() {
     return new APIRequest.ResponseParser<VideoCopyrightRule>() {
-      public APINodeList<VideoCopyrightRule> parseResponse(String response, APIContext context, APIRequest<VideoCopyrightRule> request) throws MalformedResponseException {
-        return VideoCopyrightRule.parseResponse(response, context, request);
+      public APINodeList<VideoCopyrightRule> parseResponse(String response, APIContext context, APIRequest<VideoCopyrightRule> request, String header) throws MalformedResponseException {
+        return VideoCopyrightRule.parseResponse(response, context, request, header);
       }
     };
   }

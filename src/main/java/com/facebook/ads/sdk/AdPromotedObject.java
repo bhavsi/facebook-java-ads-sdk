@@ -63,6 +63,8 @@ public class AdPromotedObject extends APINode {
   private EnumCustomEventType mCustomEventType = null;
   @SerializedName("event_id")
   private String mEventId = null;
+  @SerializedName("fundraiser_campaign_id")
+  private String mFundraiserCampaignId = null;
   @SerializedName("object_store_url")
   private String mObjectStoreUrl = null;
   @SerializedName("offer_id")
@@ -71,23 +73,33 @@ public class AdPromotedObject extends APINode {
   private String mOfflineConversionDataSetId = null;
   @SerializedName("page_id")
   private String mPageId = null;
+  @SerializedName("pixel_aggregation_rule")
+  private String mPixelAggregationRule = null;
   @SerializedName("pixel_id")
   private String mPixelId = null;
+  @SerializedName("pixel_rule")
+  private String mPixelRule = null;
   @SerializedName("place_page_set_id")
   private String mPlacePageSetId = null;
   @SerializedName("product_catalog_id")
   private String mProductCatalogId = null;
+  @SerializedName("product_item_id")
+  private String mProductItemId = null;
   @SerializedName("product_set_id")
   private String mProductSetId = null;
+  @SerializedName("retention_days")
+  private String mRetentionDays = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdPromotedObject() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdPromotedObject loadJSON(String json, APIContext context) {
+  public static AdPromotedObject loadJSON(String json, APIContext context, String header) {
     AdPromotedObject adPromotedObject = getGson().fromJson(json, AdPromotedObject.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -104,11 +116,12 @@ public class AdPromotedObject extends APINode {
     }
     adPromotedObject.context = context;
     adPromotedObject.rawValue = json;
+    adPromotedObject.header = header;
     return adPromotedObject;
   }
 
-  public static APINodeList<AdPromotedObject> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdPromotedObject> adPromotedObjects = new APINodeList<AdPromotedObject>(request, json);
+  public static APINodeList<AdPromotedObject> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdPromotedObject> adPromotedObjects = new APINodeList<AdPromotedObject>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -119,7 +132,7 @@ public class AdPromotedObject extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adPromotedObjects.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adPromotedObjects.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adPromotedObjects;
       } else if (result.isJsonObject()) {
@@ -144,7 +157,7 @@ public class AdPromotedObject extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adPromotedObjects.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adPromotedObjects.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -155,13 +168,13 @@ public class AdPromotedObject extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adPromotedObjects.add(loadJSON(entry.getValue().toString(), context));
+                  adPromotedObjects.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adPromotedObjects.add(loadJSON(obj.toString(), context));
+              adPromotedObjects.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adPromotedObjects;
@@ -169,7 +182,7 @@ public class AdPromotedObject extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adPromotedObjects.add(loadJSON(entry.getValue().toString(), context));
+              adPromotedObjects.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adPromotedObjects;
         } else {
@@ -188,7 +201,7 @@ public class AdPromotedObject extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adPromotedObjects.add(loadJSON(value.toString(), context));
+              adPromotedObjects.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -200,7 +213,7 @@ public class AdPromotedObject extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adPromotedObjects.clear();
-          adPromotedObjects.add(loadJSON(json, context));
+          adPromotedObjects.add(loadJSON(json, context, header));
           return adPromotedObjects;
         }
       }
@@ -265,6 +278,15 @@ public class AdPromotedObject extends APINode {
     return this;
   }
 
+  public String getFieldFundraiserCampaignId() {
+    return mFundraiserCampaignId;
+  }
+
+  public AdPromotedObject setFieldFundraiserCampaignId(String value) {
+    this.mFundraiserCampaignId = value;
+    return this;
+  }
+
   public String getFieldObjectStoreUrl() {
     return mObjectStoreUrl;
   }
@@ -301,12 +323,30 @@ public class AdPromotedObject extends APINode {
     return this;
   }
 
+  public String getFieldPixelAggregationRule() {
+    return mPixelAggregationRule;
+  }
+
+  public AdPromotedObject setFieldPixelAggregationRule(String value) {
+    this.mPixelAggregationRule = value;
+    return this;
+  }
+
   public String getFieldPixelId() {
     return mPixelId;
   }
 
   public AdPromotedObject setFieldPixelId(String value) {
     this.mPixelId = value;
+    return this;
+  }
+
+  public String getFieldPixelRule() {
+    return mPixelRule;
+  }
+
+  public AdPromotedObject setFieldPixelRule(String value) {
+    this.mPixelRule = value;
     return this;
   }
 
@@ -328,12 +368,39 @@ public class AdPromotedObject extends APINode {
     return this;
   }
 
+  public String getFieldProductItemId() {
+    return mProductItemId;
+  }
+
+  public AdPromotedObject setFieldProductItemId(String value) {
+    this.mProductItemId = value;
+    return this;
+  }
+
   public String getFieldProductSetId() {
     return mProductSetId;
   }
 
   public AdPromotedObject setFieldProductSetId(String value) {
     this.mProductSetId = value;
+    return this;
+  }
+
+  public String getFieldRetentionDays() {
+    return mRetentionDays;
+  }
+
+  public AdPromotedObject setFieldRetentionDays(String value) {
+    this.mRetentionDays = value;
+    return this;
+  }
+
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AdPromotedObject setFieldId(String value) {
+    this.mId = value;
     return this;
   }
 
@@ -344,6 +411,22 @@ public class AdPromotedObject extends APINode {
       VALUE_RATE("RATE"),
       @SerializedName("TUTORIAL_COMPLETION")
       VALUE_TUTORIAL_COMPLETION("TUTORIAL_COMPLETION"),
+      @SerializedName("CONTACT")
+      VALUE_CONTACT("CONTACT"),
+      @SerializedName("CUSTOMIZE_PRODUCT")
+      VALUE_CUSTOMIZE_PRODUCT("CUSTOMIZE_PRODUCT"),
+      @SerializedName("DONATE")
+      VALUE_DONATE("DONATE"),
+      @SerializedName("FIND_LOCATION")
+      VALUE_FIND_LOCATION("FIND_LOCATION"),
+      @SerializedName("SCHEDULE")
+      VALUE_SCHEDULE("SCHEDULE"),
+      @SerializedName("START_TRIAL")
+      VALUE_START_TRIAL("START_TRIAL"),
+      @SerializedName("SUBMIT_APPLICATION")
+      VALUE_SUBMIT_APPLICATION("SUBMIT_APPLICATION"),
+      @SerializedName("SUBSCRIBE")
+      VALUE_SUBSCRIBE("SUBSCRIBE"),
       @SerializedName("ADD_TO_CART")
       VALUE_ADD_TO_CART("ADD_TO_CART"),
       @SerializedName("ADD_TO_WISHLIST")
@@ -372,6 +455,10 @@ public class AdPromotedObject extends APINode {
       VALUE_ACHIEVEMENT_UNLOCKED("ACHIEVEMENT_UNLOCKED"),
       @SerializedName("SPENT_CREDITS")
       VALUE_SPENT_CREDITS("SPENT_CREDITS"),
+      @SerializedName("D2_RETENTION")
+      VALUE_D2_RETENTION("D2_RETENTION"),
+      @SerializedName("D7_RETENTION")
+      VALUE_D7_RETENTION("D7_RETENTION"),
       @SerializedName("OTHER")
       VALUE_OTHER("OTHER"),
       NULL(null);
@@ -407,14 +494,20 @@ public class AdPromotedObject extends APINode {
     this.mCustomConversionId = instance.mCustomConversionId;
     this.mCustomEventType = instance.mCustomEventType;
     this.mEventId = instance.mEventId;
+    this.mFundraiserCampaignId = instance.mFundraiserCampaignId;
     this.mObjectStoreUrl = instance.mObjectStoreUrl;
     this.mOfferId = instance.mOfferId;
     this.mOfflineConversionDataSetId = instance.mOfflineConversionDataSetId;
     this.mPageId = instance.mPageId;
+    this.mPixelAggregationRule = instance.mPixelAggregationRule;
     this.mPixelId = instance.mPixelId;
+    this.mPixelRule = instance.mPixelRule;
     this.mPlacePageSetId = instance.mPlacePageSetId;
     this.mProductCatalogId = instance.mProductCatalogId;
+    this.mProductItemId = instance.mProductItemId;
     this.mProductSetId = instance.mProductSetId;
+    this.mRetentionDays = instance.mRetentionDays;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -422,8 +515,8 @@ public class AdPromotedObject extends APINode {
 
   public static APIRequest.ResponseParser<AdPromotedObject> getParser() {
     return new APIRequest.ResponseParser<AdPromotedObject>() {
-      public APINodeList<AdPromotedObject> parseResponse(String response, APIContext context, APIRequest<AdPromotedObject> request) throws MalformedResponseException {
-        return AdPromotedObject.parseResponse(response, context, request);
+      public APINodeList<AdPromotedObject> parseResponse(String response, APIContext context, APIRequest<AdPromotedObject> request, String header) throws MalformedResponseException {
+        return AdPromotedObject.parseResponse(response, context, request, header);
       }
     };
   }

@@ -57,15 +57,17 @@ import com.facebook.ads.sdk.APIException.MalformedResponseException;
 public class CanvasBodyElement extends APINode {
   @SerializedName("element")
   private Object mElement = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public CanvasBodyElement() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static CanvasBodyElement loadJSON(String json, APIContext context) {
+  public static CanvasBodyElement loadJSON(String json, APIContext context, String header) {
     CanvasBodyElement canvasBodyElement = getGson().fromJson(json, CanvasBodyElement.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -82,11 +84,12 @@ public class CanvasBodyElement extends APINode {
     }
     canvasBodyElement.context = context;
     canvasBodyElement.rawValue = json;
+    canvasBodyElement.header = header;
     return canvasBodyElement;
   }
 
-  public static APINodeList<CanvasBodyElement> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<CanvasBodyElement> canvasBodyElements = new APINodeList<CanvasBodyElement>(request, json);
+  public static APINodeList<CanvasBodyElement> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<CanvasBodyElement> canvasBodyElements = new APINodeList<CanvasBodyElement>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -97,7 +100,7 @@ public class CanvasBodyElement extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          canvasBodyElements.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          canvasBodyElements.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return canvasBodyElements;
       } else if (result.isJsonObject()) {
@@ -122,7 +125,7 @@ public class CanvasBodyElement extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              canvasBodyElements.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              canvasBodyElements.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -133,13 +136,13 @@ public class CanvasBodyElement extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  canvasBodyElements.add(loadJSON(entry.getValue().toString(), context));
+                  canvasBodyElements.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              canvasBodyElements.add(loadJSON(obj.toString(), context));
+              canvasBodyElements.add(loadJSON(obj.toString(), context, header));
             }
           }
           return canvasBodyElements;
@@ -147,7 +150,7 @@ public class CanvasBodyElement extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              canvasBodyElements.add(loadJSON(entry.getValue().toString(), context));
+              canvasBodyElements.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return canvasBodyElements;
         } else {
@@ -166,7 +169,7 @@ public class CanvasBodyElement extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              canvasBodyElements.add(loadJSON(value.toString(), context));
+              canvasBodyElements.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -178,7 +181,7 @@ public class CanvasBodyElement extends APINode {
 
           // Sixth, check if it's pure JsonObject
           canvasBodyElements.clear();
-          canvasBodyElements.add(loadJSON(json, context));
+          canvasBodyElements.add(loadJSON(json, context, header));
           return canvasBodyElements;
         }
       }
@@ -216,6 +219,15 @@ public class CanvasBodyElement extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public CanvasBodyElement setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -234,6 +246,7 @@ public class CanvasBodyElement extends APINode {
 
   public CanvasBodyElement copyFrom(CanvasBodyElement instance) {
     this.mElement = instance.mElement;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -241,8 +254,8 @@ public class CanvasBodyElement extends APINode {
 
   public static APIRequest.ResponseParser<CanvasBodyElement> getParser() {
     return new APIRequest.ResponseParser<CanvasBodyElement>() {
-      public APINodeList<CanvasBodyElement> parseResponse(String response, APIContext context, APIRequest<CanvasBodyElement> request) throws MalformedResponseException {
-        return CanvasBodyElement.parseResponse(response, context, request);
+      public APINodeList<CanvasBodyElement> parseResponse(String response, APIContext context, APIRequest<CanvasBodyElement> request, String header) throws MalformedResponseException {
+        return CanvasBodyElement.parseResponse(response, context, request, header);
       }
     };
   }

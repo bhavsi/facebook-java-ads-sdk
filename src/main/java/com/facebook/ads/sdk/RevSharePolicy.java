@@ -59,15 +59,17 @@ public class RevSharePolicy extends APINode {
   private String mPolicyId = null;
   @SerializedName("policy_name")
   private String mPolicyName = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public RevSharePolicy() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static RevSharePolicy loadJSON(String json, APIContext context) {
+  public static RevSharePolicy loadJSON(String json, APIContext context, String header) {
     RevSharePolicy revSharePolicy = getGson().fromJson(json, RevSharePolicy.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -84,11 +86,12 @@ public class RevSharePolicy extends APINode {
     }
     revSharePolicy.context = context;
     revSharePolicy.rawValue = json;
+    revSharePolicy.header = header;
     return revSharePolicy;
   }
 
-  public static APINodeList<RevSharePolicy> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<RevSharePolicy> revSharePolicys = new APINodeList<RevSharePolicy>(request, json);
+  public static APINodeList<RevSharePolicy> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<RevSharePolicy> revSharePolicys = new APINodeList<RevSharePolicy>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -99,7 +102,7 @@ public class RevSharePolicy extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          revSharePolicys.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          revSharePolicys.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return revSharePolicys;
       } else if (result.isJsonObject()) {
@@ -124,7 +127,7 @@ public class RevSharePolicy extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              revSharePolicys.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              revSharePolicys.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -135,13 +138,13 @@ public class RevSharePolicy extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  revSharePolicys.add(loadJSON(entry.getValue().toString(), context));
+                  revSharePolicys.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              revSharePolicys.add(loadJSON(obj.toString(), context));
+              revSharePolicys.add(loadJSON(obj.toString(), context, header));
             }
           }
           return revSharePolicys;
@@ -149,7 +152,7 @@ public class RevSharePolicy extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              revSharePolicys.add(loadJSON(entry.getValue().toString(), context));
+              revSharePolicys.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return revSharePolicys;
         } else {
@@ -168,7 +171,7 @@ public class RevSharePolicy extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              revSharePolicys.add(loadJSON(value.toString(), context));
+              revSharePolicys.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -180,7 +183,7 @@ public class RevSharePolicy extends APINode {
 
           // Sixth, check if it's pure JsonObject
           revSharePolicys.clear();
-          revSharePolicys.add(loadJSON(json, context));
+          revSharePolicys.add(loadJSON(json, context, header));
           return revSharePolicys;
         }
       }
@@ -227,6 +230,15 @@ public class RevSharePolicy extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public RevSharePolicy setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -246,6 +258,7 @@ public class RevSharePolicy extends APINode {
   public RevSharePolicy copyFrom(RevSharePolicy instance) {
     this.mPolicyId = instance.mPolicyId;
     this.mPolicyName = instance.mPolicyName;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -253,8 +266,8 @@ public class RevSharePolicy extends APINode {
 
   public static APIRequest.ResponseParser<RevSharePolicy> getParser() {
     return new APIRequest.ResponseParser<RevSharePolicy>() {
-      public APINodeList<RevSharePolicy> parseResponse(String response, APIContext context, APIRequest<RevSharePolicy> request) throws MalformedResponseException {
-        return RevSharePolicy.parseResponse(response, context, request);
+      public APINodeList<RevSharePolicy> parseResponse(String response, APIContext context, APIRequest<RevSharePolicy> request, String header) throws MalformedResponseException {
+        return RevSharePolicy.parseResponse(response, context, request, header);
       }
     };
   }

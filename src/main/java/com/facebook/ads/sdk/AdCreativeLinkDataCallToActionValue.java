@@ -75,15 +75,19 @@ public class AdCreativeLinkDataCallToActionValue extends APINode {
   private String mPage = null;
   @SerializedName("product_link")
   private String mProductLink = null;
+  @SerializedName("whatsapp_number")
+  private String mWhatsappNumber = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdCreativeLinkDataCallToActionValue() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdCreativeLinkDataCallToActionValue loadJSON(String json, APIContext context) {
+  public static AdCreativeLinkDataCallToActionValue loadJSON(String json, APIContext context, String header) {
     AdCreativeLinkDataCallToActionValue adCreativeLinkDataCallToActionValue = getGson().fromJson(json, AdCreativeLinkDataCallToActionValue.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -100,11 +104,12 @@ public class AdCreativeLinkDataCallToActionValue extends APINode {
     }
     adCreativeLinkDataCallToActionValue.context = context;
     adCreativeLinkDataCallToActionValue.rawValue = json;
+    adCreativeLinkDataCallToActionValue.header = header;
     return adCreativeLinkDataCallToActionValue;
   }
 
-  public static APINodeList<AdCreativeLinkDataCallToActionValue> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdCreativeLinkDataCallToActionValue> adCreativeLinkDataCallToActionValues = new APINodeList<AdCreativeLinkDataCallToActionValue>(request, json);
+  public static APINodeList<AdCreativeLinkDataCallToActionValue> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdCreativeLinkDataCallToActionValue> adCreativeLinkDataCallToActionValues = new APINodeList<AdCreativeLinkDataCallToActionValue>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -115,7 +120,7 @@ public class AdCreativeLinkDataCallToActionValue extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adCreativeLinkDataCallToActionValues.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adCreativeLinkDataCallToActionValues.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adCreativeLinkDataCallToActionValues;
       } else if (result.isJsonObject()) {
@@ -140,7 +145,7 @@ public class AdCreativeLinkDataCallToActionValue extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adCreativeLinkDataCallToActionValues.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adCreativeLinkDataCallToActionValues.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -151,13 +156,13 @@ public class AdCreativeLinkDataCallToActionValue extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adCreativeLinkDataCallToActionValues.add(loadJSON(entry.getValue().toString(), context));
+                  adCreativeLinkDataCallToActionValues.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adCreativeLinkDataCallToActionValues.add(loadJSON(obj.toString(), context));
+              adCreativeLinkDataCallToActionValues.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adCreativeLinkDataCallToActionValues;
@@ -165,7 +170,7 @@ public class AdCreativeLinkDataCallToActionValue extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adCreativeLinkDataCallToActionValues.add(loadJSON(entry.getValue().toString(), context));
+              adCreativeLinkDataCallToActionValues.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adCreativeLinkDataCallToActionValues;
         } else {
@@ -184,7 +189,7 @@ public class AdCreativeLinkDataCallToActionValue extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adCreativeLinkDataCallToActionValues.add(loadJSON(value.toString(), context));
+              adCreativeLinkDataCallToActionValues.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -196,7 +201,7 @@ public class AdCreativeLinkDataCallToActionValue extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adCreativeLinkDataCallToActionValues.clear();
-          adCreativeLinkDataCallToActionValues.add(loadJSON(json, context));
+          adCreativeLinkDataCallToActionValues.add(loadJSON(json, context, header));
           return adCreativeLinkDataCallToActionValues;
         }
       }
@@ -315,6 +320,24 @@ public class AdCreativeLinkDataCallToActionValue extends APINode {
     return this;
   }
 
+  public String getFieldWhatsappNumber() {
+    return mWhatsappNumber;
+  }
+
+  public AdCreativeLinkDataCallToActionValue setFieldWhatsappNumber(String value) {
+    this.mWhatsappNumber = value;
+    return this;
+  }
+
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AdCreativeLinkDataCallToActionValue setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -342,6 +365,8 @@ public class AdCreativeLinkDataCallToActionValue extends APINode {
     this.mLinkFormat = instance.mLinkFormat;
     this.mPage = instance.mPage;
     this.mProductLink = instance.mProductLink;
+    this.mWhatsappNumber = instance.mWhatsappNumber;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -349,8 +374,8 @@ public class AdCreativeLinkDataCallToActionValue extends APINode {
 
   public static APIRequest.ResponseParser<AdCreativeLinkDataCallToActionValue> getParser() {
     return new APIRequest.ResponseParser<AdCreativeLinkDataCallToActionValue>() {
-      public APINodeList<AdCreativeLinkDataCallToActionValue> parseResponse(String response, APIContext context, APIRequest<AdCreativeLinkDataCallToActionValue> request) throws MalformedResponseException {
-        return AdCreativeLinkDataCallToActionValue.parseResponse(response, context, request);
+      public APINodeList<AdCreativeLinkDataCallToActionValue> parseResponse(String response, APIContext context, APIRequest<AdCreativeLinkDataCallToActionValue> request, String header) throws MalformedResponseException {
+        return AdCreativeLinkDataCallToActionValue.parseResponse(response, context, request, header);
       }
     };
   }

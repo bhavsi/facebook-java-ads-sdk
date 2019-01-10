@@ -61,15 +61,17 @@ public class TargetingProductAudienceSpec extends APINode {
   private List<TargetingProductAudienceSubSpec> mInclusions = null;
   @SerializedName("product_set_id")
   private String mProductSetId = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public TargetingProductAudienceSpec() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static TargetingProductAudienceSpec loadJSON(String json, APIContext context) {
+  public static TargetingProductAudienceSpec loadJSON(String json, APIContext context, String header) {
     TargetingProductAudienceSpec targetingProductAudienceSpec = getGson().fromJson(json, TargetingProductAudienceSpec.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -86,11 +88,12 @@ public class TargetingProductAudienceSpec extends APINode {
     }
     targetingProductAudienceSpec.context = context;
     targetingProductAudienceSpec.rawValue = json;
+    targetingProductAudienceSpec.header = header;
     return targetingProductAudienceSpec;
   }
 
-  public static APINodeList<TargetingProductAudienceSpec> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<TargetingProductAudienceSpec> targetingProductAudienceSpecs = new APINodeList<TargetingProductAudienceSpec>(request, json);
+  public static APINodeList<TargetingProductAudienceSpec> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<TargetingProductAudienceSpec> targetingProductAudienceSpecs = new APINodeList<TargetingProductAudienceSpec>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -101,7 +104,7 @@ public class TargetingProductAudienceSpec extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          targetingProductAudienceSpecs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          targetingProductAudienceSpecs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return targetingProductAudienceSpecs;
       } else if (result.isJsonObject()) {
@@ -126,7 +129,7 @@ public class TargetingProductAudienceSpec extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              targetingProductAudienceSpecs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              targetingProductAudienceSpecs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -137,13 +140,13 @@ public class TargetingProductAudienceSpec extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  targetingProductAudienceSpecs.add(loadJSON(entry.getValue().toString(), context));
+                  targetingProductAudienceSpecs.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              targetingProductAudienceSpecs.add(loadJSON(obj.toString(), context));
+              targetingProductAudienceSpecs.add(loadJSON(obj.toString(), context, header));
             }
           }
           return targetingProductAudienceSpecs;
@@ -151,7 +154,7 @@ public class TargetingProductAudienceSpec extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              targetingProductAudienceSpecs.add(loadJSON(entry.getValue().toString(), context));
+              targetingProductAudienceSpecs.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return targetingProductAudienceSpecs;
         } else {
@@ -170,7 +173,7 @@ public class TargetingProductAudienceSpec extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              targetingProductAudienceSpecs.add(loadJSON(value.toString(), context));
+              targetingProductAudienceSpecs.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -182,7 +185,7 @@ public class TargetingProductAudienceSpec extends APINode {
 
           // Sixth, check if it's pure JsonObject
           targetingProductAudienceSpecs.clear();
-          targetingProductAudienceSpecs.add(loadJSON(json, context));
+          targetingProductAudienceSpecs.add(loadJSON(json, context, header));
           return targetingProductAudienceSpecs;
         }
       }
@@ -248,6 +251,15 @@ public class TargetingProductAudienceSpec extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public TargetingProductAudienceSpec setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -268,6 +280,7 @@ public class TargetingProductAudienceSpec extends APINode {
     this.mExclusions = instance.mExclusions;
     this.mInclusions = instance.mInclusions;
     this.mProductSetId = instance.mProductSetId;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -275,8 +288,8 @@ public class TargetingProductAudienceSpec extends APINode {
 
   public static APIRequest.ResponseParser<TargetingProductAudienceSpec> getParser() {
     return new APIRequest.ResponseParser<TargetingProductAudienceSpec>() {
-      public APINodeList<TargetingProductAudienceSpec> parseResponse(String response, APIContext context, APIRequest<TargetingProductAudienceSpec> request) throws MalformedResponseException {
-        return TargetingProductAudienceSpec.parseResponse(response, context, request);
+      public APINodeList<TargetingProductAudienceSpec> parseResponse(String response, APIContext context, APIRequest<TargetingProductAudienceSpec> request, String header) throws MalformedResponseException {
+        return TargetingProductAudienceSpec.parseResponse(response, context, request, header);
       }
     };
   }

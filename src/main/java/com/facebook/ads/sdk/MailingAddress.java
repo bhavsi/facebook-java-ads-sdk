@@ -82,6 +82,7 @@ public class MailingAddress extends APINode {
 
   public MailingAddress(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -100,19 +101,17 @@ public class MailingAddress extends APINode {
   }
 
   public static MailingAddress fetchById(String id, APIContext context) throws APIException {
-    MailingAddress mailingAddress =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return mailingAddress;
   }
 
   public static ListenableFuture<MailingAddress> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<MailingAddress> mailingAddress =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return mailingAddress;
   }
 
   public static APINodeList<MailingAddress> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -125,12 +124,11 @@ public class MailingAddress extends APINode {
   }
 
   public static ListenableFuture<APINodeList<MailingAddress>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<MailingAddress>> mailingAddress =
+    return
       new APIRequest(context, "", "/", "GET", MailingAddress.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return mailingAddress;
   }
 
   private String getPrefixedId() {
@@ -140,7 +138,7 @@ public class MailingAddress extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static MailingAddress loadJSON(String json, APIContext context) {
+  public static MailingAddress loadJSON(String json, APIContext context, String header) {
     MailingAddress mailingAddress = getGson().fromJson(json, MailingAddress.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -157,11 +155,12 @@ public class MailingAddress extends APINode {
     }
     mailingAddress.context = context;
     mailingAddress.rawValue = json;
+    mailingAddress.header = header;
     return mailingAddress;
   }
 
-  public static APINodeList<MailingAddress> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<MailingAddress> mailingAddresss = new APINodeList<MailingAddress>(request, json);
+  public static APINodeList<MailingAddress> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<MailingAddress> mailingAddresss = new APINodeList<MailingAddress>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -172,7 +171,7 @@ public class MailingAddress extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          mailingAddresss.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          mailingAddresss.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return mailingAddresss;
       } else if (result.isJsonObject()) {
@@ -197,7 +196,7 @@ public class MailingAddress extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              mailingAddresss.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              mailingAddresss.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -208,13 +207,13 @@ public class MailingAddress extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  mailingAddresss.add(loadJSON(entry.getValue().toString(), context));
+                  mailingAddresss.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              mailingAddresss.add(loadJSON(obj.toString(), context));
+              mailingAddresss.add(loadJSON(obj.toString(), context, header));
             }
           }
           return mailingAddresss;
@@ -222,7 +221,7 @@ public class MailingAddress extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              mailingAddresss.add(loadJSON(entry.getValue().toString(), context));
+              mailingAddresss.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return mailingAddresss;
         } else {
@@ -241,7 +240,7 @@ public class MailingAddress extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              mailingAddresss.add(loadJSON(value.toString(), context));
+              mailingAddresss.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -253,7 +252,7 @@ public class MailingAddress extends APINode {
 
           // Sixth, check if it's pure JsonObject
           mailingAddresss.clear();
-          mailingAddresss.add(loadJSON(json, context));
+          mailingAddresss.add(loadJSON(json, context, header));
           return mailingAddresss;
         }
       }
@@ -345,8 +344,8 @@ public class MailingAddress extends APINode {
     };
 
     @Override
-    public MailingAddress parseResponse(String response) throws APIException {
-      return MailingAddress.parseResponse(response, getContext(), this).head();
+    public MailingAddress parseResponse(String response, String header) throws APIException {
+      return MailingAddress.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -356,7 +355,8 @@ public class MailingAddress extends APINode {
 
     @Override
     public MailingAddress execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -367,10 +367,10 @@ public class MailingAddress extends APINode {
     public ListenableFuture<MailingAddress> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, MailingAddress>() {
-           public MailingAddress apply(String result) {
+        new Function<ResponseWrapper, MailingAddress>() {
+           public MailingAddress apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -520,8 +520,8 @@ public class MailingAddress extends APINode {
 
   public static APIRequest.ResponseParser<MailingAddress> getParser() {
     return new APIRequest.ResponseParser<MailingAddress>() {
-      public APINodeList<MailingAddress> parseResponse(String response, APIContext context, APIRequest<MailingAddress> request) throws MalformedResponseException {
-        return MailingAddress.parseResponse(response, context, request);
+      public APINodeList<MailingAddress> parseResponse(String response, APIContext context, APIRequest<MailingAddress> request, String header) throws MalformedResponseException {
+        return MailingAddress.parseResponse(response, context, request, header);
       }
     };
   }

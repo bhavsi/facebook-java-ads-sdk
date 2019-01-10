@@ -56,11 +56,11 @@ import com.facebook.ads.sdk.APIException.MalformedResponseException;
  */
 public class LeadGenDraftQuestion extends APINode {
   @SerializedName("conditional_questions_choices")
-  private List<Object> mConditionalQuestionsChoices = null;
+  private List<LeadGenConditionalQuestionsGroupChoices> mConditionalQuestionsChoices = null;
   @SerializedName("conditional_questions_group_id")
   private String mConditionalQuestionsGroupId = null;
   @SerializedName("dependent_conditional_questions")
-  private List<Object> mDependentConditionalQuestions = null;
+  private List<LeadGenConditionalQuestionsGroupQuestions> mDependentConditionalQuestions = null;
   @SerializedName("inline_context")
   private String mInlineContext = null;
   @SerializedName("key")
@@ -71,15 +71,17 @@ public class LeadGenDraftQuestion extends APINode {
   private List<LeadGenQuestionOption> mOptions = null;
   @SerializedName("type")
   private String mType = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public LeadGenDraftQuestion() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static LeadGenDraftQuestion loadJSON(String json, APIContext context) {
+  public static LeadGenDraftQuestion loadJSON(String json, APIContext context, String header) {
     LeadGenDraftQuestion leadGenDraftQuestion = getGson().fromJson(json, LeadGenDraftQuestion.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -96,11 +98,12 @@ public class LeadGenDraftQuestion extends APINode {
     }
     leadGenDraftQuestion.context = context;
     leadGenDraftQuestion.rawValue = json;
+    leadGenDraftQuestion.header = header;
     return leadGenDraftQuestion;
   }
 
-  public static APINodeList<LeadGenDraftQuestion> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<LeadGenDraftQuestion> leadGenDraftQuestions = new APINodeList<LeadGenDraftQuestion>(request, json);
+  public static APINodeList<LeadGenDraftQuestion> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<LeadGenDraftQuestion> leadGenDraftQuestions = new APINodeList<LeadGenDraftQuestion>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -111,7 +114,7 @@ public class LeadGenDraftQuestion extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          leadGenDraftQuestions.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          leadGenDraftQuestions.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return leadGenDraftQuestions;
       } else if (result.isJsonObject()) {
@@ -136,7 +139,7 @@ public class LeadGenDraftQuestion extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              leadGenDraftQuestions.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              leadGenDraftQuestions.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -147,13 +150,13 @@ public class LeadGenDraftQuestion extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  leadGenDraftQuestions.add(loadJSON(entry.getValue().toString(), context));
+                  leadGenDraftQuestions.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              leadGenDraftQuestions.add(loadJSON(obj.toString(), context));
+              leadGenDraftQuestions.add(loadJSON(obj.toString(), context, header));
             }
           }
           return leadGenDraftQuestions;
@@ -161,7 +164,7 @@ public class LeadGenDraftQuestion extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              leadGenDraftQuestions.add(loadJSON(entry.getValue().toString(), context));
+              leadGenDraftQuestions.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return leadGenDraftQuestions;
         } else {
@@ -180,7 +183,7 @@ public class LeadGenDraftQuestion extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              leadGenDraftQuestions.add(loadJSON(value.toString(), context));
+              leadGenDraftQuestions.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -192,7 +195,7 @@ public class LeadGenDraftQuestion extends APINode {
 
           // Sixth, check if it's pure JsonObject
           leadGenDraftQuestions.clear();
-          leadGenDraftQuestions.add(loadJSON(json, context));
+          leadGenDraftQuestions.add(loadJSON(json, context, header));
           return leadGenDraftQuestions;
         }
       }
@@ -221,15 +224,20 @@ public class LeadGenDraftQuestion extends APINode {
   }
 
 
-  public List<Object> getFieldConditionalQuestionsChoices() {
+  public List<LeadGenConditionalQuestionsGroupChoices> getFieldConditionalQuestionsChoices() {
     return mConditionalQuestionsChoices;
   }
 
-  public LeadGenDraftQuestion setFieldConditionalQuestionsChoices(List<Object> value) {
+  public LeadGenDraftQuestion setFieldConditionalQuestionsChoices(List<LeadGenConditionalQuestionsGroupChoices> value) {
     this.mConditionalQuestionsChoices = value;
     return this;
   }
 
+  public LeadGenDraftQuestion setFieldConditionalQuestionsChoices(String value) {
+    Type type = new TypeToken<List<LeadGenConditionalQuestionsGroupChoices>>(){}.getType();
+    this.mConditionalQuestionsChoices = LeadGenConditionalQuestionsGroupChoices.getGson().fromJson(value, type);
+    return this;
+  }
   public String getFieldConditionalQuestionsGroupId() {
     return mConditionalQuestionsGroupId;
   }
@@ -239,15 +247,20 @@ public class LeadGenDraftQuestion extends APINode {
     return this;
   }
 
-  public List<Object> getFieldDependentConditionalQuestions() {
+  public List<LeadGenConditionalQuestionsGroupQuestions> getFieldDependentConditionalQuestions() {
     return mDependentConditionalQuestions;
   }
 
-  public LeadGenDraftQuestion setFieldDependentConditionalQuestions(List<Object> value) {
+  public LeadGenDraftQuestion setFieldDependentConditionalQuestions(List<LeadGenConditionalQuestionsGroupQuestions> value) {
     this.mDependentConditionalQuestions = value;
     return this;
   }
 
+  public LeadGenDraftQuestion setFieldDependentConditionalQuestions(String value) {
+    Type type = new TypeToken<List<LeadGenConditionalQuestionsGroupQuestions>>(){}.getType();
+    this.mDependentConditionalQuestions = LeadGenConditionalQuestionsGroupQuestions.getGson().fromJson(value, type);
+    return this;
+  }
   public String getFieldInlineContext() {
     return mInlineContext;
   }
@@ -298,6 +311,15 @@ public class LeadGenDraftQuestion extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public LeadGenDraftQuestion setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -323,6 +345,7 @@ public class LeadGenDraftQuestion extends APINode {
     this.mLabel = instance.mLabel;
     this.mOptions = instance.mOptions;
     this.mType = instance.mType;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -330,8 +353,8 @@ public class LeadGenDraftQuestion extends APINode {
 
   public static APIRequest.ResponseParser<LeadGenDraftQuestion> getParser() {
     return new APIRequest.ResponseParser<LeadGenDraftQuestion>() {
-      public APINodeList<LeadGenDraftQuestion> parseResponse(String response, APIContext context, APIRequest<LeadGenDraftQuestion> request) throws MalformedResponseException {
-        return LeadGenDraftQuestion.parseResponse(response, context, request);
+      public APINodeList<LeadGenDraftQuestion> parseResponse(String response, APIContext context, APIRequest<LeadGenDraftQuestion> request, String header) throws MalformedResponseException {
+        return LeadGenDraftQuestion.parseResponse(response, context, request, header);
       }
     };
   }

@@ -77,10 +77,14 @@ public class OfflineConversionDataSet extends APINode {
   private Long mEventTimeMin = null;
   @SerializedName("id")
   private String mId = null;
+  @SerializedName("is_mta_use")
+  private Boolean mIsMtaUse = null;
   @SerializedName("is_restricted_use")
   private Boolean mIsRestrictedUse = null;
   @SerializedName("last_upload_app")
   private String mLastUploadApp = null;
+  @SerializedName("last_upload_app_changed_time")
+  private Long mLastUploadAppChangedTime = null;
   @SerializedName("match_rate_approx")
   private Long mMatchRateApprox = null;
   @SerializedName("matched_entries")
@@ -102,6 +106,7 @@ public class OfflineConversionDataSet extends APINode {
 
   public OfflineConversionDataSet(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -120,19 +125,17 @@ public class OfflineConversionDataSet extends APINode {
   }
 
   public static OfflineConversionDataSet fetchById(String id, APIContext context) throws APIException {
-    OfflineConversionDataSet offlineConversionDataSet =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return offlineConversionDataSet;
   }
 
   public static ListenableFuture<OfflineConversionDataSet> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<OfflineConversionDataSet> offlineConversionDataSet =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return offlineConversionDataSet;
   }
 
   public static APINodeList<OfflineConversionDataSet> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -145,12 +148,11 @@ public class OfflineConversionDataSet extends APINode {
   }
 
   public static ListenableFuture<APINodeList<OfflineConversionDataSet>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<OfflineConversionDataSet>> offlineConversionDataSet =
+    return
       new APIRequest(context, "", "/", "GET", OfflineConversionDataSet.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return offlineConversionDataSet;
   }
 
   private String getPrefixedId() {
@@ -160,7 +162,7 @@ public class OfflineConversionDataSet extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static OfflineConversionDataSet loadJSON(String json, APIContext context) {
+  public static OfflineConversionDataSet loadJSON(String json, APIContext context, String header) {
     OfflineConversionDataSet offlineConversionDataSet = getGson().fromJson(json, OfflineConversionDataSet.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -177,11 +179,12 @@ public class OfflineConversionDataSet extends APINode {
     }
     offlineConversionDataSet.context = context;
     offlineConversionDataSet.rawValue = json;
+    offlineConversionDataSet.header = header;
     return offlineConversionDataSet;
   }
 
-  public static APINodeList<OfflineConversionDataSet> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<OfflineConversionDataSet> offlineConversionDataSets = new APINodeList<OfflineConversionDataSet>(request, json);
+  public static APINodeList<OfflineConversionDataSet> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<OfflineConversionDataSet> offlineConversionDataSets = new APINodeList<OfflineConversionDataSet>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -192,7 +195,7 @@ public class OfflineConversionDataSet extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          offlineConversionDataSets.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          offlineConversionDataSets.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return offlineConversionDataSets;
       } else if (result.isJsonObject()) {
@@ -217,7 +220,7 @@ public class OfflineConversionDataSet extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              offlineConversionDataSets.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              offlineConversionDataSets.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -228,13 +231,13 @@ public class OfflineConversionDataSet extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  offlineConversionDataSets.add(loadJSON(entry.getValue().toString(), context));
+                  offlineConversionDataSets.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              offlineConversionDataSets.add(loadJSON(obj.toString(), context));
+              offlineConversionDataSets.add(loadJSON(obj.toString(), context, header));
             }
           }
           return offlineConversionDataSets;
@@ -242,7 +245,7 @@ public class OfflineConversionDataSet extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              offlineConversionDataSets.add(loadJSON(entry.getValue().toString(), context));
+              offlineConversionDataSets.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return offlineConversionDataSets;
         } else {
@@ -261,7 +264,7 @@ public class OfflineConversionDataSet extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              offlineConversionDataSets.add(loadJSON(value.toString(), context));
+              offlineConversionDataSets.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -273,7 +276,7 @@ public class OfflineConversionDataSet extends APINode {
 
           // Sixth, check if it's pure JsonObject
           offlineConversionDataSets.clear();
-          offlineConversionDataSets.add(loadJSON(json, context));
+          offlineConversionDataSets.add(loadJSON(json, context, header));
           return offlineConversionDataSets;
         }
       }
@@ -321,8 +324,24 @@ public class OfflineConversionDataSet extends APINode {
     return new APIRequestDeleteAgencies(this.getPrefixedId().toString(), context);
   }
 
+  public APIRequestGetAgencies getAgencies() {
+    return new APIRequestGetAgencies(this.getPrefixedId().toString(), context);
+  }
+
   public APIRequestCreateAgency createAgency() {
     return new APIRequestCreateAgency(this.getPrefixedId().toString(), context);
+  }
+
+  public APIRequestGetAudiences getAudiences() {
+    return new APIRequestGetAudiences(this.getPrefixedId().toString(), context);
+  }
+
+  public APIRequestGetCustomConversions getCustomConversions() {
+    return new APIRequestGetCustomConversions(this.getPrefixedId().toString(), context);
+  }
+
+  public APIRequestGetDaChecks getDaChecks() {
+    return new APIRequestGetDaChecks(this.getPrefixedId().toString(), context);
   }
 
   public APIRequestCreateEvent createEvent() {
@@ -345,8 +364,20 @@ public class OfflineConversionDataSet extends APINode {
     return new APIRequestDeleteUserPermissions(this.getPrefixedId().toString(), context);
   }
 
+  public APIRequestGetUserPermissions getUserPermissions() {
+    return new APIRequestGetUserPermissions(this.getPrefixedId().toString(), context);
+  }
+
   public APIRequestCreateUserPermission createUserPermission() {
     return new APIRequestCreateUserPermission(this.getPrefixedId().toString(), context);
+  }
+
+  public APIRequestDeleteUsers deleteUsers() {
+    return new APIRequestDeleteUsers(this.getPrefixedId().toString(), context);
+  }
+
+  public APIRequestCreateUser createUser() {
+    return new APIRequestCreateUser(this.getPrefixedId().toString(), context);
   }
 
   public APIRequestCreateValidate createValidate() {
@@ -413,12 +444,20 @@ public class OfflineConversionDataSet extends APINode {
     return mId;
   }
 
+  public Boolean getFieldIsMtaUse() {
+    return mIsMtaUse;
+  }
+
   public Boolean getFieldIsRestrictedUse() {
     return mIsRestrictedUse;
   }
 
   public String getFieldLastUploadApp() {
     return mLastUploadApp;
+  }
+
+  public Long getFieldLastUploadAppChangedTime() {
+    return mLastUploadAppChangedTime;
   }
 
   public Long getFieldMatchRateApprox() {
@@ -452,17 +491,17 @@ public class OfflineConversionDataSet extends APINode {
     }
     public static final String[] PARAMS = {
       "business_id",
+      "start_time",
       "end_time",
       "event_type",
-      "start_time",
     };
 
     public static final String[] FIELDS = {
     };
 
     @Override
-    public APINodeList<APINode> parseResponse(String response) throws APIException {
-      return APINode.parseResponse(response, getContext(), this);
+    public APINodeList<APINode> parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header);
     }
 
     @Override
@@ -472,7 +511,8 @@ public class OfflineConversionDataSet extends APINode {
 
     @Override
     public APINodeList<APINode> execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
       return lastResponse;
     }
 
@@ -483,10 +523,10 @@ public class OfflineConversionDataSet extends APINode {
     public ListenableFuture<APINodeList<APINode>> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINodeList<APINode>>() {
-           public APINodeList<APINode> apply(String result) {
+        new Function<ResponseWrapper, APINodeList<APINode>>() {
+           public APINodeList<APINode> apply(ResponseWrapper result) {
              try {
-               return APIRequestGetActivities.this.parseResponse(result);
+               return APIRequestGetActivities.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -517,6 +557,11 @@ public class OfflineConversionDataSet extends APINode {
       return this;
     }
 
+    public APIRequestGetActivities setStartTime (String startTime) {
+      this.setParam("start_time", startTime);
+      return this;
+    }
+
     public APIRequestGetActivities setEndTime (String endTime) {
       this.setParam("end_time", endTime);
       return this;
@@ -528,11 +573,6 @@ public class OfflineConversionDataSet extends APINode {
     }
     public APIRequestGetActivities setEventType (String eventType) {
       this.setParam("event_type", eventType);
-      return this;
-    }
-
-    public APIRequestGetActivities setStartTime (String startTime) {
-      this.setParam("start_time", startTime);
       return this;
     }
 
@@ -590,8 +630,8 @@ public class OfflineConversionDataSet extends APINode {
     };
 
     @Override
-    public APINodeList<APINode> parseResponse(String response) throws APIException {
-      return APINode.parseResponse(response, getContext(), this);
+    public APINodeList<APINode> parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header);
     }
 
     @Override
@@ -601,7 +641,8 @@ public class OfflineConversionDataSet extends APINode {
 
     @Override
     public APINodeList<APINode> execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
       return lastResponse;
     }
 
@@ -612,10 +653,10 @@ public class OfflineConversionDataSet extends APINode {
     public ListenableFuture<APINodeList<APINode>> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINodeList<APINode>>() {
-           public APINodeList<APINode> apply(String result) {
+        new Function<ResponseWrapper, APINodeList<APINode>>() {
+           public APINodeList<APINode> apply(ResponseWrapper result) {
              try {
-               return APIRequestDeleteAdAccounts.this.parseResponse(result);
+               return APIRequestDeleteAdAccounts.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -703,6 +744,8 @@ public class OfflineConversionDataSet extends APINode {
     public static final String[] FIELDS = {
       "account_id",
       "account_status",
+      "ad_account_creation_request",
+      "ad_account_promotable_objects",
       "age",
       "agency_client_declaration",
       "amount_spent",
@@ -719,6 +762,7 @@ public class OfflineConversionDataSet extends APINode {
       "capabilities",
       "created_time",
       "currency",
+      "direct_deals_tos_accepted",
       "disable_reason",
       "end_advertiser",
       "end_advertiser_name",
@@ -732,6 +776,7 @@ public class OfflineConversionDataSet extends APINode {
       "io_number",
       "is_attribution_spec_system_default",
       "is_direct_deals_enabled",
+      "is_in_3ds_authorization_enabled_market",
       "is_in_middle_of_local_entity_migration",
       "is_notifications_enabled",
       "is_personal",
@@ -745,7 +790,6 @@ public class OfflineConversionDataSet extends APINode {
       "offsite_pixels_tos_accepted",
       "owner",
       "partner",
-      "rate_limit_reset_time",
       "rf_spec",
       "show_checkout_experience",
       "spend_cap",
@@ -761,8 +805,8 @@ public class OfflineConversionDataSet extends APINode {
     };
 
     @Override
-    public APINodeList<AdAccount> parseResponse(String response) throws APIException {
-      return AdAccount.parseResponse(response, getContext(), this);
+    public APINodeList<AdAccount> parseResponse(String response, String header) throws APIException {
+      return AdAccount.parseResponse(response, getContext(), this, header);
     }
 
     @Override
@@ -772,7 +816,8 @@ public class OfflineConversionDataSet extends APINode {
 
     @Override
     public APINodeList<AdAccount> execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
       return lastResponse;
     }
 
@@ -783,10 +828,10 @@ public class OfflineConversionDataSet extends APINode {
     public ListenableFuture<APINodeList<AdAccount>> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINodeList<AdAccount>>() {
-           public APINodeList<AdAccount> apply(String result) {
+        new Function<ResponseWrapper, APINodeList<AdAccount>>() {
+           public APINodeList<AdAccount> apply(ResponseWrapper result) {
              try {
-               return APIRequestGetAdAccounts.this.parseResponse(result);
+               return APIRequestGetAdAccounts.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -865,6 +910,20 @@ public class OfflineConversionDataSet extends APINode {
     }
     public APIRequestGetAdAccounts requestAccountStatusField (boolean value) {
       this.requestField("account_status", value);
+      return this;
+    }
+    public APIRequestGetAdAccounts requestAdAccountCreationRequestField () {
+      return this.requestAdAccountCreationRequestField(true);
+    }
+    public APIRequestGetAdAccounts requestAdAccountCreationRequestField (boolean value) {
+      this.requestField("ad_account_creation_request", value);
+      return this;
+    }
+    public APIRequestGetAdAccounts requestAdAccountPromotableObjectsField () {
+      return this.requestAdAccountPromotableObjectsField(true);
+    }
+    public APIRequestGetAdAccounts requestAdAccountPromotableObjectsField (boolean value) {
+      this.requestField("ad_account_promotable_objects", value);
       return this;
     }
     public APIRequestGetAdAccounts requestAgeField () {
@@ -979,6 +1038,13 @@ public class OfflineConversionDataSet extends APINode {
       this.requestField("currency", value);
       return this;
     }
+    public APIRequestGetAdAccounts requestDirectDealsTosAcceptedField () {
+      return this.requestDirectDealsTosAcceptedField(true);
+    }
+    public APIRequestGetAdAccounts requestDirectDealsTosAcceptedField (boolean value) {
+      this.requestField("direct_deals_tos_accepted", value);
+      return this;
+    }
     public APIRequestGetAdAccounts requestDisableReasonField () {
       return this.requestDisableReasonField(true);
     }
@@ -1068,6 +1134,13 @@ public class OfflineConversionDataSet extends APINode {
     }
     public APIRequestGetAdAccounts requestIsDirectDealsEnabledField (boolean value) {
       this.requestField("is_direct_deals_enabled", value);
+      return this;
+    }
+    public APIRequestGetAdAccounts requestIsIn3dsAuthorizationEnabledMarketField () {
+      return this.requestIsIn3dsAuthorizationEnabledMarketField(true);
+    }
+    public APIRequestGetAdAccounts requestIsIn3dsAuthorizationEnabledMarketField (boolean value) {
+      this.requestField("is_in_3ds_authorization_enabled_market", value);
       return this;
     }
     public APIRequestGetAdAccounts requestIsInMiddleOfLocalEntityMigrationField () {
@@ -1161,13 +1234,6 @@ public class OfflineConversionDataSet extends APINode {
       this.requestField("partner", value);
       return this;
     }
-    public APIRequestGetAdAccounts requestRateLimitResetTimeField () {
-      return this.requestRateLimitResetTimeField(true);
-    }
-    public APIRequestGetAdAccounts requestRateLimitResetTimeField (boolean value) {
-      this.requestField("rate_limit_reset_time", value);
-      return this;
-    }
     public APIRequestGetAdAccounts requestRfSpecField () {
       return this.requestRfSpecField(true);
     }
@@ -1254,49 +1320,50 @@ public class OfflineConversionDataSet extends APINode {
     }
   }
 
-  public static class APIRequestCreateAdAccount extends APIRequest<APINode> {
+  public static class APIRequestCreateAdAccount extends APIRequest<OfflineConversionDataSet> {
 
-    APINode lastResponse = null;
+    OfflineConversionDataSet lastResponse = null;
     @Override
-    public APINode getLastResponse() {
+    public OfflineConversionDataSet getLastResponse() {
       return lastResponse;
     }
     public static final String[] PARAMS = {
       "account_id",
-      "auto_track_for_ads",
       "business",
+      "auto_track_for_ads",
     };
 
     public static final String[] FIELDS = {
     };
 
     @Override
-    public APINode parseResponse(String response) throws APIException {
-      return APINode.parseResponse(response, getContext(), this).head();
+    public OfflineConversionDataSet parseResponse(String response, String header) throws APIException {
+      return OfflineConversionDataSet.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
-    public APINode execute() throws APIException {
+    public OfflineConversionDataSet execute() throws APIException {
       return execute(new HashMap<String, Object>());
     }
 
     @Override
-    public APINode execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+    public OfflineConversionDataSet execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
-    public ListenableFuture<APINode> executeAsync() throws APIException {
+    public ListenableFuture<OfflineConversionDataSet> executeAsync() throws APIException {
       return executeAsync(new HashMap<String, Object>());
     };
 
-    public ListenableFuture<APINode> executeAsync(Map<String, Object> extraParams) throws APIException {
+    public ListenableFuture<OfflineConversionDataSet> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINode>() {
-           public APINode apply(String result) {
+        new Function<ResponseWrapper, OfflineConversionDataSet>() {
+           public OfflineConversionDataSet apply(ResponseWrapper result) {
              try {
-               return APIRequestCreateAdAccount.this.parseResponse(result);
+               return APIRequestCreateAdAccount.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -1327,17 +1394,17 @@ public class OfflineConversionDataSet extends APINode {
       return this;
     }
 
+    public APIRequestCreateAdAccount setBusiness (String business) {
+      this.setParam("business", business);
+      return this;
+    }
+
     public APIRequestCreateAdAccount setAutoTrackForAds (Boolean autoTrackForAds) {
       this.setParam("auto_track_for_ads", autoTrackForAds);
       return this;
     }
     public APIRequestCreateAdAccount setAutoTrackForAds (String autoTrackForAds) {
       this.setParam("auto_track_for_ads", autoTrackForAds);
-      return this;
-    }
-
-    public APIRequestCreateAdAccount setBusiness (String business) {
-      this.setParam("business", business);
       return this;
     }
 
@@ -1394,8 +1461,8 @@ public class OfflineConversionDataSet extends APINode {
     };
 
     @Override
-    public APINodeList<APINode> parseResponse(String response) throws APIException {
-      return APINode.parseResponse(response, getContext(), this);
+    public APINodeList<APINode> parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header);
     }
 
     @Override
@@ -1405,7 +1472,8 @@ public class OfflineConversionDataSet extends APINode {
 
     @Override
     public APINodeList<APINode> execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
       return lastResponse;
     }
 
@@ -1416,10 +1484,10 @@ public class OfflineConversionDataSet extends APINode {
     public ListenableFuture<APINodeList<APINode>> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINodeList<APINode>>() {
-           public APINodeList<APINode> apply(String result) {
+        new Function<ResponseWrapper, APINodeList<APINode>>() {
+           public APINodeList<APINode> apply(ResponseWrapper result) {
              try {
-               return APIRequestDeleteAgencies.this.parseResponse(result);
+               return APIRequestDeleteAgencies.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -1488,48 +1556,299 @@ public class OfflineConversionDataSet extends APINode {
 
   }
 
-  public static class APIRequestCreateAgency extends APIRequest<Business> {
+  public static class APIRequestGetAgencies extends APIRequest<Business> {
 
-    Business lastResponse = null;
+    APINodeList<Business> lastResponse = null;
     @Override
-    public Business getLastResponse() {
+    public APINodeList<Business> getLastResponse() {
+      return lastResponse;
+    }
+    public static final String[] PARAMS = {
+    };
+
+    public static final String[] FIELDS = {
+      "block_offline_analytics",
+      "created_by",
+      "created_time",
+      "extended_updated_time",
+      "id",
+      "is_hidden",
+      "is_instagram_enabled_in_fb_analytics",
+      "link",
+      "name",
+      "primary_page",
+      "profile_picture_uri",
+      "timezone_id",
+      "two_factor_type",
+      "updated_by",
+      "updated_time",
+      "verification_status",
+      "vertical",
+      "vertical_id",
+    };
+
+    @Override
+    public APINodeList<Business> parseResponse(String response, String header) throws APIException {
+      return Business.parseResponse(response, getContext(), this, header);
+    }
+
+    @Override
+    public APINodeList<Business> execute() throws APIException {
+      return execute(new HashMap<String, Object>());
+    }
+
+    @Override
+    public APINodeList<Business> execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
+      return lastResponse;
+    }
+
+    public ListenableFuture<APINodeList<Business>> executeAsync() throws APIException {
+      return executeAsync(new HashMap<String, Object>());
+    };
+
+    public ListenableFuture<APINodeList<Business>> executeAsync(Map<String, Object> extraParams) throws APIException {
+      return Futures.transform(
+        executeAsyncInternal(extraParams),
+        new Function<ResponseWrapper, APINodeList<Business>>() {
+           public APINodeList<Business> apply(ResponseWrapper result) {
+             try {
+               return APIRequestGetAgencies.this.parseResponse(result.getBody(), result.getHeader());
+             } catch (Exception e) {
+               throw new RuntimeException(e);
+             }
+           }
+         }
+      );
+    };
+
+    public APIRequestGetAgencies(String nodeId, APIContext context) {
+      super(context, nodeId, "/agencies", "GET", Arrays.asList(PARAMS));
+    }
+
+    @Override
+    public APIRequestGetAgencies setParam(String param, Object value) {
+      setParamInternal(param, value);
+      return this;
+    }
+
+    @Override
+    public APIRequestGetAgencies setParams(Map<String, Object> params) {
+      setParamsInternal(params);
+      return this;
+    }
+
+
+    public APIRequestGetAgencies requestAllFields () {
+      return this.requestAllFields(true);
+    }
+
+    public APIRequestGetAgencies requestAllFields (boolean value) {
+      for (String field : FIELDS) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestGetAgencies requestFields (List<String> fields) {
+      return this.requestFields(fields, true);
+    }
+
+    @Override
+    public APIRequestGetAgencies requestFields (List<String> fields, boolean value) {
+      for (String field : fields) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestGetAgencies requestField (String field) {
+      this.requestField(field, true);
+      return this;
+    }
+
+    @Override
+    public APIRequestGetAgencies requestField (String field, boolean value) {
+      this.requestFieldInternal(field, value);
+      return this;
+    }
+
+    public APIRequestGetAgencies requestBlockOfflineAnalyticsField () {
+      return this.requestBlockOfflineAnalyticsField(true);
+    }
+    public APIRequestGetAgencies requestBlockOfflineAnalyticsField (boolean value) {
+      this.requestField("block_offline_analytics", value);
+      return this;
+    }
+    public APIRequestGetAgencies requestCreatedByField () {
+      return this.requestCreatedByField(true);
+    }
+    public APIRequestGetAgencies requestCreatedByField (boolean value) {
+      this.requestField("created_by", value);
+      return this;
+    }
+    public APIRequestGetAgencies requestCreatedTimeField () {
+      return this.requestCreatedTimeField(true);
+    }
+    public APIRequestGetAgencies requestCreatedTimeField (boolean value) {
+      this.requestField("created_time", value);
+      return this;
+    }
+    public APIRequestGetAgencies requestExtendedUpdatedTimeField () {
+      return this.requestExtendedUpdatedTimeField(true);
+    }
+    public APIRequestGetAgencies requestExtendedUpdatedTimeField (boolean value) {
+      this.requestField("extended_updated_time", value);
+      return this;
+    }
+    public APIRequestGetAgencies requestIdField () {
+      return this.requestIdField(true);
+    }
+    public APIRequestGetAgencies requestIdField (boolean value) {
+      this.requestField("id", value);
+      return this;
+    }
+    public APIRequestGetAgencies requestIsHiddenField () {
+      return this.requestIsHiddenField(true);
+    }
+    public APIRequestGetAgencies requestIsHiddenField (boolean value) {
+      this.requestField("is_hidden", value);
+      return this;
+    }
+    public APIRequestGetAgencies requestIsInstagramEnabledInFbAnalyticsField () {
+      return this.requestIsInstagramEnabledInFbAnalyticsField(true);
+    }
+    public APIRequestGetAgencies requestIsInstagramEnabledInFbAnalyticsField (boolean value) {
+      this.requestField("is_instagram_enabled_in_fb_analytics", value);
+      return this;
+    }
+    public APIRequestGetAgencies requestLinkField () {
+      return this.requestLinkField(true);
+    }
+    public APIRequestGetAgencies requestLinkField (boolean value) {
+      this.requestField("link", value);
+      return this;
+    }
+    public APIRequestGetAgencies requestNameField () {
+      return this.requestNameField(true);
+    }
+    public APIRequestGetAgencies requestNameField (boolean value) {
+      this.requestField("name", value);
+      return this;
+    }
+    public APIRequestGetAgencies requestPrimaryPageField () {
+      return this.requestPrimaryPageField(true);
+    }
+    public APIRequestGetAgencies requestPrimaryPageField (boolean value) {
+      this.requestField("primary_page", value);
+      return this;
+    }
+    public APIRequestGetAgencies requestProfilePictureUriField () {
+      return this.requestProfilePictureUriField(true);
+    }
+    public APIRequestGetAgencies requestProfilePictureUriField (boolean value) {
+      this.requestField("profile_picture_uri", value);
+      return this;
+    }
+    public APIRequestGetAgencies requestTimezoneIdField () {
+      return this.requestTimezoneIdField(true);
+    }
+    public APIRequestGetAgencies requestTimezoneIdField (boolean value) {
+      this.requestField("timezone_id", value);
+      return this;
+    }
+    public APIRequestGetAgencies requestTwoFactorTypeField () {
+      return this.requestTwoFactorTypeField(true);
+    }
+    public APIRequestGetAgencies requestTwoFactorTypeField (boolean value) {
+      this.requestField("two_factor_type", value);
+      return this;
+    }
+    public APIRequestGetAgencies requestUpdatedByField () {
+      return this.requestUpdatedByField(true);
+    }
+    public APIRequestGetAgencies requestUpdatedByField (boolean value) {
+      this.requestField("updated_by", value);
+      return this;
+    }
+    public APIRequestGetAgencies requestUpdatedTimeField () {
+      return this.requestUpdatedTimeField(true);
+    }
+    public APIRequestGetAgencies requestUpdatedTimeField (boolean value) {
+      this.requestField("updated_time", value);
+      return this;
+    }
+    public APIRequestGetAgencies requestVerificationStatusField () {
+      return this.requestVerificationStatusField(true);
+    }
+    public APIRequestGetAgencies requestVerificationStatusField (boolean value) {
+      this.requestField("verification_status", value);
+      return this;
+    }
+    public APIRequestGetAgencies requestVerticalField () {
+      return this.requestVerticalField(true);
+    }
+    public APIRequestGetAgencies requestVerticalField (boolean value) {
+      this.requestField("vertical", value);
+      return this;
+    }
+    public APIRequestGetAgencies requestVerticalIdField () {
+      return this.requestVerticalIdField(true);
+    }
+    public APIRequestGetAgencies requestVerticalIdField (boolean value) {
+      this.requestField("vertical_id", value);
+      return this;
+    }
+  }
+
+  public static class APIRequestCreateAgency extends APIRequest<OfflineConversionDataSet> {
+
+    OfflineConversionDataSet lastResponse = null;
+    @Override
+    public OfflineConversionDataSet getLastResponse() {
       return lastResponse;
     }
     public static final String[] PARAMS = {
       "business",
       "permitted_roles",
+      "relationship_type",
+      "other_relationship",
     };
 
     public static final String[] FIELDS = {
     };
 
     @Override
-    public Business parseResponse(String response) throws APIException {
-      return Business.parseResponse(response, getContext(), this).head();
+    public OfflineConversionDataSet parseResponse(String response, String header) throws APIException {
+      return OfflineConversionDataSet.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
-    public Business execute() throws APIException {
+    public OfflineConversionDataSet execute() throws APIException {
       return execute(new HashMap<String, Object>());
     }
 
     @Override
-    public Business execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+    public OfflineConversionDataSet execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
-    public ListenableFuture<Business> executeAsync() throws APIException {
+    public ListenableFuture<OfflineConversionDataSet> executeAsync() throws APIException {
       return executeAsync(new HashMap<String, Object>());
     };
 
-    public ListenableFuture<Business> executeAsync(Map<String, Object> extraParams) throws APIException {
+    public ListenableFuture<OfflineConversionDataSet> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, Business>() {
-           public Business apply(String result) {
+        new Function<ResponseWrapper, OfflineConversionDataSet>() {
+           public OfflineConversionDataSet apply(ResponseWrapper result) {
              try {
-               return APIRequestCreateAgency.this.parseResponse(result);
+               return APIRequestCreateAgency.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -1560,12 +1879,26 @@ public class OfflineConversionDataSet extends APINode {
       return this;
     }
 
-    public APIRequestCreateAgency setPermittedRoles (List<Business.EnumPermittedRoles> permittedRoles) {
+    public APIRequestCreateAgency setPermittedRoles (List<OfflineConversionDataSet.EnumPermittedRoles> permittedRoles) {
       this.setParam("permitted_roles", permittedRoles);
       return this;
     }
     public APIRequestCreateAgency setPermittedRoles (String permittedRoles) {
       this.setParam("permitted_roles", permittedRoles);
+      return this;
+    }
+
+    public APIRequestCreateAgency setRelationshipType (List<OfflineConversionDataSet.EnumRelationshipType> relationshipType) {
+      this.setParam("relationship_type", relationshipType);
+      return this;
+    }
+    public APIRequestCreateAgency setRelationshipType (String relationshipType) {
+      this.setParam("relationship_type", relationshipType);
+      return this;
+    }
+
+    public APIRequestCreateAgency setOtherRelationship (String otherRelationship) {
+      this.setParam("other_relationship", otherRelationship);
       return this;
     }
 
@@ -1607,6 +1940,836 @@ public class OfflineConversionDataSet extends APINode {
 
   }
 
+  public static class APIRequestGetAudiences extends APIRequest<CustomAudience> {
+
+    APINodeList<CustomAudience> lastResponse = null;
+    @Override
+    public APINodeList<CustomAudience> getLastResponse() {
+      return lastResponse;
+    }
+    public static final String[] PARAMS = {
+      "ad_account",
+    };
+
+    public static final String[] FIELDS = {
+      "account_id",
+      "approximate_count",
+      "customer_file_source",
+      "data_source",
+      "data_source_types",
+      "datafile_custom_audience_uploading_status",
+      "delivery_status",
+      "description",
+      "excluded_custom_audiences",
+      "expiry_time",
+      "external_event_source",
+      "household_audience",
+      "id",
+      "included_custom_audiences",
+      "is_household",
+      "is_snapshot",
+      "is_value_based",
+      "list_of_accounts",
+      "lookalike_audience_ids",
+      "lookalike_spec",
+      "name",
+      "operation_status",
+      "opt_out_link",
+      "permission_for_actions",
+      "pixel_id",
+      "retention_days",
+      "rev_share_policy_id",
+      "rule",
+      "rule_aggregation",
+      "rule_v2",
+      "seed_audience",
+      "sharing_status",
+      "study_spec",
+      "subtype",
+      "time_content_updated",
+      "time_created",
+      "time_updated",
+    };
+
+    @Override
+    public APINodeList<CustomAudience> parseResponse(String response, String header) throws APIException {
+      return CustomAudience.parseResponse(response, getContext(), this, header);
+    }
+
+    @Override
+    public APINodeList<CustomAudience> execute() throws APIException {
+      return execute(new HashMap<String, Object>());
+    }
+
+    @Override
+    public APINodeList<CustomAudience> execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
+      return lastResponse;
+    }
+
+    public ListenableFuture<APINodeList<CustomAudience>> executeAsync() throws APIException {
+      return executeAsync(new HashMap<String, Object>());
+    };
+
+    public ListenableFuture<APINodeList<CustomAudience>> executeAsync(Map<String, Object> extraParams) throws APIException {
+      return Futures.transform(
+        executeAsyncInternal(extraParams),
+        new Function<ResponseWrapper, APINodeList<CustomAudience>>() {
+           public APINodeList<CustomAudience> apply(ResponseWrapper result) {
+             try {
+               return APIRequestGetAudiences.this.parseResponse(result.getBody(), result.getHeader());
+             } catch (Exception e) {
+               throw new RuntimeException(e);
+             }
+           }
+         }
+      );
+    };
+
+    public APIRequestGetAudiences(String nodeId, APIContext context) {
+      super(context, nodeId, "/audiences", "GET", Arrays.asList(PARAMS));
+    }
+
+    @Override
+    public APIRequestGetAudiences setParam(String param, Object value) {
+      setParamInternal(param, value);
+      return this;
+    }
+
+    @Override
+    public APIRequestGetAudiences setParams(Map<String, Object> params) {
+      setParamsInternal(params);
+      return this;
+    }
+
+
+    public APIRequestGetAudiences setAdAccount (String adAccount) {
+      this.setParam("ad_account", adAccount);
+      return this;
+    }
+
+    public APIRequestGetAudiences requestAllFields () {
+      return this.requestAllFields(true);
+    }
+
+    public APIRequestGetAudiences requestAllFields (boolean value) {
+      for (String field : FIELDS) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestGetAudiences requestFields (List<String> fields) {
+      return this.requestFields(fields, true);
+    }
+
+    @Override
+    public APIRequestGetAudiences requestFields (List<String> fields, boolean value) {
+      for (String field : fields) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestGetAudiences requestField (String field) {
+      this.requestField(field, true);
+      return this;
+    }
+
+    @Override
+    public APIRequestGetAudiences requestField (String field, boolean value) {
+      this.requestFieldInternal(field, value);
+      return this;
+    }
+
+    public APIRequestGetAudiences requestAccountIdField () {
+      return this.requestAccountIdField(true);
+    }
+    public APIRequestGetAudiences requestAccountIdField (boolean value) {
+      this.requestField("account_id", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestApproximateCountField () {
+      return this.requestApproximateCountField(true);
+    }
+    public APIRequestGetAudiences requestApproximateCountField (boolean value) {
+      this.requestField("approximate_count", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestCustomerFileSourceField () {
+      return this.requestCustomerFileSourceField(true);
+    }
+    public APIRequestGetAudiences requestCustomerFileSourceField (boolean value) {
+      this.requestField("customer_file_source", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestDataSourceField () {
+      return this.requestDataSourceField(true);
+    }
+    public APIRequestGetAudiences requestDataSourceField (boolean value) {
+      this.requestField("data_source", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestDataSourceTypesField () {
+      return this.requestDataSourceTypesField(true);
+    }
+    public APIRequestGetAudiences requestDataSourceTypesField (boolean value) {
+      this.requestField("data_source_types", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestDatafileCustomAudienceUploadingStatusField () {
+      return this.requestDatafileCustomAudienceUploadingStatusField(true);
+    }
+    public APIRequestGetAudiences requestDatafileCustomAudienceUploadingStatusField (boolean value) {
+      this.requestField("datafile_custom_audience_uploading_status", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestDeliveryStatusField () {
+      return this.requestDeliveryStatusField(true);
+    }
+    public APIRequestGetAudiences requestDeliveryStatusField (boolean value) {
+      this.requestField("delivery_status", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestDescriptionField () {
+      return this.requestDescriptionField(true);
+    }
+    public APIRequestGetAudiences requestDescriptionField (boolean value) {
+      this.requestField("description", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestExcludedCustomAudiencesField () {
+      return this.requestExcludedCustomAudiencesField(true);
+    }
+    public APIRequestGetAudiences requestExcludedCustomAudiencesField (boolean value) {
+      this.requestField("excluded_custom_audiences", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestExpiryTimeField () {
+      return this.requestExpiryTimeField(true);
+    }
+    public APIRequestGetAudiences requestExpiryTimeField (boolean value) {
+      this.requestField("expiry_time", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestExternalEventSourceField () {
+      return this.requestExternalEventSourceField(true);
+    }
+    public APIRequestGetAudiences requestExternalEventSourceField (boolean value) {
+      this.requestField("external_event_source", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestHouseholdAudienceField () {
+      return this.requestHouseholdAudienceField(true);
+    }
+    public APIRequestGetAudiences requestHouseholdAudienceField (boolean value) {
+      this.requestField("household_audience", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestIdField () {
+      return this.requestIdField(true);
+    }
+    public APIRequestGetAudiences requestIdField (boolean value) {
+      this.requestField("id", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestIncludedCustomAudiencesField () {
+      return this.requestIncludedCustomAudiencesField(true);
+    }
+    public APIRequestGetAudiences requestIncludedCustomAudiencesField (boolean value) {
+      this.requestField("included_custom_audiences", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestIsHouseholdField () {
+      return this.requestIsHouseholdField(true);
+    }
+    public APIRequestGetAudiences requestIsHouseholdField (boolean value) {
+      this.requestField("is_household", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestIsSnapshotField () {
+      return this.requestIsSnapshotField(true);
+    }
+    public APIRequestGetAudiences requestIsSnapshotField (boolean value) {
+      this.requestField("is_snapshot", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestIsValueBasedField () {
+      return this.requestIsValueBasedField(true);
+    }
+    public APIRequestGetAudiences requestIsValueBasedField (boolean value) {
+      this.requestField("is_value_based", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestListOfAccountsField () {
+      return this.requestListOfAccountsField(true);
+    }
+    public APIRequestGetAudiences requestListOfAccountsField (boolean value) {
+      this.requestField("list_of_accounts", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestLookalikeAudienceIdsField () {
+      return this.requestLookalikeAudienceIdsField(true);
+    }
+    public APIRequestGetAudiences requestLookalikeAudienceIdsField (boolean value) {
+      this.requestField("lookalike_audience_ids", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestLookalikeSpecField () {
+      return this.requestLookalikeSpecField(true);
+    }
+    public APIRequestGetAudiences requestLookalikeSpecField (boolean value) {
+      this.requestField("lookalike_spec", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestNameField () {
+      return this.requestNameField(true);
+    }
+    public APIRequestGetAudiences requestNameField (boolean value) {
+      this.requestField("name", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestOperationStatusField () {
+      return this.requestOperationStatusField(true);
+    }
+    public APIRequestGetAudiences requestOperationStatusField (boolean value) {
+      this.requestField("operation_status", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestOptOutLinkField () {
+      return this.requestOptOutLinkField(true);
+    }
+    public APIRequestGetAudiences requestOptOutLinkField (boolean value) {
+      this.requestField("opt_out_link", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestPermissionForActionsField () {
+      return this.requestPermissionForActionsField(true);
+    }
+    public APIRequestGetAudiences requestPermissionForActionsField (boolean value) {
+      this.requestField("permission_for_actions", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestPixelIdField () {
+      return this.requestPixelIdField(true);
+    }
+    public APIRequestGetAudiences requestPixelIdField (boolean value) {
+      this.requestField("pixel_id", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestRetentionDaysField () {
+      return this.requestRetentionDaysField(true);
+    }
+    public APIRequestGetAudiences requestRetentionDaysField (boolean value) {
+      this.requestField("retention_days", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestRevSharePolicyIdField () {
+      return this.requestRevSharePolicyIdField(true);
+    }
+    public APIRequestGetAudiences requestRevSharePolicyIdField (boolean value) {
+      this.requestField("rev_share_policy_id", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestRuleField () {
+      return this.requestRuleField(true);
+    }
+    public APIRequestGetAudiences requestRuleField (boolean value) {
+      this.requestField("rule", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestRuleAggregationField () {
+      return this.requestRuleAggregationField(true);
+    }
+    public APIRequestGetAudiences requestRuleAggregationField (boolean value) {
+      this.requestField("rule_aggregation", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestRuleV2Field () {
+      return this.requestRuleV2Field(true);
+    }
+    public APIRequestGetAudiences requestRuleV2Field (boolean value) {
+      this.requestField("rule_v2", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestSeedAudienceField () {
+      return this.requestSeedAudienceField(true);
+    }
+    public APIRequestGetAudiences requestSeedAudienceField (boolean value) {
+      this.requestField("seed_audience", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestSharingStatusField () {
+      return this.requestSharingStatusField(true);
+    }
+    public APIRequestGetAudiences requestSharingStatusField (boolean value) {
+      this.requestField("sharing_status", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestStudySpecField () {
+      return this.requestStudySpecField(true);
+    }
+    public APIRequestGetAudiences requestStudySpecField (boolean value) {
+      this.requestField("study_spec", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestSubtypeField () {
+      return this.requestSubtypeField(true);
+    }
+    public APIRequestGetAudiences requestSubtypeField (boolean value) {
+      this.requestField("subtype", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestTimeContentUpdatedField () {
+      return this.requestTimeContentUpdatedField(true);
+    }
+    public APIRequestGetAudiences requestTimeContentUpdatedField (boolean value) {
+      this.requestField("time_content_updated", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestTimeCreatedField () {
+      return this.requestTimeCreatedField(true);
+    }
+    public APIRequestGetAudiences requestTimeCreatedField (boolean value) {
+      this.requestField("time_created", value);
+      return this;
+    }
+    public APIRequestGetAudiences requestTimeUpdatedField () {
+      return this.requestTimeUpdatedField(true);
+    }
+    public APIRequestGetAudiences requestTimeUpdatedField (boolean value) {
+      this.requestField("time_updated", value);
+      return this;
+    }
+  }
+
+  public static class APIRequestGetCustomConversions extends APIRequest<CustomConversion> {
+
+    APINodeList<CustomConversion> lastResponse = null;
+    @Override
+    public APINodeList<CustomConversion> getLastResponse() {
+      return lastResponse;
+    }
+    public static final String[] PARAMS = {
+      "ad_account",
+    };
+
+    public static final String[] FIELDS = {
+      "account_id",
+      "aggregation_rule",
+      "business",
+      "creation_time",
+      "custom_event_type",
+      "data_sources",
+      "default_conversion_value",
+      "description",
+      "event_source_type",
+      "first_fired_time",
+      "id",
+      "is_archived",
+      "last_fired_time",
+      "name",
+      "offline_conversion_data_set",
+      "pixel",
+      "retention_days",
+      "rule",
+    };
+
+    @Override
+    public APINodeList<CustomConversion> parseResponse(String response, String header) throws APIException {
+      return CustomConversion.parseResponse(response, getContext(), this, header);
+    }
+
+    @Override
+    public APINodeList<CustomConversion> execute() throws APIException {
+      return execute(new HashMap<String, Object>());
+    }
+
+    @Override
+    public APINodeList<CustomConversion> execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
+      return lastResponse;
+    }
+
+    public ListenableFuture<APINodeList<CustomConversion>> executeAsync() throws APIException {
+      return executeAsync(new HashMap<String, Object>());
+    };
+
+    public ListenableFuture<APINodeList<CustomConversion>> executeAsync(Map<String, Object> extraParams) throws APIException {
+      return Futures.transform(
+        executeAsyncInternal(extraParams),
+        new Function<ResponseWrapper, APINodeList<CustomConversion>>() {
+           public APINodeList<CustomConversion> apply(ResponseWrapper result) {
+             try {
+               return APIRequestGetCustomConversions.this.parseResponse(result.getBody(), result.getHeader());
+             } catch (Exception e) {
+               throw new RuntimeException(e);
+             }
+           }
+         }
+      );
+    };
+
+    public APIRequestGetCustomConversions(String nodeId, APIContext context) {
+      super(context, nodeId, "/customconversions", "GET", Arrays.asList(PARAMS));
+    }
+
+    @Override
+    public APIRequestGetCustomConversions setParam(String param, Object value) {
+      setParamInternal(param, value);
+      return this;
+    }
+
+    @Override
+    public APIRequestGetCustomConversions setParams(Map<String, Object> params) {
+      setParamsInternal(params);
+      return this;
+    }
+
+
+    public APIRequestGetCustomConversions setAdAccount (String adAccount) {
+      this.setParam("ad_account", adAccount);
+      return this;
+    }
+
+    public APIRequestGetCustomConversions requestAllFields () {
+      return this.requestAllFields(true);
+    }
+
+    public APIRequestGetCustomConversions requestAllFields (boolean value) {
+      for (String field : FIELDS) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestGetCustomConversions requestFields (List<String> fields) {
+      return this.requestFields(fields, true);
+    }
+
+    @Override
+    public APIRequestGetCustomConversions requestFields (List<String> fields, boolean value) {
+      for (String field : fields) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestGetCustomConversions requestField (String field) {
+      this.requestField(field, true);
+      return this;
+    }
+
+    @Override
+    public APIRequestGetCustomConversions requestField (String field, boolean value) {
+      this.requestFieldInternal(field, value);
+      return this;
+    }
+
+    public APIRequestGetCustomConversions requestAccountIdField () {
+      return this.requestAccountIdField(true);
+    }
+    public APIRequestGetCustomConversions requestAccountIdField (boolean value) {
+      this.requestField("account_id", value);
+      return this;
+    }
+    public APIRequestGetCustomConversions requestAggregationRuleField () {
+      return this.requestAggregationRuleField(true);
+    }
+    public APIRequestGetCustomConversions requestAggregationRuleField (boolean value) {
+      this.requestField("aggregation_rule", value);
+      return this;
+    }
+    public APIRequestGetCustomConversions requestBusinessField () {
+      return this.requestBusinessField(true);
+    }
+    public APIRequestGetCustomConversions requestBusinessField (boolean value) {
+      this.requestField("business", value);
+      return this;
+    }
+    public APIRequestGetCustomConversions requestCreationTimeField () {
+      return this.requestCreationTimeField(true);
+    }
+    public APIRequestGetCustomConversions requestCreationTimeField (boolean value) {
+      this.requestField("creation_time", value);
+      return this;
+    }
+    public APIRequestGetCustomConversions requestCustomEventTypeField () {
+      return this.requestCustomEventTypeField(true);
+    }
+    public APIRequestGetCustomConversions requestCustomEventTypeField (boolean value) {
+      this.requestField("custom_event_type", value);
+      return this;
+    }
+    public APIRequestGetCustomConversions requestDataSourcesField () {
+      return this.requestDataSourcesField(true);
+    }
+    public APIRequestGetCustomConversions requestDataSourcesField (boolean value) {
+      this.requestField("data_sources", value);
+      return this;
+    }
+    public APIRequestGetCustomConversions requestDefaultConversionValueField () {
+      return this.requestDefaultConversionValueField(true);
+    }
+    public APIRequestGetCustomConversions requestDefaultConversionValueField (boolean value) {
+      this.requestField("default_conversion_value", value);
+      return this;
+    }
+    public APIRequestGetCustomConversions requestDescriptionField () {
+      return this.requestDescriptionField(true);
+    }
+    public APIRequestGetCustomConversions requestDescriptionField (boolean value) {
+      this.requestField("description", value);
+      return this;
+    }
+    public APIRequestGetCustomConversions requestEventSourceTypeField () {
+      return this.requestEventSourceTypeField(true);
+    }
+    public APIRequestGetCustomConversions requestEventSourceTypeField (boolean value) {
+      this.requestField("event_source_type", value);
+      return this;
+    }
+    public APIRequestGetCustomConversions requestFirstFiredTimeField () {
+      return this.requestFirstFiredTimeField(true);
+    }
+    public APIRequestGetCustomConversions requestFirstFiredTimeField (boolean value) {
+      this.requestField("first_fired_time", value);
+      return this;
+    }
+    public APIRequestGetCustomConversions requestIdField () {
+      return this.requestIdField(true);
+    }
+    public APIRequestGetCustomConversions requestIdField (boolean value) {
+      this.requestField("id", value);
+      return this;
+    }
+    public APIRequestGetCustomConversions requestIsArchivedField () {
+      return this.requestIsArchivedField(true);
+    }
+    public APIRequestGetCustomConversions requestIsArchivedField (boolean value) {
+      this.requestField("is_archived", value);
+      return this;
+    }
+    public APIRequestGetCustomConversions requestLastFiredTimeField () {
+      return this.requestLastFiredTimeField(true);
+    }
+    public APIRequestGetCustomConversions requestLastFiredTimeField (boolean value) {
+      this.requestField("last_fired_time", value);
+      return this;
+    }
+    public APIRequestGetCustomConversions requestNameField () {
+      return this.requestNameField(true);
+    }
+    public APIRequestGetCustomConversions requestNameField (boolean value) {
+      this.requestField("name", value);
+      return this;
+    }
+    public APIRequestGetCustomConversions requestOfflineConversionDataSetField () {
+      return this.requestOfflineConversionDataSetField(true);
+    }
+    public APIRequestGetCustomConversions requestOfflineConversionDataSetField (boolean value) {
+      this.requestField("offline_conversion_data_set", value);
+      return this;
+    }
+    public APIRequestGetCustomConversions requestPixelField () {
+      return this.requestPixelField(true);
+    }
+    public APIRequestGetCustomConversions requestPixelField (boolean value) {
+      this.requestField("pixel", value);
+      return this;
+    }
+    public APIRequestGetCustomConversions requestRetentionDaysField () {
+      return this.requestRetentionDaysField(true);
+    }
+    public APIRequestGetCustomConversions requestRetentionDaysField (boolean value) {
+      this.requestField("retention_days", value);
+      return this;
+    }
+    public APIRequestGetCustomConversions requestRuleField () {
+      return this.requestRuleField(true);
+    }
+    public APIRequestGetCustomConversions requestRuleField (boolean value) {
+      this.requestField("rule", value);
+      return this;
+    }
+  }
+
+  public static class APIRequestGetDaChecks extends APIRequest<DACheck> {
+
+    APINodeList<DACheck> lastResponse = null;
+    @Override
+    public APINodeList<DACheck> getLastResponse() {
+      return lastResponse;
+    }
+    public static final String[] PARAMS = {
+      "checks",
+    };
+
+    public static final String[] FIELDS = {
+      "action_uri",
+      "description",
+      "key",
+      "result",
+      "title",
+      "user_message",
+      "id",
+    };
+
+    @Override
+    public APINodeList<DACheck> parseResponse(String response, String header) throws APIException {
+      return DACheck.parseResponse(response, getContext(), this, header);
+    }
+
+    @Override
+    public APINodeList<DACheck> execute() throws APIException {
+      return execute(new HashMap<String, Object>());
+    }
+
+    @Override
+    public APINodeList<DACheck> execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
+      return lastResponse;
+    }
+
+    public ListenableFuture<APINodeList<DACheck>> executeAsync() throws APIException {
+      return executeAsync(new HashMap<String, Object>());
+    };
+
+    public ListenableFuture<APINodeList<DACheck>> executeAsync(Map<String, Object> extraParams) throws APIException {
+      return Futures.transform(
+        executeAsyncInternal(extraParams),
+        new Function<ResponseWrapper, APINodeList<DACheck>>() {
+           public APINodeList<DACheck> apply(ResponseWrapper result) {
+             try {
+               return APIRequestGetDaChecks.this.parseResponse(result.getBody(), result.getHeader());
+             } catch (Exception e) {
+               throw new RuntimeException(e);
+             }
+           }
+         }
+      );
+    };
+
+    public APIRequestGetDaChecks(String nodeId, APIContext context) {
+      super(context, nodeId, "/da_checks", "GET", Arrays.asList(PARAMS));
+    }
+
+    @Override
+    public APIRequestGetDaChecks setParam(String param, Object value) {
+      setParamInternal(param, value);
+      return this;
+    }
+
+    @Override
+    public APIRequestGetDaChecks setParams(Map<String, Object> params) {
+      setParamsInternal(params);
+      return this;
+    }
+
+
+    public APIRequestGetDaChecks setChecks (List<String> checks) {
+      this.setParam("checks", checks);
+      return this;
+    }
+    public APIRequestGetDaChecks setChecks (String checks) {
+      this.setParam("checks", checks);
+      return this;
+    }
+
+    public APIRequestGetDaChecks requestAllFields () {
+      return this.requestAllFields(true);
+    }
+
+    public APIRequestGetDaChecks requestAllFields (boolean value) {
+      for (String field : FIELDS) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestGetDaChecks requestFields (List<String> fields) {
+      return this.requestFields(fields, true);
+    }
+
+    @Override
+    public APIRequestGetDaChecks requestFields (List<String> fields, boolean value) {
+      for (String field : fields) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestGetDaChecks requestField (String field) {
+      this.requestField(field, true);
+      return this;
+    }
+
+    @Override
+    public APIRequestGetDaChecks requestField (String field, boolean value) {
+      this.requestFieldInternal(field, value);
+      return this;
+    }
+
+    public APIRequestGetDaChecks requestActionUriField () {
+      return this.requestActionUriField(true);
+    }
+    public APIRequestGetDaChecks requestActionUriField (boolean value) {
+      this.requestField("action_uri", value);
+      return this;
+    }
+    public APIRequestGetDaChecks requestDescriptionField () {
+      return this.requestDescriptionField(true);
+    }
+    public APIRequestGetDaChecks requestDescriptionField (boolean value) {
+      this.requestField("description", value);
+      return this;
+    }
+    public APIRequestGetDaChecks requestKeyField () {
+      return this.requestKeyField(true);
+    }
+    public APIRequestGetDaChecks requestKeyField (boolean value) {
+      this.requestField("key", value);
+      return this;
+    }
+    public APIRequestGetDaChecks requestResultField () {
+      return this.requestResultField(true);
+    }
+    public APIRequestGetDaChecks requestResultField (boolean value) {
+      this.requestField("result", value);
+      return this;
+    }
+    public APIRequestGetDaChecks requestTitleField () {
+      return this.requestTitleField(true);
+    }
+    public APIRequestGetDaChecks requestTitleField (boolean value) {
+      this.requestField("title", value);
+      return this;
+    }
+    public APIRequestGetDaChecks requestUserMessageField () {
+      return this.requestUserMessageField(true);
+    }
+    public APIRequestGetDaChecks requestUserMessageField (boolean value) {
+      this.requestField("user_message", value);
+      return this;
+    }
+    public APIRequestGetDaChecks requestIdField () {
+      return this.requestIdField(true);
+    }
+    public APIRequestGetDaChecks requestIdField (boolean value) {
+      this.requestField("id", value);
+      return this;
+    }
+  }
+
   public static class APIRequestCreateEvent extends APIRequest<APINode> {
 
     APINode lastResponse = null;
@@ -1615,19 +2778,20 @@ public class OfflineConversionDataSet extends APINode {
       return lastResponse;
     }
     public static final String[] PARAMS = {
+      "upload_tag",
+      "upload_id",
+      "upload_source",
       "data",
       "namespace_id",
       "progress",
-      "upload_id",
-      "upload_tag",
     };
 
     public static final String[] FIELDS = {
     };
 
     @Override
-    public APINode parseResponse(String response) throws APIException {
-      return APINode.parseResponse(response, getContext(), this).head();
+    public APINode parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -1637,7 +2801,8 @@ public class OfflineConversionDataSet extends APINode {
 
     @Override
     public APINode execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -1648,10 +2813,10 @@ public class OfflineConversionDataSet extends APINode {
     public ListenableFuture<APINode> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINode>() {
-           public APINode apply(String result) {
+        new Function<ResponseWrapper, APINode>() {
+           public APINode apply(ResponseWrapper result) {
              try {
-               return APIRequestCreateEvent.this.parseResponse(result);
+               return APIRequestCreateEvent.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -1677,6 +2842,21 @@ public class OfflineConversionDataSet extends APINode {
     }
 
 
+    public APIRequestCreateEvent setUploadTag (String uploadTag) {
+      this.setParam("upload_tag", uploadTag);
+      return this;
+    }
+
+    public APIRequestCreateEvent setUploadId (String uploadId) {
+      this.setParam("upload_id", uploadId);
+      return this;
+    }
+
+    public APIRequestCreateEvent setUploadSource (String uploadSource) {
+      this.setParam("upload_source", uploadSource);
+      return this;
+    }
+
     public APIRequestCreateEvent setData (List<String> data) {
       this.setParam("data", data);
       return this;
@@ -1697,16 +2877,6 @@ public class OfflineConversionDataSet extends APINode {
     }
     public APIRequestCreateEvent setProgress (String progress) {
       this.setParam("progress", progress);
-      return this;
-    }
-
-    public APIRequestCreateEvent setUploadId (String uploadId) {
-      this.setParam("upload_id", uploadId);
-      return this;
-    }
-
-    public APIRequestCreateEvent setUploadTag (String uploadTag) {
-      this.setParam("upload_tag", uploadTag);
       return this;
     }
 
@@ -1756,20 +2926,20 @@ public class OfflineConversionDataSet extends APINode {
       return lastResponse;
     }
     public static final String[] PARAMS = {
-      "aggr_time",
-      "end",
-      "granularity",
-      "skip_empty_values",
       "start",
+      "end",
+      "skip_empty_values",
+      "aggr_time",
       "user_timezone_id",
+      "granularity",
     };
 
     public static final String[] FIELDS = {
     };
 
     @Override
-    public APINodeList<APINode> parseResponse(String response) throws APIException {
-      return APINode.parseResponse(response, getContext(), this);
+    public APINodeList<APINode> parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header);
     }
 
     @Override
@@ -1779,7 +2949,8 @@ public class OfflineConversionDataSet extends APINode {
 
     @Override
     public APINodeList<APINode> execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
       return lastResponse;
     }
 
@@ -1790,10 +2961,10 @@ public class OfflineConversionDataSet extends APINode {
     public ListenableFuture<APINodeList<APINode>> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINodeList<APINode>>() {
-           public APINodeList<APINode> apply(String result) {
+        new Function<ResponseWrapper, APINodeList<APINode>>() {
+           public APINodeList<APINode> apply(ResponseWrapper result) {
              try {
-               return APIRequestGetStats.this.parseResponse(result);
+               return APIRequestGetStats.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -1819,12 +2990,12 @@ public class OfflineConversionDataSet extends APINode {
     }
 
 
-    public APIRequestGetStats setAggrTime (EnumAggrTime aggrTime) {
-      this.setParam("aggr_time", aggrTime);
+    public APIRequestGetStats setStart (Long start) {
+      this.setParam("start", start);
       return this;
     }
-    public APIRequestGetStats setAggrTime (String aggrTime) {
-      this.setParam("aggr_time", aggrTime);
+    public APIRequestGetStats setStart (String start) {
+      this.setParam("start", start);
       return this;
     }
 
@@ -1837,15 +3008,6 @@ public class OfflineConversionDataSet extends APINode {
       return this;
     }
 
-    public APIRequestGetStats setGranularity (EnumGranularity granularity) {
-      this.setParam("granularity", granularity);
-      return this;
-    }
-    public APIRequestGetStats setGranularity (String granularity) {
-      this.setParam("granularity", granularity);
-      return this;
-    }
-
     public APIRequestGetStats setSkipEmptyValues (Boolean skipEmptyValues) {
       this.setParam("skip_empty_values", skipEmptyValues);
       return this;
@@ -1855,12 +3017,12 @@ public class OfflineConversionDataSet extends APINode {
       return this;
     }
 
-    public APIRequestGetStats setStart (Long start) {
-      this.setParam("start", start);
+    public APIRequestGetStats setAggrTime (EnumAggrTime aggrTime) {
+      this.setParam("aggr_time", aggrTime);
       return this;
     }
-    public APIRequestGetStats setStart (String start) {
-      this.setParam("start", start);
+    public APIRequestGetStats setAggrTime (String aggrTime) {
+      this.setParam("aggr_time", aggrTime);
       return this;
     }
 
@@ -1870,6 +3032,15 @@ public class OfflineConversionDataSet extends APINode {
     }
     public APIRequestGetStats setUserTimezoneId (String userTimezoneId) {
       this.setParam("user_timezone_id", userTimezoneId);
+      return this;
+    }
+
+    public APIRequestGetStats setGranularity (EnumGranularity granularity) {
+      this.setParam("granularity", granularity);
+      return this;
+    }
+    public APIRequestGetStats setGranularity (String granularity) {
+      this.setParam("granularity", granularity);
       return this;
     }
 
@@ -1919,19 +3090,19 @@ public class OfflineConversionDataSet extends APINode {
       return lastResponse;
     }
     public static final String[] PARAMS = {
-      "end_time",
-      "order",
-      "sort_by",
-      "start_time",
       "upload_tag",
+      "start_time",
+      "end_time",
+      "sort_by",
+      "order",
     };
 
     public static final String[] FIELDS = {
     };
 
     @Override
-    public APINodeList<APINode> parseResponse(String response) throws APIException {
-      return APINode.parseResponse(response, getContext(), this);
+    public APINodeList<APINode> parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header);
     }
 
     @Override
@@ -1941,7 +3112,8 @@ public class OfflineConversionDataSet extends APINode {
 
     @Override
     public APINodeList<APINode> execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
       return lastResponse;
     }
 
@@ -1952,10 +3124,10 @@ public class OfflineConversionDataSet extends APINode {
     public ListenableFuture<APINodeList<APINode>> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINodeList<APINode>>() {
-           public APINodeList<APINode> apply(String result) {
+        new Function<ResponseWrapper, APINodeList<APINode>>() {
+           public APINodeList<APINode> apply(ResponseWrapper result) {
              try {
-               return APIRequestGetUploads.this.parseResponse(result);
+               return APIRequestGetUploads.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -1981,30 +3153,8 @@ public class OfflineConversionDataSet extends APINode {
     }
 
 
-    public APIRequestGetUploads setEndTime (Object endTime) {
-      this.setParam("end_time", endTime);
-      return this;
-    }
-    public APIRequestGetUploads setEndTime (String endTime) {
-      this.setParam("end_time", endTime);
-      return this;
-    }
-
-    public APIRequestGetUploads setOrder (EnumOrder order) {
-      this.setParam("order", order);
-      return this;
-    }
-    public APIRequestGetUploads setOrder (String order) {
-      this.setParam("order", order);
-      return this;
-    }
-
-    public APIRequestGetUploads setSortBy (EnumSortBy sortBy) {
-      this.setParam("sort_by", sortBy);
-      return this;
-    }
-    public APIRequestGetUploads setSortBy (String sortBy) {
-      this.setParam("sort_by", sortBy);
+    public APIRequestGetUploads setUploadTag (String uploadTag) {
+      this.setParam("upload_tag", uploadTag);
       return this;
     }
 
@@ -2017,8 +3167,30 @@ public class OfflineConversionDataSet extends APINode {
       return this;
     }
 
-    public APIRequestGetUploads setUploadTag (String uploadTag) {
-      this.setParam("upload_tag", uploadTag);
+    public APIRequestGetUploads setEndTime (Object endTime) {
+      this.setParam("end_time", endTime);
+      return this;
+    }
+    public APIRequestGetUploads setEndTime (String endTime) {
+      this.setParam("end_time", endTime);
+      return this;
+    }
+
+    public APIRequestGetUploads setSortBy (EnumSortBy sortBy) {
+      this.setParam("sort_by", sortBy);
+      return this;
+    }
+    public APIRequestGetUploads setSortBy (String sortBy) {
+      this.setParam("sort_by", sortBy);
+      return this;
+    }
+
+    public APIRequestGetUploads setOrder (EnumOrder order) {
+      this.setParam("order", order);
+      return this;
+    }
+    public APIRequestGetUploads setOrder (String order) {
+      this.setParam("order", order);
       return this;
     }
 
@@ -2075,8 +3247,8 @@ public class OfflineConversionDataSet extends APINode {
     };
 
     @Override
-    public APINode parseResponse(String response) throws APIException {
-      return APINode.parseResponse(response, getContext(), this).head();
+    public APINode parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -2086,7 +3258,8 @@ public class OfflineConversionDataSet extends APINode {
 
     @Override
     public APINode execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -2097,10 +3270,10 @@ public class OfflineConversionDataSet extends APINode {
     public ListenableFuture<APINode> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINode>() {
-           public APINode apply(String result) {
+        new Function<ResponseWrapper, APINode>() {
+           public APINode apply(ResponseWrapper result) {
              try {
-               return APIRequestCreateUpload.this.parseResponse(result);
+               return APIRequestCreateUpload.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -2177,17 +3350,17 @@ public class OfflineConversionDataSet extends APINode {
       return lastResponse;
     }
     public static final String[] PARAMS = {
-      "business",
-      "email",
       "user",
+      "email",
+      "business",
     };
 
     public static final String[] FIELDS = {
     };
 
     @Override
-    public APINodeList<APINode> parseResponse(String response) throws APIException {
-      return APINode.parseResponse(response, getContext(), this);
+    public APINodeList<APINode> parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header);
     }
 
     @Override
@@ -2197,7 +3370,8 @@ public class OfflineConversionDataSet extends APINode {
 
     @Override
     public APINodeList<APINode> execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
       return lastResponse;
     }
 
@@ -2208,10 +3382,10 @@ public class OfflineConversionDataSet extends APINode {
     public ListenableFuture<APINodeList<APINode>> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINodeList<APINode>>() {
-           public APINodeList<APINode> apply(String result) {
+        new Function<ResponseWrapper, APINodeList<APINode>>() {
+           public APINodeList<APINode> apply(ResponseWrapper result) {
              try {
-               return APIRequestDeleteUserPermissions.this.parseResponse(result);
+               return APIRequestDeleteUserPermissions.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -2237,12 +3411,12 @@ public class OfflineConversionDataSet extends APINode {
     }
 
 
-    public APIRequestDeleteUserPermissions setBusiness (Object business) {
-      this.setParam("business", business);
+    public APIRequestDeleteUserPermissions setUser (Long user) {
+      this.setParam("user", user);
       return this;
     }
-    public APIRequestDeleteUserPermissions setBusiness (String business) {
-      this.setParam("business", business);
+    public APIRequestDeleteUserPermissions setUser (String user) {
+      this.setParam("user", user);
       return this;
     }
 
@@ -2251,12 +3425,12 @@ public class OfflineConversionDataSet extends APINode {
       return this;
     }
 
-    public APIRequestDeleteUserPermissions setUser (Long user) {
-      this.setParam("user", user);
+    public APIRequestDeleteUserPermissions setBusiness (Object business) {
+      this.setParam("business", business);
       return this;
     }
-    public APIRequestDeleteUserPermissions setUser (String user) {
-      this.setParam("user", user);
+    public APIRequestDeleteUserPermissions setBusiness (String business) {
+      this.setParam("business", business);
       return this;
     }
 
@@ -2298,49 +3472,164 @@ public class OfflineConversionDataSet extends APINode {
 
   }
 
-  public static class APIRequestCreateUserPermission extends APIRequest<APINode> {
+  public static class APIRequestGetUserPermissions extends APIRequest<APINode> {
 
-    APINode lastResponse = null;
+    APINodeList<APINode> lastResponse = null;
     @Override
-    public APINode getLastResponse() {
+    public APINodeList<APINode> getLastResponse() {
       return lastResponse;
     }
     public static final String[] PARAMS = {
       "business",
-      "role",
-      "user",
     };
 
     public static final String[] FIELDS = {
     };
 
     @Override
-    public APINode parseResponse(String response) throws APIException {
-      return APINode.parseResponse(response, getContext(), this).head();
+    public APINodeList<APINode> parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header);
     }
 
     @Override
-    public APINode execute() throws APIException {
+    public APINodeList<APINode> execute() throws APIException {
       return execute(new HashMap<String, Object>());
     }
 
     @Override
-    public APINode execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+    public APINodeList<APINode> execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
       return lastResponse;
     }
 
-    public ListenableFuture<APINode> executeAsync() throws APIException {
+    public ListenableFuture<APINodeList<APINode>> executeAsync() throws APIException {
       return executeAsync(new HashMap<String, Object>());
     };
 
-    public ListenableFuture<APINode> executeAsync(Map<String, Object> extraParams) throws APIException {
+    public ListenableFuture<APINodeList<APINode>> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINode>() {
-           public APINode apply(String result) {
+        new Function<ResponseWrapper, APINodeList<APINode>>() {
+           public APINodeList<APINode> apply(ResponseWrapper result) {
              try {
-               return APIRequestCreateUserPermission.this.parseResponse(result);
+               return APIRequestGetUserPermissions.this.parseResponse(result.getBody(), result.getHeader());
+             } catch (Exception e) {
+               throw new RuntimeException(e);
+             }
+           }
+         }
+      );
+    };
+
+    public APIRequestGetUserPermissions(String nodeId, APIContext context) {
+      super(context, nodeId, "/userpermissions", "GET", Arrays.asList(PARAMS));
+    }
+
+    @Override
+    public APIRequestGetUserPermissions setParam(String param, Object value) {
+      setParamInternal(param, value);
+      return this;
+    }
+
+    @Override
+    public APIRequestGetUserPermissions setParams(Map<String, Object> params) {
+      setParamsInternal(params);
+      return this;
+    }
+
+
+    public APIRequestGetUserPermissions setBusiness (Object business) {
+      this.setParam("business", business);
+      return this;
+    }
+    public APIRequestGetUserPermissions setBusiness (String business) {
+      this.setParam("business", business);
+      return this;
+    }
+
+    public APIRequestGetUserPermissions requestAllFields () {
+      return this.requestAllFields(true);
+    }
+
+    public APIRequestGetUserPermissions requestAllFields (boolean value) {
+      for (String field : FIELDS) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestGetUserPermissions requestFields (List<String> fields) {
+      return this.requestFields(fields, true);
+    }
+
+    @Override
+    public APIRequestGetUserPermissions requestFields (List<String> fields, boolean value) {
+      for (String field : fields) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestGetUserPermissions requestField (String field) {
+      this.requestField(field, true);
+      return this;
+    }
+
+    @Override
+    public APIRequestGetUserPermissions requestField (String field, boolean value) {
+      this.requestFieldInternal(field, value);
+      return this;
+    }
+
+  }
+
+  public static class APIRequestCreateUserPermission extends APIRequest<OfflineConversionDataSet> {
+
+    OfflineConversionDataSet lastResponse = null;
+    @Override
+    public OfflineConversionDataSet getLastResponse() {
+      return lastResponse;
+    }
+    public static final String[] PARAMS = {
+      "user",
+      "role",
+      "business",
+    };
+
+    public static final String[] FIELDS = {
+    };
+
+    @Override
+    public OfflineConversionDataSet parseResponse(String response, String header) throws APIException {
+      return OfflineConversionDataSet.parseResponse(response, getContext(), this, header).head();
+    }
+
+    @Override
+    public OfflineConversionDataSet execute() throws APIException {
+      return execute(new HashMap<String, Object>());
+    }
+
+    @Override
+    public OfflineConversionDataSet execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
+      return lastResponse;
+    }
+
+    public ListenableFuture<OfflineConversionDataSet> executeAsync() throws APIException {
+      return executeAsync(new HashMap<String, Object>());
+    };
+
+    public ListenableFuture<OfflineConversionDataSet> executeAsync(Map<String, Object> extraParams) throws APIException {
+      return Futures.transform(
+        executeAsyncInternal(extraParams),
+        new Function<ResponseWrapper, OfflineConversionDataSet>() {
+           public OfflineConversionDataSet apply(ResponseWrapper result) {
+             try {
+               return APIRequestCreateUserPermission.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -2366,16 +3655,16 @@ public class OfflineConversionDataSet extends APINode {
     }
 
 
-    public APIRequestCreateUserPermission setBusiness (Object business) {
-      this.setParam("business", business);
+    public APIRequestCreateUserPermission setUser (Long user) {
+      this.setParam("user", user);
       return this;
     }
-    public APIRequestCreateUserPermission setBusiness (String business) {
-      this.setParam("business", business);
+    public APIRequestCreateUserPermission setUser (String user) {
+      this.setParam("user", user);
       return this;
     }
 
-    public APIRequestCreateUserPermission setRole (EnumRole role) {
+    public APIRequestCreateUserPermission setRole (OfflineConversionDataSet.EnumRole role) {
       this.setParam("role", role);
       return this;
     }
@@ -2384,12 +3673,12 @@ public class OfflineConversionDataSet extends APINode {
       return this;
     }
 
-    public APIRequestCreateUserPermission setUser (Long user) {
-      this.setParam("user", user);
+    public APIRequestCreateUserPermission setBusiness (Object business) {
+      this.setParam("business", business);
       return this;
     }
-    public APIRequestCreateUserPermission setUser (String user) {
-      this.setParam("user", user);
+    public APIRequestCreateUserPermission setBusiness (String business) {
+      this.setParam("business", business);
       return this;
     }
 
@@ -2431,6 +3720,234 @@ public class OfflineConversionDataSet extends APINode {
 
   }
 
+  public static class APIRequestDeleteUsers extends APIRequest<APINode> {
+
+    APINodeList<APINode> lastResponse = null;
+    @Override
+    public APINodeList<APINode> getLastResponse() {
+      return lastResponse;
+    }
+    public static final String[] PARAMS = {
+      "data",
+    };
+
+    public static final String[] FIELDS = {
+    };
+
+    @Override
+    public APINodeList<APINode> parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header);
+    }
+
+    @Override
+    public APINodeList<APINode> execute() throws APIException {
+      return execute(new HashMap<String, Object>());
+    }
+
+    @Override
+    public APINodeList<APINode> execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
+      return lastResponse;
+    }
+
+    public ListenableFuture<APINodeList<APINode>> executeAsync() throws APIException {
+      return executeAsync(new HashMap<String, Object>());
+    };
+
+    public ListenableFuture<APINodeList<APINode>> executeAsync(Map<String, Object> extraParams) throws APIException {
+      return Futures.transform(
+        executeAsyncInternal(extraParams),
+        new Function<ResponseWrapper, APINodeList<APINode>>() {
+           public APINodeList<APINode> apply(ResponseWrapper result) {
+             try {
+               return APIRequestDeleteUsers.this.parseResponse(result.getBody(), result.getHeader());
+             } catch (Exception e) {
+               throw new RuntimeException(e);
+             }
+           }
+         }
+      );
+    };
+
+    public APIRequestDeleteUsers(String nodeId, APIContext context) {
+      super(context, nodeId, "/users", "DELETE", Arrays.asList(PARAMS));
+    }
+
+    @Override
+    public APIRequestDeleteUsers setParam(String param, Object value) {
+      setParamInternal(param, value);
+      return this;
+    }
+
+    @Override
+    public APIRequestDeleteUsers setParams(Map<String, Object> params) {
+      setParamsInternal(params);
+      return this;
+    }
+
+
+    public APIRequestDeleteUsers setData (List<Object> data) {
+      this.setParam("data", data);
+      return this;
+    }
+    public APIRequestDeleteUsers setData (String data) {
+      this.setParam("data", data);
+      return this;
+    }
+
+    public APIRequestDeleteUsers requestAllFields () {
+      return this.requestAllFields(true);
+    }
+
+    public APIRequestDeleteUsers requestAllFields (boolean value) {
+      for (String field : FIELDS) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestDeleteUsers requestFields (List<String> fields) {
+      return this.requestFields(fields, true);
+    }
+
+    @Override
+    public APIRequestDeleteUsers requestFields (List<String> fields, boolean value) {
+      for (String field : fields) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestDeleteUsers requestField (String field) {
+      this.requestField(field, true);
+      return this;
+    }
+
+    @Override
+    public APIRequestDeleteUsers requestField (String field, boolean value) {
+      this.requestFieldInternal(field, value);
+      return this;
+    }
+
+  }
+
+  public static class APIRequestCreateUser extends APIRequest<OfflineConversionDataSet> {
+
+    OfflineConversionDataSet lastResponse = null;
+    @Override
+    public OfflineConversionDataSet getLastResponse() {
+      return lastResponse;
+    }
+    public static final String[] PARAMS = {
+      "data",
+    };
+
+    public static final String[] FIELDS = {
+    };
+
+    @Override
+    public OfflineConversionDataSet parseResponse(String response, String header) throws APIException {
+      return OfflineConversionDataSet.parseResponse(response, getContext(), this, header).head();
+    }
+
+    @Override
+    public OfflineConversionDataSet execute() throws APIException {
+      return execute(new HashMap<String, Object>());
+    }
+
+    @Override
+    public OfflineConversionDataSet execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
+      return lastResponse;
+    }
+
+    public ListenableFuture<OfflineConversionDataSet> executeAsync() throws APIException {
+      return executeAsync(new HashMap<String, Object>());
+    };
+
+    public ListenableFuture<OfflineConversionDataSet> executeAsync(Map<String, Object> extraParams) throws APIException {
+      return Futures.transform(
+        executeAsyncInternal(extraParams),
+        new Function<ResponseWrapper, OfflineConversionDataSet>() {
+           public OfflineConversionDataSet apply(ResponseWrapper result) {
+             try {
+               return APIRequestCreateUser.this.parseResponse(result.getBody(), result.getHeader());
+             } catch (Exception e) {
+               throw new RuntimeException(e);
+             }
+           }
+         }
+      );
+    };
+
+    public APIRequestCreateUser(String nodeId, APIContext context) {
+      super(context, nodeId, "/users", "POST", Arrays.asList(PARAMS));
+    }
+
+    @Override
+    public APIRequestCreateUser setParam(String param, Object value) {
+      setParamInternal(param, value);
+      return this;
+    }
+
+    @Override
+    public APIRequestCreateUser setParams(Map<String, Object> params) {
+      setParamsInternal(params);
+      return this;
+    }
+
+
+    public APIRequestCreateUser setData (List<Object> data) {
+      this.setParam("data", data);
+      return this;
+    }
+    public APIRequestCreateUser setData (String data) {
+      this.setParam("data", data);
+      return this;
+    }
+
+    public APIRequestCreateUser requestAllFields () {
+      return this.requestAllFields(true);
+    }
+
+    public APIRequestCreateUser requestAllFields (boolean value) {
+      for (String field : FIELDS) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestCreateUser requestFields (List<String> fields) {
+      return this.requestFields(fields, true);
+    }
+
+    @Override
+    public APIRequestCreateUser requestFields (List<String> fields, boolean value) {
+      for (String field : fields) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestCreateUser requestField (String field) {
+      this.requestField(field, true);
+      return this;
+    }
+
+    @Override
+    public APIRequestCreateUser requestField (String field, boolean value) {
+      this.requestFieldInternal(field, value);
+      return this;
+    }
+
+  }
+
   public static class APIRequestCreateValidate extends APIRequest<OfflineConversionDataSet> {
 
     OfflineConversionDataSet lastResponse = null;
@@ -2447,8 +3964,8 @@ public class OfflineConversionDataSet extends APINode {
     };
 
     @Override
-    public OfflineConversionDataSet parseResponse(String response) throws APIException {
-      return OfflineConversionDataSet.parseResponse(response, getContext(), this).head();
+    public OfflineConversionDataSet parseResponse(String response, String header) throws APIException {
+      return OfflineConversionDataSet.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -2458,7 +3975,8 @@ public class OfflineConversionDataSet extends APINode {
 
     @Override
     public OfflineConversionDataSet execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -2469,10 +3987,10 @@ public class OfflineConversionDataSet extends APINode {
     public ListenableFuture<OfflineConversionDataSet> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, OfflineConversionDataSet>() {
-           public OfflineConversionDataSet apply(String result) {
+        new Function<ResponseWrapper, OfflineConversionDataSet>() {
+           public OfflineConversionDataSet apply(ResponseWrapper result) {
              try {
-               return APIRequestCreateValidate.this.parseResponse(result);
+               return APIRequestCreateValidate.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -2564,8 +4082,8 @@ public class OfflineConversionDataSet extends APINode {
     };
 
     @Override
-    public APINode parseResponse(String response) throws APIException {
-      return APINode.parseResponse(response, getContext(), this).head();
+    public APINode parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -2575,7 +4093,8 @@ public class OfflineConversionDataSet extends APINode {
 
     @Override
     public APINode execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -2586,10 +4105,10 @@ public class OfflineConversionDataSet extends APINode {
     public ListenableFuture<APINode> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINode>() {
-           public APINode apply(String result) {
+        new Function<ResponseWrapper, APINode>() {
+           public APINode apply(ResponseWrapper result) {
              try {
-               return APIRequestDelete.this.parseResponse(result);
+               return APIRequestDelete.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -2675,8 +4194,10 @@ public class OfflineConversionDataSet extends APINode {
       "event_time_max",
       "event_time_min",
       "id",
+      "is_mta_use",
       "is_restricted_use",
       "last_upload_app",
+      "last_upload_app_changed_time",
       "match_rate_approx",
       "matched_entries",
       "name",
@@ -2685,8 +4206,8 @@ public class OfflineConversionDataSet extends APINode {
     };
 
     @Override
-    public OfflineConversionDataSet parseResponse(String response) throws APIException {
-      return OfflineConversionDataSet.parseResponse(response, getContext(), this).head();
+    public OfflineConversionDataSet parseResponse(String response, String header) throws APIException {
+      return OfflineConversionDataSet.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -2696,7 +4217,8 @@ public class OfflineConversionDataSet extends APINode {
 
     @Override
     public OfflineConversionDataSet execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -2707,10 +4229,10 @@ public class OfflineConversionDataSet extends APINode {
     public ListenableFuture<OfflineConversionDataSet> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, OfflineConversionDataSet>() {
-           public OfflineConversionDataSet apply(String result) {
+        new Function<ResponseWrapper, OfflineConversionDataSet>() {
+           public OfflineConversionDataSet apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -2849,6 +4371,13 @@ public class OfflineConversionDataSet extends APINode {
       this.requestField("id", value);
       return this;
     }
+    public APIRequestGet requestIsMtaUseField () {
+      return this.requestIsMtaUseField(true);
+    }
+    public APIRequestGet requestIsMtaUseField (boolean value) {
+      this.requestField("is_mta_use", value);
+      return this;
+    }
     public APIRequestGet requestIsRestrictedUseField () {
       return this.requestIsRestrictedUseField(true);
     }
@@ -2861,6 +4390,13 @@ public class OfflineConversionDataSet extends APINode {
     }
     public APIRequestGet requestLastUploadAppField (boolean value) {
       this.requestField("last_upload_app", value);
+      return this;
+    }
+    public APIRequestGet requestLastUploadAppChangedTimeField () {
+      return this.requestLastUploadAppChangedTimeField(true);
+    }
+    public APIRequestGet requestLastUploadAppChangedTimeField (boolean value) {
+      this.requestField("last_upload_app_changed_time", value);
       return this;
     }
     public APIRequestGet requestMatchRateApproxField () {
@@ -2908,19 +4444,19 @@ public class OfflineConversionDataSet extends APINode {
       return lastResponse;
     }
     public static final String[] PARAMS = {
-      "auto_assign_to_new_accounts_only",
-      "data_origin",
-      "description",
-      "enable_auto_assign_to_accounts",
       "name",
+      "description",
+      "data_origin",
+      "enable_auto_assign_to_accounts",
+      "auto_assign_to_new_accounts_only",
     };
 
     public static final String[] FIELDS = {
     };
 
     @Override
-    public OfflineConversionDataSet parseResponse(String response) throws APIException {
-      return OfflineConversionDataSet.parseResponse(response, getContext(), this).head();
+    public OfflineConversionDataSet parseResponse(String response, String header) throws APIException {
+      return OfflineConversionDataSet.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -2930,7 +4466,8 @@ public class OfflineConversionDataSet extends APINode {
 
     @Override
     public OfflineConversionDataSet execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -2941,10 +4478,10 @@ public class OfflineConversionDataSet extends APINode {
     public ListenableFuture<OfflineConversionDataSet> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, OfflineConversionDataSet>() {
-           public OfflineConversionDataSet apply(String result) {
+        new Function<ResponseWrapper, OfflineConversionDataSet>() {
+           public OfflineConversionDataSet apply(ResponseWrapper result) {
              try {
-               return APIRequestUpdate.this.parseResponse(result);
+               return APIRequestUpdate.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -2970,12 +4507,13 @@ public class OfflineConversionDataSet extends APINode {
     }
 
 
-    public APIRequestUpdate setAutoAssignToNewAccountsOnly (Boolean autoAssignToNewAccountsOnly) {
-      this.setParam("auto_assign_to_new_accounts_only", autoAssignToNewAccountsOnly);
+    public APIRequestUpdate setName (String name) {
+      this.setParam("name", name);
       return this;
     }
-    public APIRequestUpdate setAutoAssignToNewAccountsOnly (String autoAssignToNewAccountsOnly) {
-      this.setParam("auto_assign_to_new_accounts_only", autoAssignToNewAccountsOnly);
+
+    public APIRequestUpdate setDescription (String description) {
+      this.setParam("description", description);
       return this;
     }
 
@@ -2988,11 +4526,6 @@ public class OfflineConversionDataSet extends APINode {
       return this;
     }
 
-    public APIRequestUpdate setDescription (String description) {
-      this.setParam("description", description);
-      return this;
-    }
-
     public APIRequestUpdate setEnableAutoAssignToAccounts (Boolean enableAutoAssignToAccounts) {
       this.setParam("enable_auto_assign_to_accounts", enableAutoAssignToAccounts);
       return this;
@@ -3002,8 +4535,12 @@ public class OfflineConversionDataSet extends APINode {
       return this;
     }
 
-    public APIRequestUpdate setName (String name) {
-      this.setParam("name", name);
+    public APIRequestUpdate setAutoAssignToNewAccountsOnly (Boolean autoAssignToNewAccountsOnly) {
+      this.setParam("auto_assign_to_new_accounts_only", autoAssignToNewAccountsOnly);
+      return this;
+    }
+    public APIRequestUpdate setAutoAssignToNewAccountsOnly (String autoAssignToNewAccountsOnly) {
+      this.setParam("auto_assign_to_new_accounts_only", autoAssignToNewAccountsOnly);
       return this;
     }
 
@@ -3059,6 +4596,71 @@ public class OfflineConversionDataSet extends APINode {
       private String value;
 
       private EnumDataOrigin(String value) {
+        this.value = value;
+      }
+
+      @Override
+      public String toString() {
+        return value;
+      }
+  }
+
+  public static enum EnumPermittedRoles {
+      @SerializedName("ADMIN")
+      VALUE_ADMIN("ADMIN"),
+      @SerializedName("UPLOADER")
+      VALUE_UPLOADER("UPLOADER"),
+      @SerializedName("ADVERTISER")
+      VALUE_ADVERTISER("ADVERTISER"),
+      NULL(null);
+
+      private String value;
+
+      private EnumPermittedRoles(String value) {
+        this.value = value;
+      }
+
+      @Override
+      public String toString() {
+        return value;
+      }
+  }
+
+  public static enum EnumRelationshipType {
+      @SerializedName("AD_MANAGER")
+      VALUE_AD_MANAGER("AD_MANAGER"),
+      @SerializedName("AUDIENCE_MANAGER")
+      VALUE_AUDIENCE_MANAGER("AUDIENCE_MANAGER"),
+      @SerializedName("AGENCY")
+      VALUE_AGENCY("AGENCY"),
+      @SerializedName("OTHER")
+      VALUE_OTHER("OTHER"),
+      NULL(null);
+
+      private String value;
+
+      private EnumRelationshipType(String value) {
+        this.value = value;
+      }
+
+      @Override
+      public String toString() {
+        return value;
+      }
+  }
+
+  public static enum EnumRole {
+      @SerializedName("ADMIN")
+      VALUE_ADMIN("ADMIN"),
+      @SerializedName("UPLOADER")
+      VALUE_UPLOADER("UPLOADER"),
+      @SerializedName("ADVERTISER")
+      VALUE_ADVERTISER("ADVERTISER"),
+      NULL(null);
+
+      private String value;
+
+      private EnumRole(String value) {
         this.value = value;
       }
 
@@ -3133,30 +4735,13 @@ public class OfflineConversionDataSet extends APINode {
       VALUE_DAILY("daily"),
       @SerializedName("hourly")
       VALUE_HOURLY("hourly"),
+      @SerializedName("six_hourly")
+      VALUE_SIX_HOURLY("six_hourly"),
       NULL(null);
 
       private String value;
 
       private EnumGranularity(String value) {
-        this.value = value;
-      }
-
-      @Override
-      public String toString() {
-        return value;
-      }
-  }
-
-  public static enum EnumOrder {
-      @SerializedName("ASCENDING")
-      VALUE_ASCENDING("ASCENDING"),
-      @SerializedName("DESCENDING")
-      VALUE_DESCENDING("DESCENDING"),
-      NULL(null);
-
-      private String value;
-
-      private EnumOrder(String value) {
         this.value = value;
       }
 
@@ -3195,18 +4780,16 @@ public class OfflineConversionDataSet extends APINode {
       }
   }
 
-  public static enum EnumRole {
-      @SerializedName("ADMIN")
-      VALUE_ADMIN("ADMIN"),
-      @SerializedName("UPLOADER")
-      VALUE_UPLOADER("UPLOADER"),
-      @SerializedName("ADVERTISER")
-      VALUE_ADVERTISER("ADVERTISER"),
+  public static enum EnumOrder {
+      @SerializedName("ASCENDING")
+      VALUE_ASCENDING("ASCENDING"),
+      @SerializedName("DESCENDING")
+      VALUE_DESCENDING("DESCENDING"),
       NULL(null);
 
       private String value;
 
-      private EnumRole(String value) {
+      private EnumOrder(String value) {
         this.value = value;
       }
 
@@ -3242,8 +4825,10 @@ public class OfflineConversionDataSet extends APINode {
     this.mEventTimeMax = instance.mEventTimeMax;
     this.mEventTimeMin = instance.mEventTimeMin;
     this.mId = instance.mId;
+    this.mIsMtaUse = instance.mIsMtaUse;
     this.mIsRestrictedUse = instance.mIsRestrictedUse;
     this.mLastUploadApp = instance.mLastUploadApp;
+    this.mLastUploadAppChangedTime = instance.mLastUploadAppChangedTime;
     this.mMatchRateApprox = instance.mMatchRateApprox;
     this.mMatchedEntries = instance.mMatchedEntries;
     this.mName = instance.mName;
@@ -3256,8 +4841,8 @@ public class OfflineConversionDataSet extends APINode {
 
   public static APIRequest.ResponseParser<OfflineConversionDataSet> getParser() {
     return new APIRequest.ResponseParser<OfflineConversionDataSet>() {
-      public APINodeList<OfflineConversionDataSet> parseResponse(String response, APIContext context, APIRequest<OfflineConversionDataSet> request) throws MalformedResponseException {
-        return OfflineConversionDataSet.parseResponse(response, context, request);
+      public APINodeList<OfflineConversionDataSet> parseResponse(String response, APIContext context, APIRequest<OfflineConversionDataSet> request, String header) throws MalformedResponseException {
+        return OfflineConversionDataSet.parseResponse(response, context, request, header);
       }
     };
   }

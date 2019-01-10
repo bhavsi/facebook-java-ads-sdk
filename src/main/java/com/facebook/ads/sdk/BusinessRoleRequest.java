@@ -94,6 +94,7 @@ public class BusinessRoleRequest extends APINode {
 
   public BusinessRoleRequest(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -112,19 +113,17 @@ public class BusinessRoleRequest extends APINode {
   }
 
   public static BusinessRoleRequest fetchById(String id, APIContext context) throws APIException {
-    BusinessRoleRequest businessRoleRequest =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return businessRoleRequest;
   }
 
   public static ListenableFuture<BusinessRoleRequest> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<BusinessRoleRequest> businessRoleRequest =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return businessRoleRequest;
   }
 
   public static APINodeList<BusinessRoleRequest> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -137,12 +136,11 @@ public class BusinessRoleRequest extends APINode {
   }
 
   public static ListenableFuture<APINodeList<BusinessRoleRequest>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<BusinessRoleRequest>> businessRoleRequest =
+    return
       new APIRequest(context, "", "/", "GET", BusinessRoleRequest.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return businessRoleRequest;
   }
 
   private String getPrefixedId() {
@@ -152,7 +150,7 @@ public class BusinessRoleRequest extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static BusinessRoleRequest loadJSON(String json, APIContext context) {
+  public static BusinessRoleRequest loadJSON(String json, APIContext context, String header) {
     BusinessRoleRequest businessRoleRequest = getGson().fromJson(json, BusinessRoleRequest.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -169,11 +167,12 @@ public class BusinessRoleRequest extends APINode {
     }
     businessRoleRequest.context = context;
     businessRoleRequest.rawValue = json;
+    businessRoleRequest.header = header;
     return businessRoleRequest;
   }
 
-  public static APINodeList<BusinessRoleRequest> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<BusinessRoleRequest> businessRoleRequests = new APINodeList<BusinessRoleRequest>(request, json);
+  public static APINodeList<BusinessRoleRequest> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<BusinessRoleRequest> businessRoleRequests = new APINodeList<BusinessRoleRequest>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -184,7 +183,7 @@ public class BusinessRoleRequest extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          businessRoleRequests.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          businessRoleRequests.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return businessRoleRequests;
       } else if (result.isJsonObject()) {
@@ -209,7 +208,7 @@ public class BusinessRoleRequest extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              businessRoleRequests.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              businessRoleRequests.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -220,13 +219,13 @@ public class BusinessRoleRequest extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  businessRoleRequests.add(loadJSON(entry.getValue().toString(), context));
+                  businessRoleRequests.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              businessRoleRequests.add(loadJSON(obj.toString(), context));
+              businessRoleRequests.add(loadJSON(obj.toString(), context, header));
             }
           }
           return businessRoleRequests;
@@ -234,7 +233,7 @@ public class BusinessRoleRequest extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              businessRoleRequests.add(loadJSON(entry.getValue().toString(), context));
+              businessRoleRequests.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return businessRoleRequests;
         } else {
@@ -253,7 +252,7 @@ public class BusinessRoleRequest extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              businessRoleRequests.add(loadJSON(value.toString(), context));
+              businessRoleRequests.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -265,7 +264,7 @@ public class BusinessRoleRequest extends APINode {
 
           // Sixth, check if it's pure JsonObject
           businessRoleRequests.clear();
-          businessRoleRequests.add(loadJSON(json, context));
+          businessRoleRequests.add(loadJSON(json, context, header));
           return businessRoleRequests;
         }
       }
@@ -381,8 +380,8 @@ public class BusinessRoleRequest extends APINode {
     };
 
     @Override
-    public APINode parseResponse(String response) throws APIException {
-      return APINode.parseResponse(response, getContext(), this).head();
+    public APINode parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -392,7 +391,8 @@ public class BusinessRoleRequest extends APINode {
 
     @Override
     public APINode execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -403,10 +403,10 @@ public class BusinessRoleRequest extends APINode {
     public ListenableFuture<APINode> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINode>() {
-           public APINode apply(String result) {
+        new Function<ResponseWrapper, APINode>() {
+           public APINode apply(ResponseWrapper result) {
              try {
-               return APIRequestDelete.this.parseResponse(result);
+               return APIRequestDelete.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -498,8 +498,8 @@ public class BusinessRoleRequest extends APINode {
     };
 
     @Override
-    public BusinessRoleRequest parseResponse(String response) throws APIException {
-      return BusinessRoleRequest.parseResponse(response, getContext(), this).head();
+    public BusinessRoleRequest parseResponse(String response, String header) throws APIException {
+      return BusinessRoleRequest.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -509,7 +509,8 @@ public class BusinessRoleRequest extends APINode {
 
     @Override
     public BusinessRoleRequest execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -520,10 +521,10 @@ public class BusinessRoleRequest extends APINode {
     public ListenableFuture<BusinessRoleRequest> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, BusinessRoleRequest>() {
-           public BusinessRoleRequest apply(String result) {
+        new Function<ResponseWrapper, BusinessRoleRequest>() {
+           public BusinessRoleRequest apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -700,8 +701,8 @@ public class BusinessRoleRequest extends APINode {
     };
 
     @Override
-    public BusinessRoleRequest parseResponse(String response) throws APIException {
-      return BusinessRoleRequest.parseResponse(response, getContext(), this).head();
+    public BusinessRoleRequest parseResponse(String response, String header) throws APIException {
+      return BusinessRoleRequest.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -711,7 +712,8 @@ public class BusinessRoleRequest extends APINode {
 
     @Override
     public BusinessRoleRequest execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -722,10 +724,10 @@ public class BusinessRoleRequest extends APINode {
     public ListenableFuture<BusinessRoleRequest> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, BusinessRoleRequest>() {
-           public BusinessRoleRequest apply(String result) {
+        new Function<ResponseWrapper, BusinessRoleRequest>() {
+           public BusinessRoleRequest apply(ResponseWrapper result) {
              try {
-               return APIRequestUpdate.this.parseResponse(result);
+               return APIRequestUpdate.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -884,8 +886,8 @@ public class BusinessRoleRequest extends APINode {
 
   public static APIRequest.ResponseParser<BusinessRoleRequest> getParser() {
     return new APIRequest.ResponseParser<BusinessRoleRequest>() {
-      public APINodeList<BusinessRoleRequest> parseResponse(String response, APIContext context, APIRequest<BusinessRoleRequest> request) throws MalformedResponseException {
-        return BusinessRoleRequest.parseResponse(response, context, request);
+      public APINodeList<BusinessRoleRequest> parseResponse(String response, APIContext context, APIRequest<BusinessRoleRequest> request, String header) throws MalformedResponseException {
+        return BusinessRoleRequest.parseResponse(response, context, request, header);
       }
     };
   }

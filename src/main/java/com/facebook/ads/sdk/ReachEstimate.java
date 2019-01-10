@@ -61,15 +61,17 @@ public class ReachEstimate extends APINode {
   private Boolean mUnsupported = null;
   @SerializedName("users")
   private Long mUsers = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public ReachEstimate() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static ReachEstimate loadJSON(String json, APIContext context) {
+  public static ReachEstimate loadJSON(String json, APIContext context, String header) {
     ReachEstimate reachEstimate = getGson().fromJson(json, ReachEstimate.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -86,11 +88,12 @@ public class ReachEstimate extends APINode {
     }
     reachEstimate.context = context;
     reachEstimate.rawValue = json;
+    reachEstimate.header = header;
     return reachEstimate;
   }
 
-  public static APINodeList<ReachEstimate> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<ReachEstimate> reachEstimates = new APINodeList<ReachEstimate>(request, json);
+  public static APINodeList<ReachEstimate> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<ReachEstimate> reachEstimates = new APINodeList<ReachEstimate>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -101,7 +104,7 @@ public class ReachEstimate extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          reachEstimates.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          reachEstimates.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return reachEstimates;
       } else if (result.isJsonObject()) {
@@ -126,7 +129,7 @@ public class ReachEstimate extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              reachEstimates.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              reachEstimates.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -137,13 +140,13 @@ public class ReachEstimate extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  reachEstimates.add(loadJSON(entry.getValue().toString(), context));
+                  reachEstimates.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              reachEstimates.add(loadJSON(obj.toString(), context));
+              reachEstimates.add(loadJSON(obj.toString(), context, header));
             }
           }
           return reachEstimates;
@@ -151,7 +154,7 @@ public class ReachEstimate extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              reachEstimates.add(loadJSON(entry.getValue().toString(), context));
+              reachEstimates.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return reachEstimates;
         } else {
@@ -170,7 +173,7 @@ public class ReachEstimate extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              reachEstimates.add(loadJSON(value.toString(), context));
+              reachEstimates.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -182,7 +185,7 @@ public class ReachEstimate extends APINode {
 
           // Sixth, check if it's pure JsonObject
           reachEstimates.clear();
-          reachEstimates.add(loadJSON(json, context));
+          reachEstimates.add(loadJSON(json, context, header));
           return reachEstimates;
         }
       }
@@ -238,7 +241,79 @@ public class ReachEstimate extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
 
+  public ReachEstimate setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
+
+
+  public static enum EnumOptimizeFor {
+      @SerializedName("NONE")
+      VALUE_NONE("NONE"),
+      @SerializedName("APP_INSTALLS")
+      VALUE_APP_INSTALLS("APP_INSTALLS"),
+      @SerializedName("BRAND_AWARENESS")
+      VALUE_BRAND_AWARENESS("BRAND_AWARENESS"),
+      @SerializedName("AD_RECALL_LIFT")
+      VALUE_AD_RECALL_LIFT("AD_RECALL_LIFT"),
+      @SerializedName("CLICKS")
+      VALUE_CLICKS("CLICKS"),
+      @SerializedName("ENGAGED_USERS")
+      VALUE_ENGAGED_USERS("ENGAGED_USERS"),
+      @SerializedName("EVENT_RESPONSES")
+      VALUE_EVENT_RESPONSES("EVENT_RESPONSES"),
+      @SerializedName("IMPRESSIONS")
+      VALUE_IMPRESSIONS("IMPRESSIONS"),
+      @SerializedName("LEAD_GENERATION")
+      VALUE_LEAD_GENERATION("LEAD_GENERATION"),
+      @SerializedName("LINK_CLICKS")
+      VALUE_LINK_CLICKS("LINK_CLICKS"),
+      @SerializedName("OFFER_CLAIMS")
+      VALUE_OFFER_CLAIMS("OFFER_CLAIMS"),
+      @SerializedName("OFFSITE_CONVERSIONS")
+      VALUE_OFFSITE_CONVERSIONS("OFFSITE_CONVERSIONS"),
+      @SerializedName("PAGE_ENGAGEMENT")
+      VALUE_PAGE_ENGAGEMENT("PAGE_ENGAGEMENT"),
+      @SerializedName("PAGE_LIKES")
+      VALUE_PAGE_LIKES("PAGE_LIKES"),
+      @SerializedName("POST_ENGAGEMENT")
+      VALUE_POST_ENGAGEMENT("POST_ENGAGEMENT"),
+      @SerializedName("REACH")
+      VALUE_REACH("REACH"),
+      @SerializedName("SOCIAL_IMPRESSIONS")
+      VALUE_SOCIAL_IMPRESSIONS("SOCIAL_IMPRESSIONS"),
+      @SerializedName("VIDEO_VIEWS")
+      VALUE_VIDEO_VIEWS("VIDEO_VIEWS"),
+      @SerializedName("APP_DOWNLOADS")
+      VALUE_APP_DOWNLOADS("APP_DOWNLOADS"),
+      @SerializedName("LANDING_PAGE_VIEWS")
+      VALUE_LANDING_PAGE_VIEWS("LANDING_PAGE_VIEWS"),
+      @SerializedName("VALUE")
+      VALUE_VALUE("VALUE"),
+      @SerializedName("THRUPLAY")
+      VALUE_THRUPLAY("THRUPLAY"),
+      @SerializedName("REPLIES")
+      VALUE_REPLIES("REPLIES"),
+      @SerializedName("DERIVED_EVENTS")
+      VALUE_DERIVED_EVENTS("DERIVED_EVENTS"),
+      NULL(null);
+
+      private String value;
+
+      private EnumOptimizeFor(String value) {
+        this.value = value;
+      }
+
+      @Override
+      public String toString() {
+        return value;
+      }
+  }
 
 
   synchronized /*package*/ static Gson getGson() {
@@ -258,6 +333,7 @@ public class ReachEstimate extends APINode {
     this.mEstimateReady = instance.mEstimateReady;
     this.mUnsupported = instance.mUnsupported;
     this.mUsers = instance.mUsers;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -265,8 +341,8 @@ public class ReachEstimate extends APINode {
 
   public static APIRequest.ResponseParser<ReachEstimate> getParser() {
     return new APIRequest.ResponseParser<ReachEstimate>() {
-      public APINodeList<ReachEstimate> parseResponse(String response, APIContext context, APIRequest<ReachEstimate> request) throws MalformedResponseException {
-        return ReachEstimate.parseResponse(response, context, request);
+      public APINodeList<ReachEstimate> parseResponse(String response, APIContext context, APIRequest<ReachEstimate> request, String header) throws MalformedResponseException {
+        return ReachEstimate.parseResponse(response, context, request, header);
       }
     };
   }

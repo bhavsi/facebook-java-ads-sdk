@@ -55,30 +55,20 @@ import com.facebook.ads.sdk.APIException.MalformedResponseException;
  *
  */
 public class LeadGenDataDraft extends APINode {
-  @SerializedName("allow_organic_lead")
-  private Boolean mAllowOrganicLead = null;
   @SerializedName("block_display_for_non_targeted_viewer")
   private Boolean mBlockDisplayForNonTargetedViewer = null;
   @SerializedName("context_card")
   private Object mContextCard = null;
-  @SerializedName("continued_flow_request_method")
-  private String mContinuedFlowRequestMethod = null;
   @SerializedName("created_time")
   private String mCreatedTime = null;
   @SerializedName("creator_id")
-  private Long mCreatorId = null;
-  @SerializedName("expired_leads_count")
-  private Long mExpiredLeadsCount = null;
+  private String mCreatorId = null;
   @SerializedName("follow_up_action_url")
   private String mFollowUpActionUrl = null;
   @SerializedName("id")
   private String mId = null;
-  @SerializedName("is_continued_flow")
-  private Boolean mIsContinuedFlow = null;
   @SerializedName("is_optimized_for_quality")
   private Boolean mIsOptimizedForQuality = null;
-  @SerializedName("leadgen_export_csv_url")
-  private String mLeadgenExportCsvUrl = null;
   @SerializedName("legal_content")
   private Object mLegalContent = null;
   @SerializedName("locale")
@@ -108,6 +98,7 @@ public class LeadGenDataDraft extends APINode {
 
   public LeadGenDataDraft(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -126,19 +117,17 @@ public class LeadGenDataDraft extends APINode {
   }
 
   public static LeadGenDataDraft fetchById(String id, APIContext context) throws APIException {
-    LeadGenDataDraft leadGenDataDraft =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return leadGenDataDraft;
   }
 
   public static ListenableFuture<LeadGenDataDraft> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<LeadGenDataDraft> leadGenDataDraft =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return leadGenDataDraft;
   }
 
   public static APINodeList<LeadGenDataDraft> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -151,12 +140,11 @@ public class LeadGenDataDraft extends APINode {
   }
 
   public static ListenableFuture<APINodeList<LeadGenDataDraft>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<LeadGenDataDraft>> leadGenDataDraft =
+    return
       new APIRequest(context, "", "/", "GET", LeadGenDataDraft.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return leadGenDataDraft;
   }
 
   private String getPrefixedId() {
@@ -166,7 +154,7 @@ public class LeadGenDataDraft extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static LeadGenDataDraft loadJSON(String json, APIContext context) {
+  public static LeadGenDataDraft loadJSON(String json, APIContext context, String header) {
     LeadGenDataDraft leadGenDataDraft = getGson().fromJson(json, LeadGenDataDraft.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -183,11 +171,12 @@ public class LeadGenDataDraft extends APINode {
     }
     leadGenDataDraft.context = context;
     leadGenDataDraft.rawValue = json;
+    leadGenDataDraft.header = header;
     return leadGenDataDraft;
   }
 
-  public static APINodeList<LeadGenDataDraft> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<LeadGenDataDraft> leadGenDataDrafts = new APINodeList<LeadGenDataDraft>(request, json);
+  public static APINodeList<LeadGenDataDraft> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<LeadGenDataDraft> leadGenDataDrafts = new APINodeList<LeadGenDataDraft>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -198,7 +187,7 @@ public class LeadGenDataDraft extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          leadGenDataDrafts.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          leadGenDataDrafts.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return leadGenDataDrafts;
       } else if (result.isJsonObject()) {
@@ -223,7 +212,7 @@ public class LeadGenDataDraft extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              leadGenDataDrafts.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              leadGenDataDrafts.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -234,13 +223,13 @@ public class LeadGenDataDraft extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  leadGenDataDrafts.add(loadJSON(entry.getValue().toString(), context));
+                  leadGenDataDrafts.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              leadGenDataDrafts.add(loadJSON(obj.toString(), context));
+              leadGenDataDrafts.add(loadJSON(obj.toString(), context, header));
             }
           }
           return leadGenDataDrafts;
@@ -248,7 +237,7 @@ public class LeadGenDataDraft extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              leadGenDataDrafts.add(loadJSON(entry.getValue().toString(), context));
+              leadGenDataDrafts.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return leadGenDataDrafts;
         } else {
@@ -267,7 +256,7 @@ public class LeadGenDataDraft extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              leadGenDataDrafts.add(loadJSON(value.toString(), context));
+              leadGenDataDrafts.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -279,7 +268,7 @@ public class LeadGenDataDraft extends APINode {
 
           // Sixth, check if it's pure JsonObject
           leadGenDataDrafts.clear();
-          leadGenDataDrafts.add(loadJSON(json, context));
+          leadGenDataDrafts.add(loadJSON(json, context, header));
           return leadGenDataDrafts;
         }
       }
@@ -316,10 +305,6 @@ public class LeadGenDataDraft extends APINode {
   }
 
 
-  public Boolean getFieldAllowOrganicLead() {
-    return mAllowOrganicLead;
-  }
-
   public Boolean getFieldBlockDisplayForNonTargetedViewer() {
     return mBlockDisplayForNonTargetedViewer;
   }
@@ -328,20 +313,12 @@ public class LeadGenDataDraft extends APINode {
     return mContextCard;
   }
 
-  public String getFieldContinuedFlowRequestMethod() {
-    return mContinuedFlowRequestMethod;
-  }
-
   public String getFieldCreatedTime() {
     return mCreatedTime;
   }
 
-  public Long getFieldCreatorId() {
+  public String getFieldCreatorId() {
     return mCreatorId;
-  }
-
-  public Long getFieldExpiredLeadsCount() {
-    return mExpiredLeadsCount;
   }
 
   public String getFieldFollowUpActionUrl() {
@@ -352,16 +329,8 @@ public class LeadGenDataDraft extends APINode {
     return mId;
   }
 
-  public Boolean getFieldIsContinuedFlow() {
-    return mIsContinuedFlow;
-  }
-
   public Boolean getFieldIsOptimizedForQuality() {
     return mIsOptimizedForQuality;
-  }
-
-  public String getFieldLeadgenExportCsvUrl() {
-    return mLeadgenExportCsvUrl;
   }
 
   public Object getFieldLegalContent() {
@@ -416,18 +385,13 @@ public class LeadGenDataDraft extends APINode {
     };
 
     public static final String[] FIELDS = {
-      "allow_organic_lead",
       "block_display_for_non_targeted_viewer",
       "context_card",
-      "continued_flow_request_method",
       "created_time",
       "creator_id",
-      "expired_leads_count",
       "follow_up_action_url",
       "id",
-      "is_continued_flow",
       "is_optimized_for_quality",
-      "leadgen_export_csv_url",
       "legal_content",
       "locale",
       "name",
@@ -440,8 +404,8 @@ public class LeadGenDataDraft extends APINode {
     };
 
     @Override
-    public LeadGenDataDraft parseResponse(String response) throws APIException {
-      return LeadGenDataDraft.parseResponse(response, getContext(), this).head();
+    public LeadGenDataDraft parseResponse(String response, String header) throws APIException {
+      return LeadGenDataDraft.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -451,7 +415,8 @@ public class LeadGenDataDraft extends APINode {
 
     @Override
     public LeadGenDataDraft execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -462,10 +427,10 @@ public class LeadGenDataDraft extends APINode {
     public ListenableFuture<LeadGenDataDraft> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, LeadGenDataDraft>() {
-           public LeadGenDataDraft apply(String result) {
+        new Function<ResponseWrapper, LeadGenDataDraft>() {
+           public LeadGenDataDraft apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -527,13 +492,6 @@ public class LeadGenDataDraft extends APINode {
       return this;
     }
 
-    public APIRequestGet requestAllowOrganicLeadField () {
-      return this.requestAllowOrganicLeadField(true);
-    }
-    public APIRequestGet requestAllowOrganicLeadField (boolean value) {
-      this.requestField("allow_organic_lead", value);
-      return this;
-    }
     public APIRequestGet requestBlockDisplayForNonTargetedViewerField () {
       return this.requestBlockDisplayForNonTargetedViewerField(true);
     }
@@ -546,13 +504,6 @@ public class LeadGenDataDraft extends APINode {
     }
     public APIRequestGet requestContextCardField (boolean value) {
       this.requestField("context_card", value);
-      return this;
-    }
-    public APIRequestGet requestContinuedFlowRequestMethodField () {
-      return this.requestContinuedFlowRequestMethodField(true);
-    }
-    public APIRequestGet requestContinuedFlowRequestMethodField (boolean value) {
-      this.requestField("continued_flow_request_method", value);
       return this;
     }
     public APIRequestGet requestCreatedTimeField () {
@@ -569,13 +520,6 @@ public class LeadGenDataDraft extends APINode {
       this.requestField("creator_id", value);
       return this;
     }
-    public APIRequestGet requestExpiredLeadsCountField () {
-      return this.requestExpiredLeadsCountField(true);
-    }
-    public APIRequestGet requestExpiredLeadsCountField (boolean value) {
-      this.requestField("expired_leads_count", value);
-      return this;
-    }
     public APIRequestGet requestFollowUpActionUrlField () {
       return this.requestFollowUpActionUrlField(true);
     }
@@ -590,25 +534,11 @@ public class LeadGenDataDraft extends APINode {
       this.requestField("id", value);
       return this;
     }
-    public APIRequestGet requestIsContinuedFlowField () {
-      return this.requestIsContinuedFlowField(true);
-    }
-    public APIRequestGet requestIsContinuedFlowField (boolean value) {
-      this.requestField("is_continued_flow", value);
-      return this;
-    }
     public APIRequestGet requestIsOptimizedForQualityField () {
       return this.requestIsOptimizedForQualityField(true);
     }
     public APIRequestGet requestIsOptimizedForQualityField (boolean value) {
       this.requestField("is_optimized_for_quality", value);
-      return this;
-    }
-    public APIRequestGet requestLeadgenExportCsvUrlField () {
-      return this.requestLeadgenExportCsvUrlField(true);
-    }
-    public APIRequestGet requestLeadgenExportCsvUrlField (boolean value) {
-      this.requestField("leadgen_export_csv_url", value);
       return this;
     }
     public APIRequestGet requestLegalContentField () {
@@ -684,31 +614,30 @@ public class LeadGenDataDraft extends APINode {
       return lastResponse;
     }
     public static final String[] PARAMS = {
-      "allow_organic_lead_retrieval",
-      "block_display_for_non_targeted_viewer",
-      "context_card",
-      "context_card_id",
-      "custom_disclaimer",
-      "delete_missing_parameters",
-      "follow_up_action_url",
-      "is_optimized_for_quality",
-      "legal_content_id",
-      "locale",
       "name",
-      "privacy_policy",
-      "question_page_custom_headline",
+      "locale",
+      "block_display_for_non_targeted_viewer",
+      "follow_up_action_url",
+      "legal_content_id",
+      "context_card_id",
       "questions",
-      "status",
+      "privacy_policy",
+      "custom_disclaimer",
+      "context_card",
       "thank_you_page",
       "tracking_parameters",
+      "question_page_custom_headline",
+      "is_optimized_for_quality",
+      "status",
+      "delete_missing_parameters",
     };
 
     public static final String[] FIELDS = {
     };
 
     @Override
-    public LeadGenDataDraft parseResponse(String response) throws APIException {
-      return LeadGenDataDraft.parseResponse(response, getContext(), this).head();
+    public LeadGenDataDraft parseResponse(String response, String header) throws APIException {
+      return LeadGenDataDraft.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -718,7 +647,8 @@ public class LeadGenDataDraft extends APINode {
 
     @Override
     public LeadGenDataDraft execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -729,10 +659,10 @@ public class LeadGenDataDraft extends APINode {
     public ListenableFuture<LeadGenDataDraft> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, LeadGenDataDraft>() {
-           public LeadGenDataDraft apply(String result) {
+        new Function<ResponseWrapper, LeadGenDataDraft>() {
+           public LeadGenDataDraft apply(ResponseWrapper result) {
              try {
-               return APIRequestUpdate.this.parseResponse(result);
+               return APIRequestUpdate.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -758,72 +688,8 @@ public class LeadGenDataDraft extends APINode {
     }
 
 
-    public APIRequestUpdate setAllowOrganicLeadRetrieval (Boolean allowOrganicLeadRetrieval) {
-      this.setParam("allow_organic_lead_retrieval", allowOrganicLeadRetrieval);
-      return this;
-    }
-    public APIRequestUpdate setAllowOrganicLeadRetrieval (String allowOrganicLeadRetrieval) {
-      this.setParam("allow_organic_lead_retrieval", allowOrganicLeadRetrieval);
-      return this;
-    }
-
-    public APIRequestUpdate setBlockDisplayForNonTargetedViewer (Boolean blockDisplayForNonTargetedViewer) {
-      this.setParam("block_display_for_non_targeted_viewer", blockDisplayForNonTargetedViewer);
-      return this;
-    }
-    public APIRequestUpdate setBlockDisplayForNonTargetedViewer (String blockDisplayForNonTargetedViewer) {
-      this.setParam("block_display_for_non_targeted_viewer", blockDisplayForNonTargetedViewer);
-      return this;
-    }
-
-    public APIRequestUpdate setContextCard (Object contextCard) {
-      this.setParam("context_card", contextCard);
-      return this;
-    }
-    public APIRequestUpdate setContextCard (String contextCard) {
-      this.setParam("context_card", contextCard);
-      return this;
-    }
-
-    public APIRequestUpdate setContextCardId (String contextCardId) {
-      this.setParam("context_card_id", contextCardId);
-      return this;
-    }
-
-    public APIRequestUpdate setCustomDisclaimer (Object customDisclaimer) {
-      this.setParam("custom_disclaimer", customDisclaimer);
-      return this;
-    }
-    public APIRequestUpdate setCustomDisclaimer (String customDisclaimer) {
-      this.setParam("custom_disclaimer", customDisclaimer);
-      return this;
-    }
-
-    public APIRequestUpdate setDeleteMissingParameters (Boolean deleteMissingParameters) {
-      this.setParam("delete_missing_parameters", deleteMissingParameters);
-      return this;
-    }
-    public APIRequestUpdate setDeleteMissingParameters (String deleteMissingParameters) {
-      this.setParam("delete_missing_parameters", deleteMissingParameters);
-      return this;
-    }
-
-    public APIRequestUpdate setFollowUpActionUrl (String followUpActionUrl) {
-      this.setParam("follow_up_action_url", followUpActionUrl);
-      return this;
-    }
-
-    public APIRequestUpdate setIsOptimizedForQuality (Boolean isOptimizedForQuality) {
-      this.setParam("is_optimized_for_quality", isOptimizedForQuality);
-      return this;
-    }
-    public APIRequestUpdate setIsOptimizedForQuality (String isOptimizedForQuality) {
-      this.setParam("is_optimized_for_quality", isOptimizedForQuality);
-      return this;
-    }
-
-    public APIRequestUpdate setLegalContentId (String legalContentId) {
-      this.setParam("legal_content_id", legalContentId);
+    public APIRequestUpdate setName (String name) {
+      this.setParam("name", name);
       return this;
     }
 
@@ -836,22 +702,27 @@ public class LeadGenDataDraft extends APINode {
       return this;
     }
 
-    public APIRequestUpdate setName (String name) {
-      this.setParam("name", name);
+    public APIRequestUpdate setBlockDisplayForNonTargetedViewer (Boolean blockDisplayForNonTargetedViewer) {
+      this.setParam("block_display_for_non_targeted_viewer", blockDisplayForNonTargetedViewer);
+      return this;
+    }
+    public APIRequestUpdate setBlockDisplayForNonTargetedViewer (String blockDisplayForNonTargetedViewer) {
+      this.setParam("block_display_for_non_targeted_viewer", blockDisplayForNonTargetedViewer);
       return this;
     }
 
-    public APIRequestUpdate setPrivacyPolicy (Map<String, String> privacyPolicy) {
-      this.setParam("privacy_policy", privacyPolicy);
-      return this;
-    }
-    public APIRequestUpdate setPrivacyPolicy (String privacyPolicy) {
-      this.setParam("privacy_policy", privacyPolicy);
+    public APIRequestUpdate setFollowUpActionUrl (String followUpActionUrl) {
+      this.setParam("follow_up_action_url", followUpActionUrl);
       return this;
     }
 
-    public APIRequestUpdate setQuestionPageCustomHeadline (String questionPageCustomHeadline) {
-      this.setParam("question_page_custom_headline", questionPageCustomHeadline);
+    public APIRequestUpdate setLegalContentId (String legalContentId) {
+      this.setParam("legal_content_id", legalContentId);
+      return this;
+    }
+
+    public APIRequestUpdate setContextCardId (String contextCardId) {
+      this.setParam("context_card_id", contextCardId);
       return this;
     }
 
@@ -864,12 +735,30 @@ public class LeadGenDataDraft extends APINode {
       return this;
     }
 
-    public APIRequestUpdate setStatus (LeadGenDataDraft.EnumStatus status) {
-      this.setParam("status", status);
+    public APIRequestUpdate setPrivacyPolicy (Map<String, String> privacyPolicy) {
+      this.setParam("privacy_policy", privacyPolicy);
       return this;
     }
-    public APIRequestUpdate setStatus (String status) {
-      this.setParam("status", status);
+    public APIRequestUpdate setPrivacyPolicy (String privacyPolicy) {
+      this.setParam("privacy_policy", privacyPolicy);
+      return this;
+    }
+
+    public APIRequestUpdate setCustomDisclaimer (Object customDisclaimer) {
+      this.setParam("custom_disclaimer", customDisclaimer);
+      return this;
+    }
+    public APIRequestUpdate setCustomDisclaimer (String customDisclaimer) {
+      this.setParam("custom_disclaimer", customDisclaimer);
+      return this;
+    }
+
+    public APIRequestUpdate setContextCard (Object contextCard) {
+      this.setParam("context_card", contextCard);
+      return this;
+    }
+    public APIRequestUpdate setContextCard (String contextCard) {
+      this.setParam("context_card", contextCard);
       return this;
     }
 
@@ -888,6 +777,38 @@ public class LeadGenDataDraft extends APINode {
     }
     public APIRequestUpdate setTrackingParameters (String trackingParameters) {
       this.setParam("tracking_parameters", trackingParameters);
+      return this;
+    }
+
+    public APIRequestUpdate setQuestionPageCustomHeadline (String questionPageCustomHeadline) {
+      this.setParam("question_page_custom_headline", questionPageCustomHeadline);
+      return this;
+    }
+
+    public APIRequestUpdate setIsOptimizedForQuality (Boolean isOptimizedForQuality) {
+      this.setParam("is_optimized_for_quality", isOptimizedForQuality);
+      return this;
+    }
+    public APIRequestUpdate setIsOptimizedForQuality (String isOptimizedForQuality) {
+      this.setParam("is_optimized_for_quality", isOptimizedForQuality);
+      return this;
+    }
+
+    public APIRequestUpdate setStatus (LeadGenDataDraft.EnumStatus status) {
+      this.setParam("status", status);
+      return this;
+    }
+    public APIRequestUpdate setStatus (String status) {
+      this.setParam("status", status);
+      return this;
+    }
+
+    public APIRequestUpdate setDeleteMissingParameters (Boolean deleteMissingParameters) {
+      this.setParam("delete_missing_parameters", deleteMissingParameters);
+      return this;
+    }
+    public APIRequestUpdate setDeleteMissingParameters (String deleteMissingParameters) {
+      this.setParam("delete_missing_parameters", deleteMissingParameters);
       return this;
     }
 
@@ -1044,18 +965,13 @@ public class LeadGenDataDraft extends APINode {
   }
 
   public LeadGenDataDraft copyFrom(LeadGenDataDraft instance) {
-    this.mAllowOrganicLead = instance.mAllowOrganicLead;
     this.mBlockDisplayForNonTargetedViewer = instance.mBlockDisplayForNonTargetedViewer;
     this.mContextCard = instance.mContextCard;
-    this.mContinuedFlowRequestMethod = instance.mContinuedFlowRequestMethod;
     this.mCreatedTime = instance.mCreatedTime;
     this.mCreatorId = instance.mCreatorId;
-    this.mExpiredLeadsCount = instance.mExpiredLeadsCount;
     this.mFollowUpActionUrl = instance.mFollowUpActionUrl;
     this.mId = instance.mId;
-    this.mIsContinuedFlow = instance.mIsContinuedFlow;
     this.mIsOptimizedForQuality = instance.mIsOptimizedForQuality;
-    this.mLeadgenExportCsvUrl = instance.mLeadgenExportCsvUrl;
     this.mLegalContent = instance.mLegalContent;
     this.mLocale = instance.mLocale;
     this.mName = instance.mName;
@@ -1072,8 +988,8 @@ public class LeadGenDataDraft extends APINode {
 
   public static APIRequest.ResponseParser<LeadGenDataDraft> getParser() {
     return new APIRequest.ResponseParser<LeadGenDataDraft>() {
-      public APINodeList<LeadGenDataDraft> parseResponse(String response, APIContext context, APIRequest<LeadGenDataDraft> request) throws MalformedResponseException {
-        return LeadGenDataDraft.parseResponse(response, context, request);
+      public APINodeList<LeadGenDataDraft> parseResponse(String response, APIContext context, APIRequest<LeadGenDataDraft> request, String header) throws MalformedResponseException {
+        return LeadGenDataDraft.parseResponse(response, context, request, header);
       }
     };
   }

@@ -67,24 +67,34 @@ public class AdsActionStats extends APINode {
   private String m7dClick = null;
   @SerializedName("7d_view")
   private String m7dView = null;
+  @SerializedName("action_canvas_component_id")
+  private String mActionCanvasComponentId = null;
   @SerializedName("action_canvas_component_name")
   private String mActionCanvasComponentName = null;
   @SerializedName("action_carousel_card_id")
   private String mActionCarouselCardId = null;
   @SerializedName("action_carousel_card_name")
   private String mActionCarouselCardName = null;
+  @SerializedName("action_converted_product_id")
+  private String mActionConvertedProductId = null;
   @SerializedName("action_destination")
   private String mActionDestination = null;
   @SerializedName("action_device")
   private String mActionDevice = null;
+  @SerializedName("action_event_channel")
+  private String mActionEventChannel = null;
   @SerializedName("action_link_click_destination")
   private String mActionLinkClickDestination = null;
+  @SerializedName("action_location_code")
+  private String mActionLocationCode = null;
   @SerializedName("action_reaction")
   private String mActionReaction = null;
   @SerializedName("action_target_id")
   private String mActionTargetId = null;
   @SerializedName("action_type")
   private String mActionType = null;
+  @SerializedName("action_video_asset_id")
+  private String mActionVideoAssetId = null;
   @SerializedName("action_video_sound")
   private String mActionVideoSound = null;
   @SerializedName("action_video_type")
@@ -93,15 +103,17 @@ public class AdsActionStats extends APINode {
   private String mInline = null;
   @SerializedName("value")
   private String mValue = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdsActionStats() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdsActionStats loadJSON(String json, APIContext context) {
+  public static AdsActionStats loadJSON(String json, APIContext context, String header) {
     AdsActionStats adsActionStats = getGson().fromJson(json, AdsActionStats.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -118,11 +130,12 @@ public class AdsActionStats extends APINode {
     }
     adsActionStats.context = context;
     adsActionStats.rawValue = json;
+    adsActionStats.header = header;
     return adsActionStats;
   }
 
-  public static APINodeList<AdsActionStats> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdsActionStats> adsActionStatss = new APINodeList<AdsActionStats>(request, json);
+  public static APINodeList<AdsActionStats> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdsActionStats> adsActionStatss = new APINodeList<AdsActionStats>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -133,7 +146,7 @@ public class AdsActionStats extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adsActionStatss.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adsActionStatss.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adsActionStatss;
       } else if (result.isJsonObject()) {
@@ -158,7 +171,7 @@ public class AdsActionStats extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adsActionStatss.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adsActionStatss.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -169,13 +182,13 @@ public class AdsActionStats extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adsActionStatss.add(loadJSON(entry.getValue().toString(), context));
+                  adsActionStatss.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adsActionStatss.add(loadJSON(obj.toString(), context));
+              adsActionStatss.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adsActionStatss;
@@ -183,7 +196,7 @@ public class AdsActionStats extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adsActionStatss.add(loadJSON(entry.getValue().toString(), context));
+              adsActionStatss.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adsActionStatss;
         } else {
@@ -202,7 +215,7 @@ public class AdsActionStats extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adsActionStatss.add(loadJSON(value.toString(), context));
+              adsActionStatss.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -214,7 +227,7 @@ public class AdsActionStats extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adsActionStatss.clear();
-          adsActionStatss.add(loadJSON(json, context));
+          adsActionStatss.add(loadJSON(json, context, header));
           return adsActionStatss;
         }
       }
@@ -297,6 +310,15 @@ public class AdsActionStats extends APINode {
     return this;
   }
 
+  public String getFieldActionCanvasComponentId() {
+    return mActionCanvasComponentId;
+  }
+
+  public AdsActionStats setFieldActionCanvasComponentId(String value) {
+    this.mActionCanvasComponentId = value;
+    return this;
+  }
+
   public String getFieldActionCanvasComponentName() {
     return mActionCanvasComponentName;
   }
@@ -324,6 +346,15 @@ public class AdsActionStats extends APINode {
     return this;
   }
 
+  public String getFieldActionConvertedProductId() {
+    return mActionConvertedProductId;
+  }
+
+  public AdsActionStats setFieldActionConvertedProductId(String value) {
+    this.mActionConvertedProductId = value;
+    return this;
+  }
+
   public String getFieldActionDestination() {
     return mActionDestination;
   }
@@ -342,12 +373,30 @@ public class AdsActionStats extends APINode {
     return this;
   }
 
+  public String getFieldActionEventChannel() {
+    return mActionEventChannel;
+  }
+
+  public AdsActionStats setFieldActionEventChannel(String value) {
+    this.mActionEventChannel = value;
+    return this;
+  }
+
   public String getFieldActionLinkClickDestination() {
     return mActionLinkClickDestination;
   }
 
   public AdsActionStats setFieldActionLinkClickDestination(String value) {
     this.mActionLinkClickDestination = value;
+    return this;
+  }
+
+  public String getFieldActionLocationCode() {
+    return mActionLocationCode;
+  }
+
+  public AdsActionStats setFieldActionLocationCode(String value) {
+    this.mActionLocationCode = value;
     return this;
   }
 
@@ -375,6 +424,15 @@ public class AdsActionStats extends APINode {
 
   public AdsActionStats setFieldActionType(String value) {
     this.mActionType = value;
+    return this;
+  }
+
+  public String getFieldActionVideoAssetId() {
+    return mActionVideoAssetId;
+  }
+
+  public AdsActionStats setFieldActionVideoAssetId(String value) {
+    this.mActionVideoAssetId = value;
     return this;
   }
 
@@ -414,6 +472,15 @@ public class AdsActionStats extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AdsActionStats setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -437,19 +504,25 @@ public class AdsActionStats extends APINode {
     this.m28dView = instance.m28dView;
     this.m7dClick = instance.m7dClick;
     this.m7dView = instance.m7dView;
+    this.mActionCanvasComponentId = instance.mActionCanvasComponentId;
     this.mActionCanvasComponentName = instance.mActionCanvasComponentName;
     this.mActionCarouselCardId = instance.mActionCarouselCardId;
     this.mActionCarouselCardName = instance.mActionCarouselCardName;
+    this.mActionConvertedProductId = instance.mActionConvertedProductId;
     this.mActionDestination = instance.mActionDestination;
     this.mActionDevice = instance.mActionDevice;
+    this.mActionEventChannel = instance.mActionEventChannel;
     this.mActionLinkClickDestination = instance.mActionLinkClickDestination;
+    this.mActionLocationCode = instance.mActionLocationCode;
     this.mActionReaction = instance.mActionReaction;
     this.mActionTargetId = instance.mActionTargetId;
     this.mActionType = instance.mActionType;
+    this.mActionVideoAssetId = instance.mActionVideoAssetId;
     this.mActionVideoSound = instance.mActionVideoSound;
     this.mActionVideoType = instance.mActionVideoType;
     this.mInline = instance.mInline;
     this.mValue = instance.mValue;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -457,8 +530,8 @@ public class AdsActionStats extends APINode {
 
   public static APIRequest.ResponseParser<AdsActionStats> getParser() {
     return new APIRequest.ResponseParser<AdsActionStats>() {
-      public APINodeList<AdsActionStats> parseResponse(String response, APIContext context, APIRequest<AdsActionStats> request) throws MalformedResponseException {
-        return AdsActionStats.parseResponse(response, context, request);
+      public APINodeList<AdsActionStats> parseResponse(String response, APIContext context, APIRequest<AdsActionStats> request, String header) throws MalformedResponseException {
+        return AdsActionStats.parseResponse(response, context, request, header);
       }
     };
   }

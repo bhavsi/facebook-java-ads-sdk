@@ -71,15 +71,17 @@ public class TargetingDynamicRule extends APINode {
   private String mPost = null;
   @SerializedName("retention_seconds")
   private String mRetentionSeconds = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public TargetingDynamicRule() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static TargetingDynamicRule loadJSON(String json, APIContext context) {
+  public static TargetingDynamicRule loadJSON(String json, APIContext context, String header) {
     TargetingDynamicRule targetingDynamicRule = getGson().fromJson(json, TargetingDynamicRule.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -96,11 +98,12 @@ public class TargetingDynamicRule extends APINode {
     }
     targetingDynamicRule.context = context;
     targetingDynamicRule.rawValue = json;
+    targetingDynamicRule.header = header;
     return targetingDynamicRule;
   }
 
-  public static APINodeList<TargetingDynamicRule> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<TargetingDynamicRule> targetingDynamicRules = new APINodeList<TargetingDynamicRule>(request, json);
+  public static APINodeList<TargetingDynamicRule> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<TargetingDynamicRule> targetingDynamicRules = new APINodeList<TargetingDynamicRule>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -111,7 +114,7 @@ public class TargetingDynamicRule extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          targetingDynamicRules.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          targetingDynamicRules.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return targetingDynamicRules;
       } else if (result.isJsonObject()) {
@@ -136,7 +139,7 @@ public class TargetingDynamicRule extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              targetingDynamicRules.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              targetingDynamicRules.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -147,13 +150,13 @@ public class TargetingDynamicRule extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  targetingDynamicRules.add(loadJSON(entry.getValue().toString(), context));
+                  targetingDynamicRules.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              targetingDynamicRules.add(loadJSON(obj.toString(), context));
+              targetingDynamicRules.add(loadJSON(obj.toString(), context, header));
             }
           }
           return targetingDynamicRules;
@@ -161,7 +164,7 @@ public class TargetingDynamicRule extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              targetingDynamicRules.add(loadJSON(entry.getValue().toString(), context));
+              targetingDynamicRules.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return targetingDynamicRules;
         } else {
@@ -180,7 +183,7 @@ public class TargetingDynamicRule extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              targetingDynamicRules.add(loadJSON(value.toString(), context));
+              targetingDynamicRules.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -192,7 +195,7 @@ public class TargetingDynamicRule extends APINode {
 
           // Sixth, check if it's pure JsonObject
           targetingDynamicRules.clear();
-          targetingDynamicRules.add(loadJSON(json, context));
+          targetingDynamicRules.add(loadJSON(json, context, header));
           return targetingDynamicRules;
         }
       }
@@ -293,6 +296,15 @@ public class TargetingDynamicRule extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public TargetingDynamicRule setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -318,6 +330,7 @@ public class TargetingDynamicRule extends APINode {
     this.mPageId = instance.mPageId;
     this.mPost = instance.mPost;
     this.mRetentionSeconds = instance.mRetentionSeconds;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -325,8 +338,8 @@ public class TargetingDynamicRule extends APINode {
 
   public static APIRequest.ResponseParser<TargetingDynamicRule> getParser() {
     return new APIRequest.ResponseParser<TargetingDynamicRule>() {
-      public APINodeList<TargetingDynamicRule> parseResponse(String response, APIContext context, APIRequest<TargetingDynamicRule> request) throws MalformedResponseException {
-        return TargetingDynamicRule.parseResponse(response, context, request);
+      public APINodeList<TargetingDynamicRule> parseResponse(String response, APIContext context, APIRequest<TargetingDynamicRule> request, String header) throws MalformedResponseException {
+        return TargetingDynamicRule.parseResponse(response, context, request, header);
       }
     };
   }

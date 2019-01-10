@@ -63,15 +63,17 @@ public class AdCreativeLinkDataAppLinkSpec extends APINode {
   private List<IosAppLink> mIpad = null;
   @SerializedName("iphone")
   private List<IosAppLink> mIphone = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdCreativeLinkDataAppLinkSpec() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdCreativeLinkDataAppLinkSpec loadJSON(String json, APIContext context) {
+  public static AdCreativeLinkDataAppLinkSpec loadJSON(String json, APIContext context, String header) {
     AdCreativeLinkDataAppLinkSpec adCreativeLinkDataAppLinkSpec = getGson().fromJson(json, AdCreativeLinkDataAppLinkSpec.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -88,11 +90,12 @@ public class AdCreativeLinkDataAppLinkSpec extends APINode {
     }
     adCreativeLinkDataAppLinkSpec.context = context;
     adCreativeLinkDataAppLinkSpec.rawValue = json;
+    adCreativeLinkDataAppLinkSpec.header = header;
     return adCreativeLinkDataAppLinkSpec;
   }
 
-  public static APINodeList<AdCreativeLinkDataAppLinkSpec> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdCreativeLinkDataAppLinkSpec> adCreativeLinkDataAppLinkSpecs = new APINodeList<AdCreativeLinkDataAppLinkSpec>(request, json);
+  public static APINodeList<AdCreativeLinkDataAppLinkSpec> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdCreativeLinkDataAppLinkSpec> adCreativeLinkDataAppLinkSpecs = new APINodeList<AdCreativeLinkDataAppLinkSpec>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -103,7 +106,7 @@ public class AdCreativeLinkDataAppLinkSpec extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adCreativeLinkDataAppLinkSpecs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adCreativeLinkDataAppLinkSpecs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adCreativeLinkDataAppLinkSpecs;
       } else if (result.isJsonObject()) {
@@ -128,7 +131,7 @@ public class AdCreativeLinkDataAppLinkSpec extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adCreativeLinkDataAppLinkSpecs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adCreativeLinkDataAppLinkSpecs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -139,13 +142,13 @@ public class AdCreativeLinkDataAppLinkSpec extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adCreativeLinkDataAppLinkSpecs.add(loadJSON(entry.getValue().toString(), context));
+                  adCreativeLinkDataAppLinkSpecs.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adCreativeLinkDataAppLinkSpecs.add(loadJSON(obj.toString(), context));
+              adCreativeLinkDataAppLinkSpecs.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adCreativeLinkDataAppLinkSpecs;
@@ -153,7 +156,7 @@ public class AdCreativeLinkDataAppLinkSpec extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adCreativeLinkDataAppLinkSpecs.add(loadJSON(entry.getValue().toString(), context));
+              adCreativeLinkDataAppLinkSpecs.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adCreativeLinkDataAppLinkSpecs;
         } else {
@@ -172,7 +175,7 @@ public class AdCreativeLinkDataAppLinkSpec extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adCreativeLinkDataAppLinkSpecs.add(loadJSON(value.toString(), context));
+              adCreativeLinkDataAppLinkSpecs.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -184,7 +187,7 @@ public class AdCreativeLinkDataAppLinkSpec extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adCreativeLinkDataAppLinkSpecs.clear();
-          adCreativeLinkDataAppLinkSpecs.add(loadJSON(json, context));
+          adCreativeLinkDataAppLinkSpecs.add(loadJSON(json, context, header));
           return adCreativeLinkDataAppLinkSpecs;
         }
       }
@@ -269,6 +272,15 @@ public class AdCreativeLinkDataAppLinkSpec extends APINode {
     this.mIphone = IosAppLink.getGson().fromJson(value, type);
     return this;
   }
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AdCreativeLinkDataAppLinkSpec setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -290,6 +302,7 @@ public class AdCreativeLinkDataAppLinkSpec extends APINode {
     this.mIos = instance.mIos;
     this.mIpad = instance.mIpad;
     this.mIphone = instance.mIphone;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -297,8 +310,8 @@ public class AdCreativeLinkDataAppLinkSpec extends APINode {
 
   public static APIRequest.ResponseParser<AdCreativeLinkDataAppLinkSpec> getParser() {
     return new APIRequest.ResponseParser<AdCreativeLinkDataAppLinkSpec>() {
-      public APINodeList<AdCreativeLinkDataAppLinkSpec> parseResponse(String response, APIContext context, APIRequest<AdCreativeLinkDataAppLinkSpec> request) throws MalformedResponseException {
-        return AdCreativeLinkDataAppLinkSpec.parseResponse(response, context, request);
+      public APINodeList<AdCreativeLinkDataAppLinkSpec> parseResponse(String response, APIContext context, APIRequest<AdCreativeLinkDataAppLinkSpec> request, String header) throws MalformedResponseException {
+        return AdCreativeLinkDataAppLinkSpec.parseResponse(response, context, request, header);
       }
     };
   }

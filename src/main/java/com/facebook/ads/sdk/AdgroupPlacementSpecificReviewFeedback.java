@@ -65,6 +65,10 @@ public class AdgroupPlacementSpecificReviewFeedback extends APINode {
   private Map<String, String> mBsg = null;
   @SerializedName("city_community")
   private Map<String, String> mCityCommunity = null;
+  @SerializedName("daily_deals")
+  private Map<String, String> mDailyDeals = null;
+  @SerializedName("daily_deals_legacy")
+  private Map<String, String> mDailyDealsLegacy = null;
   @SerializedName("dpa")
   private Map<String, String> mDpa = null;
   @SerializedName("facebook")
@@ -75,23 +79,39 @@ public class AdgroupPlacementSpecificReviewFeedback extends APINode {
   private Map<String, String> mInstagramShop = null;
   @SerializedName("marketplace")
   private Map<String, String> mMarketplace = null;
+  @SerializedName("marketplace_home_rentals")
+  private Map<String, String> mMarketplaceHomeRentals = null;
+  @SerializedName("marketplace_home_sales")
+  private Map<String, String> mMarketplaceHomeSales = null;
+  @SerializedName("marketplace_motors")
+  private Map<String, String> mMarketplaceMotors = null;
+  @SerializedName("max_review_placements")
+  private Map<String, String> mMaxReviewPlacements = null;
   @SerializedName("page_admin")
   private Map<String, String> mPageAdmin = null;
   @SerializedName("product")
   private Map<String, String> mProduct = null;
   @SerializedName("product_service")
   private Map<String, String> mProductService = null;
+  @SerializedName("profile")
+  private Map<String, String> mProfile = null;
   @SerializedName("seller")
   private Map<String, String> mSeller = null;
+  @SerializedName("shops")
+  private Map<String, String> mShops = null;
+  @SerializedName("whatsapp")
+  private Map<String, String> mWhatsapp = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdgroupPlacementSpecificReviewFeedback() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdgroupPlacementSpecificReviewFeedback loadJSON(String json, APIContext context) {
+  public static AdgroupPlacementSpecificReviewFeedback loadJSON(String json, APIContext context, String header) {
     AdgroupPlacementSpecificReviewFeedback adgroupPlacementSpecificReviewFeedback = getGson().fromJson(json, AdgroupPlacementSpecificReviewFeedback.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -108,11 +128,12 @@ public class AdgroupPlacementSpecificReviewFeedback extends APINode {
     }
     adgroupPlacementSpecificReviewFeedback.context = context;
     adgroupPlacementSpecificReviewFeedback.rawValue = json;
+    adgroupPlacementSpecificReviewFeedback.header = header;
     return adgroupPlacementSpecificReviewFeedback;
   }
 
-  public static APINodeList<AdgroupPlacementSpecificReviewFeedback> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdgroupPlacementSpecificReviewFeedback> adgroupPlacementSpecificReviewFeedbacks = new APINodeList<AdgroupPlacementSpecificReviewFeedback>(request, json);
+  public static APINodeList<AdgroupPlacementSpecificReviewFeedback> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdgroupPlacementSpecificReviewFeedback> adgroupPlacementSpecificReviewFeedbacks = new APINodeList<AdgroupPlacementSpecificReviewFeedback>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -123,7 +144,7 @@ public class AdgroupPlacementSpecificReviewFeedback extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adgroupPlacementSpecificReviewFeedbacks.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adgroupPlacementSpecificReviewFeedbacks.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adgroupPlacementSpecificReviewFeedbacks;
       } else if (result.isJsonObject()) {
@@ -148,7 +169,7 @@ public class AdgroupPlacementSpecificReviewFeedback extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adgroupPlacementSpecificReviewFeedbacks.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adgroupPlacementSpecificReviewFeedbacks.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -159,13 +180,13 @@ public class AdgroupPlacementSpecificReviewFeedback extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adgroupPlacementSpecificReviewFeedbacks.add(loadJSON(entry.getValue().toString(), context));
+                  adgroupPlacementSpecificReviewFeedbacks.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adgroupPlacementSpecificReviewFeedbacks.add(loadJSON(obj.toString(), context));
+              adgroupPlacementSpecificReviewFeedbacks.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adgroupPlacementSpecificReviewFeedbacks;
@@ -173,7 +194,7 @@ public class AdgroupPlacementSpecificReviewFeedback extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adgroupPlacementSpecificReviewFeedbacks.add(loadJSON(entry.getValue().toString(), context));
+              adgroupPlacementSpecificReviewFeedbacks.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adgroupPlacementSpecificReviewFeedbacks;
         } else {
@@ -192,7 +213,7 @@ public class AdgroupPlacementSpecificReviewFeedback extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adgroupPlacementSpecificReviewFeedbacks.add(loadJSON(value.toString(), context));
+              adgroupPlacementSpecificReviewFeedbacks.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -204,7 +225,7 @@ public class AdgroupPlacementSpecificReviewFeedback extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adgroupPlacementSpecificReviewFeedbacks.clear();
-          adgroupPlacementSpecificReviewFeedbacks.add(loadJSON(json, context));
+          adgroupPlacementSpecificReviewFeedbacks.add(loadJSON(json, context, header));
           return adgroupPlacementSpecificReviewFeedbacks;
         }
       }
@@ -278,6 +299,24 @@ public class AdgroupPlacementSpecificReviewFeedback extends APINode {
     return this;
   }
 
+  public Map<String, String> getFieldDailyDeals() {
+    return mDailyDeals;
+  }
+
+  public AdgroupPlacementSpecificReviewFeedback setFieldDailyDeals(Map<String, String> value) {
+    this.mDailyDeals = value;
+    return this;
+  }
+
+  public Map<String, String> getFieldDailyDealsLegacy() {
+    return mDailyDealsLegacy;
+  }
+
+  public AdgroupPlacementSpecificReviewFeedback setFieldDailyDealsLegacy(Map<String, String> value) {
+    this.mDailyDealsLegacy = value;
+    return this;
+  }
+
   public Map<String, String> getFieldDpa() {
     return mDpa;
   }
@@ -323,6 +362,42 @@ public class AdgroupPlacementSpecificReviewFeedback extends APINode {
     return this;
   }
 
+  public Map<String, String> getFieldMarketplaceHomeRentals() {
+    return mMarketplaceHomeRentals;
+  }
+
+  public AdgroupPlacementSpecificReviewFeedback setFieldMarketplaceHomeRentals(Map<String, String> value) {
+    this.mMarketplaceHomeRentals = value;
+    return this;
+  }
+
+  public Map<String, String> getFieldMarketplaceHomeSales() {
+    return mMarketplaceHomeSales;
+  }
+
+  public AdgroupPlacementSpecificReviewFeedback setFieldMarketplaceHomeSales(Map<String, String> value) {
+    this.mMarketplaceHomeSales = value;
+    return this;
+  }
+
+  public Map<String, String> getFieldMarketplaceMotors() {
+    return mMarketplaceMotors;
+  }
+
+  public AdgroupPlacementSpecificReviewFeedback setFieldMarketplaceMotors(Map<String, String> value) {
+    this.mMarketplaceMotors = value;
+    return this;
+  }
+
+  public Map<String, String> getFieldMaxReviewPlacements() {
+    return mMaxReviewPlacements;
+  }
+
+  public AdgroupPlacementSpecificReviewFeedback setFieldMaxReviewPlacements(Map<String, String> value) {
+    this.mMaxReviewPlacements = value;
+    return this;
+  }
+
   public Map<String, String> getFieldPageAdmin() {
     return mPageAdmin;
   }
@@ -350,12 +425,48 @@ public class AdgroupPlacementSpecificReviewFeedback extends APINode {
     return this;
   }
 
+  public Map<String, String> getFieldProfile() {
+    return mProfile;
+  }
+
+  public AdgroupPlacementSpecificReviewFeedback setFieldProfile(Map<String, String> value) {
+    this.mProfile = value;
+    return this;
+  }
+
   public Map<String, String> getFieldSeller() {
     return mSeller;
   }
 
   public AdgroupPlacementSpecificReviewFeedback setFieldSeller(Map<String, String> value) {
     this.mSeller = value;
+    return this;
+  }
+
+  public Map<String, String> getFieldShops() {
+    return mShops;
+  }
+
+  public AdgroupPlacementSpecificReviewFeedback setFieldShops(Map<String, String> value) {
+    this.mShops = value;
+    return this;
+  }
+
+  public Map<String, String> getFieldWhatsapp() {
+    return mWhatsapp;
+  }
+
+  public AdgroupPlacementSpecificReviewFeedback setFieldWhatsapp(Map<String, String> value) {
+    this.mWhatsapp = value;
+    return this;
+  }
+
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AdgroupPlacementSpecificReviewFeedback setFieldId(String value) {
+    this.mId = value;
     return this;
   }
 
@@ -381,15 +492,25 @@ public class AdgroupPlacementSpecificReviewFeedback extends APINode {
     this.mB2c = instance.mB2c;
     this.mBsg = instance.mBsg;
     this.mCityCommunity = instance.mCityCommunity;
+    this.mDailyDeals = instance.mDailyDeals;
+    this.mDailyDealsLegacy = instance.mDailyDealsLegacy;
     this.mDpa = instance.mDpa;
     this.mFacebook = instance.mFacebook;
     this.mInstagram = instance.mInstagram;
     this.mInstagramShop = instance.mInstagramShop;
     this.mMarketplace = instance.mMarketplace;
+    this.mMarketplaceHomeRentals = instance.mMarketplaceHomeRentals;
+    this.mMarketplaceHomeSales = instance.mMarketplaceHomeSales;
+    this.mMarketplaceMotors = instance.mMarketplaceMotors;
+    this.mMaxReviewPlacements = instance.mMaxReviewPlacements;
     this.mPageAdmin = instance.mPageAdmin;
     this.mProduct = instance.mProduct;
     this.mProductService = instance.mProductService;
+    this.mProfile = instance.mProfile;
     this.mSeller = instance.mSeller;
+    this.mShops = instance.mShops;
+    this.mWhatsapp = instance.mWhatsapp;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -397,8 +518,8 @@ public class AdgroupPlacementSpecificReviewFeedback extends APINode {
 
   public static APIRequest.ResponseParser<AdgroupPlacementSpecificReviewFeedback> getParser() {
     return new APIRequest.ResponseParser<AdgroupPlacementSpecificReviewFeedback>() {
-      public APINodeList<AdgroupPlacementSpecificReviewFeedback> parseResponse(String response, APIContext context, APIRequest<AdgroupPlacementSpecificReviewFeedback> request) throws MalformedResponseException {
-        return AdgroupPlacementSpecificReviewFeedback.parseResponse(response, context, request);
+      public APINodeList<AdgroupPlacementSpecificReviewFeedback> parseResponse(String response, APIContext context, APIRequest<AdgroupPlacementSpecificReviewFeedback> request, String header) throws MalformedResponseException {
+        return AdgroupPlacementSpecificReviewFeedback.parseResponse(response, context, request, header);
       }
     };
   }

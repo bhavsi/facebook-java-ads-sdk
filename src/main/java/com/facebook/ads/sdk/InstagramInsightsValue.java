@@ -59,15 +59,17 @@ public class InstagramInsightsValue extends APINode {
   private String mEndTime = null;
   @SerializedName("value")
   private Object mValue = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public InstagramInsightsValue() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static InstagramInsightsValue loadJSON(String json, APIContext context) {
+  public static InstagramInsightsValue loadJSON(String json, APIContext context, String header) {
     InstagramInsightsValue instagramInsightsValue = getGson().fromJson(json, InstagramInsightsValue.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -84,11 +86,12 @@ public class InstagramInsightsValue extends APINode {
     }
     instagramInsightsValue.context = context;
     instagramInsightsValue.rawValue = json;
+    instagramInsightsValue.header = header;
     return instagramInsightsValue;
   }
 
-  public static APINodeList<InstagramInsightsValue> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<InstagramInsightsValue> instagramInsightsValues = new APINodeList<InstagramInsightsValue>(request, json);
+  public static APINodeList<InstagramInsightsValue> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<InstagramInsightsValue> instagramInsightsValues = new APINodeList<InstagramInsightsValue>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -99,7 +102,7 @@ public class InstagramInsightsValue extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          instagramInsightsValues.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          instagramInsightsValues.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return instagramInsightsValues;
       } else if (result.isJsonObject()) {
@@ -124,7 +127,7 @@ public class InstagramInsightsValue extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              instagramInsightsValues.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              instagramInsightsValues.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -135,13 +138,13 @@ public class InstagramInsightsValue extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  instagramInsightsValues.add(loadJSON(entry.getValue().toString(), context));
+                  instagramInsightsValues.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              instagramInsightsValues.add(loadJSON(obj.toString(), context));
+              instagramInsightsValues.add(loadJSON(obj.toString(), context, header));
             }
           }
           return instagramInsightsValues;
@@ -149,7 +152,7 @@ public class InstagramInsightsValue extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              instagramInsightsValues.add(loadJSON(entry.getValue().toString(), context));
+              instagramInsightsValues.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return instagramInsightsValues;
         } else {
@@ -168,7 +171,7 @@ public class InstagramInsightsValue extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              instagramInsightsValues.add(loadJSON(value.toString(), context));
+              instagramInsightsValues.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -180,7 +183,7 @@ public class InstagramInsightsValue extends APINode {
 
           // Sixth, check if it's pure JsonObject
           instagramInsightsValues.clear();
-          instagramInsightsValues.add(loadJSON(json, context));
+          instagramInsightsValues.add(loadJSON(json, context, header));
           return instagramInsightsValues;
         }
       }
@@ -227,6 +230,15 @@ public class InstagramInsightsValue extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public InstagramInsightsValue setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -246,6 +258,7 @@ public class InstagramInsightsValue extends APINode {
   public InstagramInsightsValue copyFrom(InstagramInsightsValue instance) {
     this.mEndTime = instance.mEndTime;
     this.mValue = instance.mValue;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -253,8 +266,8 @@ public class InstagramInsightsValue extends APINode {
 
   public static APIRequest.ResponseParser<InstagramInsightsValue> getParser() {
     return new APIRequest.ResponseParser<InstagramInsightsValue>() {
-      public APINodeList<InstagramInsightsValue> parseResponse(String response, APIContext context, APIRequest<InstagramInsightsValue> request) throws MalformedResponseException {
-        return InstagramInsightsValue.parseResponse(response, context, request);
+      public APINodeList<InstagramInsightsValue> parseResponse(String response, APIContext context, APIRequest<InstagramInsightsValue> request, String header) throws MalformedResponseException {
+        return InstagramInsightsValue.parseResponse(response, context, request, header);
       }
     };
   }

@@ -107,15 +107,17 @@ public class ConversionActionQuery extends APINode {
   private List<String> mResponse = null;
   @SerializedName("subtype")
   private List<String> mSubtype = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public ConversionActionQuery() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static ConversionActionQuery loadJSON(String json, APIContext context) {
+  public static ConversionActionQuery loadJSON(String json, APIContext context, String header) {
     ConversionActionQuery conversionActionQuery = getGson().fromJson(json, ConversionActionQuery.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -132,11 +134,12 @@ public class ConversionActionQuery extends APINode {
     }
     conversionActionQuery.context = context;
     conversionActionQuery.rawValue = json;
+    conversionActionQuery.header = header;
     return conversionActionQuery;
   }
 
-  public static APINodeList<ConversionActionQuery> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<ConversionActionQuery> conversionActionQuerys = new APINodeList<ConversionActionQuery>(request, json);
+  public static APINodeList<ConversionActionQuery> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<ConversionActionQuery> conversionActionQuerys = new APINodeList<ConversionActionQuery>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -147,7 +150,7 @@ public class ConversionActionQuery extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          conversionActionQuerys.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          conversionActionQuerys.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return conversionActionQuerys;
       } else if (result.isJsonObject()) {
@@ -172,7 +175,7 @@ public class ConversionActionQuery extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              conversionActionQuerys.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              conversionActionQuerys.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -183,13 +186,13 @@ public class ConversionActionQuery extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  conversionActionQuerys.add(loadJSON(entry.getValue().toString(), context));
+                  conversionActionQuerys.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              conversionActionQuerys.add(loadJSON(obj.toString(), context));
+              conversionActionQuerys.add(loadJSON(obj.toString(), context, header));
             }
           }
           return conversionActionQuerys;
@@ -197,7 +200,7 @@ public class ConversionActionQuery extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              conversionActionQuerys.add(loadJSON(entry.getValue().toString(), context));
+              conversionActionQuerys.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return conversionActionQuerys;
         } else {
@@ -216,7 +219,7 @@ public class ConversionActionQuery extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              conversionActionQuerys.add(loadJSON(value.toString(), context));
+              conversionActionQuerys.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -228,7 +231,7 @@ public class ConversionActionQuery extends APINode {
 
           // Sixth, check if it's pure JsonObject
           conversionActionQuerys.clear();
-          conversionActionQuerys.add(loadJSON(json, context));
+          conversionActionQuerys.add(loadJSON(json, context, header));
           return conversionActionQuerys;
         }
       }
@@ -491,6 +494,15 @@ public class ConversionActionQuery extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public ConversionActionQuery setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -534,6 +546,7 @@ public class ConversionActionQuery extends APINode {
     this.mQuestionCreator = instance.mQuestionCreator;
     this.mResponse = instance.mResponse;
     this.mSubtype = instance.mSubtype;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -541,8 +554,8 @@ public class ConversionActionQuery extends APINode {
 
   public static APIRequest.ResponseParser<ConversionActionQuery> getParser() {
     return new APIRequest.ResponseParser<ConversionActionQuery>() {
-      public APINodeList<ConversionActionQuery> parseResponse(String response, APIContext context, APIRequest<ConversionActionQuery> request) throws MalformedResponseException {
-        return ConversionActionQuery.parseResponse(response, context, request);
+      public APINodeList<ConversionActionQuery> parseResponse(String response, APIContext context, APIRequest<ConversionActionQuery> request, String header) throws MalformedResponseException {
+        return ConversionActionQuery.parseResponse(response, context, request, header);
       }
     };
   }

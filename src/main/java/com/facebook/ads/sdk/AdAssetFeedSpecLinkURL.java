@@ -67,15 +67,17 @@ public class AdAssetFeedSpecLinkURL extends APINode {
   private String mUrlTags = null;
   @SerializedName("website_url")
   private String mWebsiteUrl = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdAssetFeedSpecLinkURL() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdAssetFeedSpecLinkURL loadJSON(String json, APIContext context) {
+  public static AdAssetFeedSpecLinkURL loadJSON(String json, APIContext context, String header) {
     AdAssetFeedSpecLinkURL adAssetFeedSpecLinkURL = getGson().fromJson(json, AdAssetFeedSpecLinkURL.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -92,11 +94,12 @@ public class AdAssetFeedSpecLinkURL extends APINode {
     }
     adAssetFeedSpecLinkURL.context = context;
     adAssetFeedSpecLinkURL.rawValue = json;
+    adAssetFeedSpecLinkURL.header = header;
     return adAssetFeedSpecLinkURL;
   }
 
-  public static APINodeList<AdAssetFeedSpecLinkURL> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdAssetFeedSpecLinkURL> adAssetFeedSpecLinkURLs = new APINodeList<AdAssetFeedSpecLinkURL>(request, json);
+  public static APINodeList<AdAssetFeedSpecLinkURL> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdAssetFeedSpecLinkURL> adAssetFeedSpecLinkURLs = new APINodeList<AdAssetFeedSpecLinkURL>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -107,7 +110,7 @@ public class AdAssetFeedSpecLinkURL extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adAssetFeedSpecLinkURLs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adAssetFeedSpecLinkURLs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adAssetFeedSpecLinkURLs;
       } else if (result.isJsonObject()) {
@@ -132,7 +135,7 @@ public class AdAssetFeedSpecLinkURL extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adAssetFeedSpecLinkURLs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adAssetFeedSpecLinkURLs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -143,13 +146,13 @@ public class AdAssetFeedSpecLinkURL extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adAssetFeedSpecLinkURLs.add(loadJSON(entry.getValue().toString(), context));
+                  adAssetFeedSpecLinkURLs.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adAssetFeedSpecLinkURLs.add(loadJSON(obj.toString(), context));
+              adAssetFeedSpecLinkURLs.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adAssetFeedSpecLinkURLs;
@@ -157,7 +160,7 @@ public class AdAssetFeedSpecLinkURL extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adAssetFeedSpecLinkURLs.add(loadJSON(entry.getValue().toString(), context));
+              adAssetFeedSpecLinkURLs.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adAssetFeedSpecLinkURLs;
         } else {
@@ -176,7 +179,7 @@ public class AdAssetFeedSpecLinkURL extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adAssetFeedSpecLinkURLs.add(loadJSON(value.toString(), context));
+              adAssetFeedSpecLinkURLs.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -188,7 +191,7 @@ public class AdAssetFeedSpecLinkURL extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adAssetFeedSpecLinkURLs.clear();
-          adAssetFeedSpecLinkURLs.add(loadJSON(json, context));
+          adAssetFeedSpecLinkURLs.add(loadJSON(json, context, header));
           return adAssetFeedSpecLinkURLs;
         }
       }
@@ -276,6 +279,15 @@ public class AdAssetFeedSpecLinkURL extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AdAssetFeedSpecLinkURL setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -299,6 +311,7 @@ public class AdAssetFeedSpecLinkURL extends APINode {
     this.mDisplayUrl = instance.mDisplayUrl;
     this.mUrlTags = instance.mUrlTags;
     this.mWebsiteUrl = instance.mWebsiteUrl;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -306,8 +319,8 @@ public class AdAssetFeedSpecLinkURL extends APINode {
 
   public static APIRequest.ResponseParser<AdAssetFeedSpecLinkURL> getParser() {
     return new APIRequest.ResponseParser<AdAssetFeedSpecLinkURL>() {
-      public APINodeList<AdAssetFeedSpecLinkURL> parseResponse(String response, APIContext context, APIRequest<AdAssetFeedSpecLinkURL> request) throws MalformedResponseException {
-        return AdAssetFeedSpecLinkURL.parseResponse(response, context, request);
+      public APINodeList<AdAssetFeedSpecLinkURL> parseResponse(String response, APIContext context, APIRequest<AdAssetFeedSpecLinkURL> request, String header) throws MalformedResponseException {
+        return AdAssetFeedSpecLinkURL.parseResponse(response, context, request, header);
       }
     };
   }

@@ -59,15 +59,17 @@ public class PageStartInfo extends APINode {
   private Object mDate = null;
   @SerializedName("type")
   private String mType = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public PageStartInfo() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static PageStartInfo loadJSON(String json, APIContext context) {
+  public static PageStartInfo loadJSON(String json, APIContext context, String header) {
     PageStartInfo pageStartInfo = getGson().fromJson(json, PageStartInfo.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -84,11 +86,12 @@ public class PageStartInfo extends APINode {
     }
     pageStartInfo.context = context;
     pageStartInfo.rawValue = json;
+    pageStartInfo.header = header;
     return pageStartInfo;
   }
 
-  public static APINodeList<PageStartInfo> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<PageStartInfo> pageStartInfos = new APINodeList<PageStartInfo>(request, json);
+  public static APINodeList<PageStartInfo> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<PageStartInfo> pageStartInfos = new APINodeList<PageStartInfo>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -99,7 +102,7 @@ public class PageStartInfo extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          pageStartInfos.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          pageStartInfos.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return pageStartInfos;
       } else if (result.isJsonObject()) {
@@ -124,7 +127,7 @@ public class PageStartInfo extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              pageStartInfos.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              pageStartInfos.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -135,13 +138,13 @@ public class PageStartInfo extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  pageStartInfos.add(loadJSON(entry.getValue().toString(), context));
+                  pageStartInfos.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              pageStartInfos.add(loadJSON(obj.toString(), context));
+              pageStartInfos.add(loadJSON(obj.toString(), context, header));
             }
           }
           return pageStartInfos;
@@ -149,7 +152,7 @@ public class PageStartInfo extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              pageStartInfos.add(loadJSON(entry.getValue().toString(), context));
+              pageStartInfos.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return pageStartInfos;
         } else {
@@ -168,7 +171,7 @@ public class PageStartInfo extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              pageStartInfos.add(loadJSON(value.toString(), context));
+              pageStartInfos.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -180,7 +183,7 @@ public class PageStartInfo extends APINode {
 
           // Sixth, check if it's pure JsonObject
           pageStartInfos.clear();
-          pageStartInfos.add(loadJSON(json, context));
+          pageStartInfos.add(loadJSON(json, context, header));
           return pageStartInfos;
         }
       }
@@ -227,6 +230,15 @@ public class PageStartInfo extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public PageStartInfo setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -246,6 +258,7 @@ public class PageStartInfo extends APINode {
   public PageStartInfo copyFrom(PageStartInfo instance) {
     this.mDate = instance.mDate;
     this.mType = instance.mType;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -253,8 +266,8 @@ public class PageStartInfo extends APINode {
 
   public static APIRequest.ResponseParser<PageStartInfo> getParser() {
     return new APIRequest.ResponseParser<PageStartInfo>() {
-      public APINodeList<PageStartInfo> parseResponse(String response, APIContext context, APIRequest<PageStartInfo> request) throws MalformedResponseException {
-        return PageStartInfo.parseResponse(response, context, request);
+      public APINodeList<PageStartInfo> parseResponse(String response, APIContext context, APIRequest<PageStartInfo> request, String header) throws MalformedResponseException {
+        return PageStartInfo.parseResponse(response, context, request, header);
       }
     };
   }

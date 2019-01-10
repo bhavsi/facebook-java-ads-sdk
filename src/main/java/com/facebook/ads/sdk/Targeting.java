@@ -69,6 +69,10 @@ public class Targeting extends APINode {
   private List<String> mAudienceNetworkPositions = null;
   @SerializedName("behaviors")
   private List<IDName> mBehaviors = null;
+  @SerializedName("brand_safety_content_severity_levels")
+  private List<String> mBrandSafetyContentSeverityLevels = null;
+  @SerializedName("catalog_based_targeting")
+  private CatalogBasedTargeting mCatalogBasedTargeting = null;
   @SerializedName("cities")
   private List<IDName> mCities = null;
   @SerializedName("college_years")
@@ -84,7 +88,7 @@ public class Targeting extends APINode {
   @SerializedName("country_groups")
   private List<String> mCountryGroups = null;
   @SerializedName("custom_audiences")
-  private List<Object> mCustomAudiences = null;
+  private List<RawCustomAudience> mCustomAudiences = null;
   @SerializedName("device_platforms")
   private List<EnumDevicePlatforms> mDevicePlatforms = null;
   @SerializedName("direct_install_devices")
@@ -197,6 +201,8 @@ public class Targeting extends APINode {
   private List<IDName> mPolitics = null;
   @SerializedName("product_audience_specs")
   private List<TargetingProductAudienceSpec> mProductAudienceSpecs = null;
+  @SerializedName("prospecting_audience")
+  private TargetingProspectingAudience mProspectingAudience = null;
   @SerializedName("publisher_platforms")
   private List<String> mPublisherPlatforms = null;
   @SerializedName("publisher_visibility_categories")
@@ -207,8 +213,6 @@ public class Targeting extends APINode {
   private List<IDName> mRegions = null;
   @SerializedName("relationship_statuses")
   private List<Long> mRelationshipStatuses = null;
-  @SerializedName("rtb_flag")
-  private Boolean mRtbFlag = null;
   @SerializedName("site_category")
   private List<String> mSiteCategory = null;
   @SerializedName("targeting_optimization")
@@ -229,15 +233,17 @@ public class Targeting extends APINode {
   private List<IDName> mWorkPositions = null;
   @SerializedName("zips")
   private List<String> mZips = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public Targeting() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static Targeting loadJSON(String json, APIContext context) {
+  public static Targeting loadJSON(String json, APIContext context, String header) {
     Targeting targeting = getGson().fromJson(json, Targeting.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -254,11 +260,12 @@ public class Targeting extends APINode {
     }
     targeting.context = context;
     targeting.rawValue = json;
+    targeting.header = header;
     return targeting;
   }
 
-  public static APINodeList<Targeting> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<Targeting> targetings = new APINodeList<Targeting>(request, json);
+  public static APINodeList<Targeting> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<Targeting> targetings = new APINodeList<Targeting>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -269,7 +276,7 @@ public class Targeting extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          targetings.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          targetings.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return targetings;
       } else if (result.isJsonObject()) {
@@ -294,7 +301,7 @@ public class Targeting extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              targetings.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              targetings.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -305,13 +312,13 @@ public class Targeting extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  targetings.add(loadJSON(entry.getValue().toString(), context));
+                  targetings.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              targetings.add(loadJSON(obj.toString(), context));
+              targetings.add(loadJSON(obj.toString(), context, header));
             }
           }
           return targetings;
@@ -319,7 +326,7 @@ public class Targeting extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              targetings.add(loadJSON(entry.getValue().toString(), context));
+              targetings.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return targetings;
         } else {
@@ -338,7 +345,7 @@ public class Targeting extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              targetings.add(loadJSON(value.toString(), context));
+              targetings.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -350,7 +357,7 @@ public class Targeting extends APINode {
 
           // Sixth, check if it's pure JsonObject
           targetings.clear();
-          targetings.add(loadJSON(json, context));
+          targetings.add(loadJSON(json, context, header));
           return targetings;
         }
       }
@@ -447,6 +454,29 @@ public class Targeting extends APINode {
     this.mBehaviors = IDName.getGson().fromJson(value, type);
     return this;
   }
+  public List<String> getFieldBrandSafetyContentSeverityLevels() {
+    return mBrandSafetyContentSeverityLevels;
+  }
+
+  public Targeting setFieldBrandSafetyContentSeverityLevels(List<String> value) {
+    this.mBrandSafetyContentSeverityLevels = value;
+    return this;
+  }
+
+  public CatalogBasedTargeting getFieldCatalogBasedTargeting() {
+    return mCatalogBasedTargeting;
+  }
+
+  public Targeting setFieldCatalogBasedTargeting(CatalogBasedTargeting value) {
+    this.mCatalogBasedTargeting = value;
+    return this;
+  }
+
+  public Targeting setFieldCatalogBasedTargeting(String value) {
+    Type type = new TypeToken<CatalogBasedTargeting>(){}.getType();
+    this.mCatalogBasedTargeting = CatalogBasedTargeting.getGson().fromJson(value, type);
+    return this;
+  }
   public List<IDName> getFieldCities() {
     return mCities;
   }
@@ -525,15 +555,20 @@ public class Targeting extends APINode {
     return this;
   }
 
-  public List<Object> getFieldCustomAudiences() {
+  public List<RawCustomAudience> getFieldCustomAudiences() {
     return mCustomAudiences;
   }
 
-  public Targeting setFieldCustomAudiences(List<Object> value) {
+  public Targeting setFieldCustomAudiences(List<RawCustomAudience> value) {
     this.mCustomAudiences = value;
     return this;
   }
 
+  public Targeting setFieldCustomAudiences(String value) {
+    Type type = new TypeToken<List<RawCustomAudience>>(){}.getType();
+    this.mCustomAudiences = RawCustomAudience.getGson().fromJson(value, type);
+    return this;
+  }
   public List<EnumDevicePlatforms> getFieldDevicePlatforms() {
     return mDevicePlatforms;
   }
@@ -1178,6 +1213,20 @@ public class Targeting extends APINode {
     this.mProductAudienceSpecs = TargetingProductAudienceSpec.getGson().fromJson(value, type);
     return this;
   }
+  public TargetingProspectingAudience getFieldProspectingAudience() {
+    return mProspectingAudience;
+  }
+
+  public Targeting setFieldProspectingAudience(TargetingProspectingAudience value) {
+    this.mProspectingAudience = value;
+    return this;
+  }
+
+  public Targeting setFieldProspectingAudience(String value) {
+    Type type = new TypeToken<TargetingProspectingAudience>(){}.getType();
+    this.mProspectingAudience = TargetingProspectingAudience.getGson().fromJson(value, type);
+    return this;
+  }
   public List<String> getFieldPublisherPlatforms() {
     return mPublisherPlatforms;
   }
@@ -1225,15 +1274,6 @@ public class Targeting extends APINode {
 
   public Targeting setFieldRelationshipStatuses(List<Long> value) {
     this.mRelationshipStatuses = value;
-    return this;
-  }
-
-  public Boolean getFieldRtbFlag() {
-    return mRtbFlag;
-  }
-
-  public Targeting setFieldRtbFlag(Boolean value) {
-    this.mRtbFlag = value;
     return this;
   }
 
@@ -1342,6 +1382,15 @@ public class Targeting extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public Targeting setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
   public static enum EnumDevicePlatforms {
@@ -1408,6 +1457,8 @@ public class Targeting extends APINode {
     this.mAppInstallState = instance.mAppInstallState;
     this.mAudienceNetworkPositions = instance.mAudienceNetworkPositions;
     this.mBehaviors = instance.mBehaviors;
+    this.mBrandSafetyContentSeverityLevels = instance.mBrandSafetyContentSeverityLevels;
+    this.mCatalogBasedTargeting = instance.mCatalogBasedTargeting;
     this.mCities = instance.mCities;
     this.mCollegeYears = instance.mCollegeYears;
     this.mConnections = instance.mConnections;
@@ -1472,12 +1523,12 @@ public class Targeting extends APINode {
     this.mPoliticalViews = instance.mPoliticalViews;
     this.mPolitics = instance.mPolitics;
     this.mProductAudienceSpecs = instance.mProductAudienceSpecs;
+    this.mProspectingAudience = instance.mProspectingAudience;
     this.mPublisherPlatforms = instance.mPublisherPlatforms;
     this.mPublisherVisibilityCategories = instance.mPublisherVisibilityCategories;
     this.mRadius = instance.mRadius;
     this.mRegions = instance.mRegions;
     this.mRelationshipStatuses = instance.mRelationshipStatuses;
-    this.mRtbFlag = instance.mRtbFlag;
     this.mSiteCategory = instance.mSiteCategory;
     this.mTargetingOptimization = instance.mTargetingOptimization;
     this.mUserAdclusters = instance.mUserAdclusters;
@@ -1488,6 +1539,7 @@ public class Targeting extends APINode {
     this.mWorkEmployers = instance.mWorkEmployers;
     this.mWorkPositions = instance.mWorkPositions;
     this.mZips = instance.mZips;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -1495,8 +1547,8 @@ public class Targeting extends APINode {
 
   public static APIRequest.ResponseParser<Targeting> getParser() {
     return new APIRequest.ResponseParser<Targeting>() {
-      public APINodeList<Targeting> parseResponse(String response, APIContext context, APIRequest<Targeting> request) throws MalformedResponseException {
-        return Targeting.parseResponse(response, context, request);
+      public APINodeList<Targeting> parseResponse(String response, APIContext context, APIRequest<Targeting> request, String header) throws MalformedResponseException {
+        return Targeting.parseResponse(response, context, request, header);
       }
     };
   }

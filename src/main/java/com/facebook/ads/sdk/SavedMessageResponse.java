@@ -78,6 +78,7 @@ public class SavedMessageResponse extends APINode {
 
   public SavedMessageResponse(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -96,19 +97,17 @@ public class SavedMessageResponse extends APINode {
   }
 
   public static SavedMessageResponse fetchById(String id, APIContext context) throws APIException {
-    SavedMessageResponse savedMessageResponse =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return savedMessageResponse;
   }
 
   public static ListenableFuture<SavedMessageResponse> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<SavedMessageResponse> savedMessageResponse =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return savedMessageResponse;
   }
 
   public static APINodeList<SavedMessageResponse> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -121,12 +120,11 @@ public class SavedMessageResponse extends APINode {
   }
 
   public static ListenableFuture<APINodeList<SavedMessageResponse>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<SavedMessageResponse>> savedMessageResponse =
+    return
       new APIRequest(context, "", "/", "GET", SavedMessageResponse.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return savedMessageResponse;
   }
 
   private String getPrefixedId() {
@@ -136,7 +134,7 @@ public class SavedMessageResponse extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static SavedMessageResponse loadJSON(String json, APIContext context) {
+  public static SavedMessageResponse loadJSON(String json, APIContext context, String header) {
     SavedMessageResponse savedMessageResponse = getGson().fromJson(json, SavedMessageResponse.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -153,11 +151,12 @@ public class SavedMessageResponse extends APINode {
     }
     savedMessageResponse.context = context;
     savedMessageResponse.rawValue = json;
+    savedMessageResponse.header = header;
     return savedMessageResponse;
   }
 
-  public static APINodeList<SavedMessageResponse> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<SavedMessageResponse> savedMessageResponses = new APINodeList<SavedMessageResponse>(request, json);
+  public static APINodeList<SavedMessageResponse> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<SavedMessageResponse> savedMessageResponses = new APINodeList<SavedMessageResponse>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -168,7 +167,7 @@ public class SavedMessageResponse extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          savedMessageResponses.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          savedMessageResponses.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return savedMessageResponses;
       } else if (result.isJsonObject()) {
@@ -193,7 +192,7 @@ public class SavedMessageResponse extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              savedMessageResponses.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              savedMessageResponses.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -204,13 +203,13 @@ public class SavedMessageResponse extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  savedMessageResponses.add(loadJSON(entry.getValue().toString(), context));
+                  savedMessageResponses.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              savedMessageResponses.add(loadJSON(obj.toString(), context));
+              savedMessageResponses.add(loadJSON(obj.toString(), context, header));
             }
           }
           return savedMessageResponses;
@@ -218,7 +217,7 @@ public class SavedMessageResponse extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              savedMessageResponses.add(loadJSON(entry.getValue().toString(), context));
+              savedMessageResponses.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return savedMessageResponses;
         } else {
@@ -237,7 +236,7 @@ public class SavedMessageResponse extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              savedMessageResponses.add(loadJSON(value.toString(), context));
+              savedMessageResponses.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -249,7 +248,7 @@ public class SavedMessageResponse extends APINode {
 
           // Sixth, check if it's pure JsonObject
           savedMessageResponses.clear();
-          savedMessageResponses.add(loadJSON(json, context));
+          savedMessageResponses.add(loadJSON(json, context, header));
           return savedMessageResponses;
         }
       }
@@ -275,6 +274,10 @@ public class SavedMessageResponse extends APINode {
   @Override
   public String toString() {
     return getGson().toJson(this);
+  }
+
+  public APIRequestGetMacros getMacros() {
+    return new APIRequestGetMacros(this.getPrefixedId().toString(), context);
   }
 
   public APIRequestDelete delete() {
@@ -316,6 +319,142 @@ public class SavedMessageResponse extends APINode {
 
 
 
+  public static class APIRequestGetMacros extends APIRequest<SavedMessageResponseMacro> {
+
+    APINodeList<SavedMessageResponseMacro> lastResponse = null;
+    @Override
+    public APINodeList<SavedMessageResponseMacro> getLastResponse() {
+      return lastResponse;
+    }
+    public static final String[] PARAMS = {
+    };
+
+    public static final String[] FIELDS = {
+      "length",
+      "macro",
+      "offset",
+      "id",
+    };
+
+    @Override
+    public APINodeList<SavedMessageResponseMacro> parseResponse(String response, String header) throws APIException {
+      return SavedMessageResponseMacro.parseResponse(response, getContext(), this, header);
+    }
+
+    @Override
+    public APINodeList<SavedMessageResponseMacro> execute() throws APIException {
+      return execute(new HashMap<String, Object>());
+    }
+
+    @Override
+    public APINodeList<SavedMessageResponseMacro> execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
+      return lastResponse;
+    }
+
+    public ListenableFuture<APINodeList<SavedMessageResponseMacro>> executeAsync() throws APIException {
+      return executeAsync(new HashMap<String, Object>());
+    };
+
+    public ListenableFuture<APINodeList<SavedMessageResponseMacro>> executeAsync(Map<String, Object> extraParams) throws APIException {
+      return Futures.transform(
+        executeAsyncInternal(extraParams),
+        new Function<ResponseWrapper, APINodeList<SavedMessageResponseMacro>>() {
+           public APINodeList<SavedMessageResponseMacro> apply(ResponseWrapper result) {
+             try {
+               return APIRequestGetMacros.this.parseResponse(result.getBody(), result.getHeader());
+             } catch (Exception e) {
+               throw new RuntimeException(e);
+             }
+           }
+         }
+      );
+    };
+
+    public APIRequestGetMacros(String nodeId, APIContext context) {
+      super(context, nodeId, "/macros", "GET", Arrays.asList(PARAMS));
+    }
+
+    @Override
+    public APIRequestGetMacros setParam(String param, Object value) {
+      setParamInternal(param, value);
+      return this;
+    }
+
+    @Override
+    public APIRequestGetMacros setParams(Map<String, Object> params) {
+      setParamsInternal(params);
+      return this;
+    }
+
+
+    public APIRequestGetMacros requestAllFields () {
+      return this.requestAllFields(true);
+    }
+
+    public APIRequestGetMacros requestAllFields (boolean value) {
+      for (String field : FIELDS) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestGetMacros requestFields (List<String> fields) {
+      return this.requestFields(fields, true);
+    }
+
+    @Override
+    public APIRequestGetMacros requestFields (List<String> fields, boolean value) {
+      for (String field : fields) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestGetMacros requestField (String field) {
+      this.requestField(field, true);
+      return this;
+    }
+
+    @Override
+    public APIRequestGetMacros requestField (String field, boolean value) {
+      this.requestFieldInternal(field, value);
+      return this;
+    }
+
+    public APIRequestGetMacros requestLengthField () {
+      return this.requestLengthField(true);
+    }
+    public APIRequestGetMacros requestLengthField (boolean value) {
+      this.requestField("length", value);
+      return this;
+    }
+    public APIRequestGetMacros requestMacroField () {
+      return this.requestMacroField(true);
+    }
+    public APIRequestGetMacros requestMacroField (boolean value) {
+      this.requestField("macro", value);
+      return this;
+    }
+    public APIRequestGetMacros requestOffsetField () {
+      return this.requestOffsetField(true);
+    }
+    public APIRequestGetMacros requestOffsetField (boolean value) {
+      this.requestField("offset", value);
+      return this;
+    }
+    public APIRequestGetMacros requestIdField () {
+      return this.requestIdField(true);
+    }
+    public APIRequestGetMacros requestIdField (boolean value) {
+      this.requestField("id", value);
+      return this;
+    }
+  }
+
   public static class APIRequestDelete extends APIRequest<APINode> {
 
     APINode lastResponse = null;
@@ -330,8 +469,8 @@ public class SavedMessageResponse extends APINode {
     };
 
     @Override
-    public APINode parseResponse(String response) throws APIException {
-      return APINode.parseResponse(response, getContext(), this).head();
+    public APINode parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -341,7 +480,8 @@ public class SavedMessageResponse extends APINode {
 
     @Override
     public APINode execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -352,10 +492,10 @@ public class SavedMessageResponse extends APINode {
     public ListenableFuture<APINode> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINode>() {
-           public APINode apply(String result) {
+        new Function<ResponseWrapper, APINode>() {
+           public APINode apply(ResponseWrapper result) {
              try {
-               return APIRequestDelete.this.parseResponse(result);
+               return APIRequestDelete.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -439,8 +579,8 @@ public class SavedMessageResponse extends APINode {
     };
 
     @Override
-    public SavedMessageResponse parseResponse(String response) throws APIException {
-      return SavedMessageResponse.parseResponse(response, getContext(), this).head();
+    public SavedMessageResponse parseResponse(String response, String header) throws APIException {
+      return SavedMessageResponse.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -450,7 +590,8 @@ public class SavedMessageResponse extends APINode {
 
     @Override
     public SavedMessageResponse execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -461,10 +602,10 @@ public class SavedMessageResponse extends APINode {
     public ListenableFuture<SavedMessageResponse> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, SavedMessageResponse>() {
-           public SavedMessageResponse apply(String result) {
+        new Function<ResponseWrapper, SavedMessageResponse>() {
+           public SavedMessageResponse apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -578,18 +719,18 @@ public class SavedMessageResponse extends APINode {
       return lastResponse;
     }
     public static final String[] PARAMS = {
-      "image",
       "message",
-      "remove_image",
       "title",
+      "image",
+      "remove_image",
     };
 
     public static final String[] FIELDS = {
     };
 
     @Override
-    public SavedMessageResponse parseResponse(String response) throws APIException {
-      return SavedMessageResponse.parseResponse(response, getContext(), this).head();
+    public SavedMessageResponse parseResponse(String response, String header) throws APIException {
+      return SavedMessageResponse.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -599,7 +740,8 @@ public class SavedMessageResponse extends APINode {
 
     @Override
     public SavedMessageResponse execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -610,10 +752,10 @@ public class SavedMessageResponse extends APINode {
     public ListenableFuture<SavedMessageResponse> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, SavedMessageResponse>() {
-           public SavedMessageResponse apply(String result) {
+        new Function<ResponseWrapper, SavedMessageResponse>() {
+           public SavedMessageResponse apply(ResponseWrapper result) {
              try {
-               return APIRequestUpdate.this.parseResponse(result);
+               return APIRequestUpdate.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -639,13 +781,18 @@ public class SavedMessageResponse extends APINode {
     }
 
 
-    public APIRequestUpdate setImage (String image) {
-      this.setParam("image", image);
+    public APIRequestUpdate setMessage (String message) {
+      this.setParam("message", message);
       return this;
     }
 
-    public APIRequestUpdate setMessage (String message) {
-      this.setParam("message", message);
+    public APIRequestUpdate setTitle (String title) {
+      this.setParam("title", title);
+      return this;
+    }
+
+    public APIRequestUpdate setImage (String image) {
+      this.setParam("image", image);
       return this;
     }
 
@@ -655,11 +802,6 @@ public class SavedMessageResponse extends APINode {
     }
     public APIRequestUpdate setRemoveImage (String removeImage) {
       this.setParam("remove_image", removeImage);
-      return this;
-    }
-
-    public APIRequestUpdate setTitle (String title) {
-      this.setParam("title", title);
       return this;
     }
 
@@ -728,6 +870,8 @@ public class SavedMessageResponse extends APINode {
       VALUE_SMART_REPLY_NEGATIVE_FEEDBACK("SMART_REPLY_NEGATIVE_FEEDBACK"),
       @SerializedName("SMART_REPLY_POSITIVE_FEEDBACK")
       VALUE_SMART_REPLY_POSITIVE_FEEDBACK("SMART_REPLY_POSITIVE_FEEDBACK"),
+      @SerializedName("JOB_APPLICATION")
+      VALUE_JOB_APPLICATION("JOB_APPLICATION"),
       NULL(null);
 
       private String value;
@@ -770,8 +914,8 @@ public class SavedMessageResponse extends APINode {
 
   public static APIRequest.ResponseParser<SavedMessageResponse> getParser() {
     return new APIRequest.ResponseParser<SavedMessageResponse>() {
-      public APINodeList<SavedMessageResponse> parseResponse(String response, APIContext context, APIRequest<SavedMessageResponse> request) throws MalformedResponseException {
-        return SavedMessageResponse.parseResponse(response, context, request);
+      public APINodeList<SavedMessageResponse> parseResponse(String response, APIContext context, APIRequest<SavedMessageResponse> request, String header) throws MalformedResponseException {
+        return SavedMessageResponse.parseResponse(response, context, request, header);
       }
     };
   }

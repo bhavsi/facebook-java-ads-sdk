@@ -63,15 +63,17 @@ public class AdRuleTrigger extends APINode {
   private EnumType mType = null;
   @SerializedName("value")
   private Object mValue = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdRuleTrigger() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdRuleTrigger loadJSON(String json, APIContext context) {
+  public static AdRuleTrigger loadJSON(String json, APIContext context, String header) {
     AdRuleTrigger adRuleTrigger = getGson().fromJson(json, AdRuleTrigger.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -88,11 +90,12 @@ public class AdRuleTrigger extends APINode {
     }
     adRuleTrigger.context = context;
     adRuleTrigger.rawValue = json;
+    adRuleTrigger.header = header;
     return adRuleTrigger;
   }
 
-  public static APINodeList<AdRuleTrigger> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdRuleTrigger> adRuleTriggers = new APINodeList<AdRuleTrigger>(request, json);
+  public static APINodeList<AdRuleTrigger> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdRuleTrigger> adRuleTriggers = new APINodeList<AdRuleTrigger>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -103,7 +106,7 @@ public class AdRuleTrigger extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adRuleTriggers.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adRuleTriggers.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adRuleTriggers;
       } else if (result.isJsonObject()) {
@@ -128,7 +131,7 @@ public class AdRuleTrigger extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adRuleTriggers.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adRuleTriggers.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -139,13 +142,13 @@ public class AdRuleTrigger extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adRuleTriggers.add(loadJSON(entry.getValue().toString(), context));
+                  adRuleTriggers.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adRuleTriggers.add(loadJSON(obj.toString(), context));
+              adRuleTriggers.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adRuleTriggers;
@@ -153,7 +156,7 @@ public class AdRuleTrigger extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adRuleTriggers.add(loadJSON(entry.getValue().toString(), context));
+              adRuleTriggers.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adRuleTriggers;
         } else {
@@ -172,7 +175,7 @@ public class AdRuleTrigger extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adRuleTriggers.add(loadJSON(value.toString(), context));
+              adRuleTriggers.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -184,7 +187,7 @@ public class AdRuleTrigger extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adRuleTriggers.clear();
-          adRuleTriggers.add(loadJSON(json, context));
+          adRuleTriggers.add(loadJSON(json, context, header));
           return adRuleTriggers;
         }
       }
@@ -246,6 +249,15 @@ public class AdRuleTrigger extends APINode {
 
   public AdRuleTrigger setFieldValue(Object value) {
     this.mValue = value;
+    return this;
+  }
+
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AdRuleTrigger setFieldId(String value) {
+    this.mId = value;
     return this;
   }
 
@@ -336,6 +348,7 @@ public class AdRuleTrigger extends APINode {
     this.mOperator = instance.mOperator;
     this.mType = instance.mType;
     this.mValue = instance.mValue;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -343,8 +356,8 @@ public class AdRuleTrigger extends APINode {
 
   public static APIRequest.ResponseParser<AdRuleTrigger> getParser() {
     return new APIRequest.ResponseParser<AdRuleTrigger>() {
-      public APINodeList<AdRuleTrigger> parseResponse(String response, APIContext context, APIRequest<AdRuleTrigger> request) throws MalformedResponseException {
-        return AdRuleTrigger.parseResponse(response, context, request);
+      public APINodeList<AdRuleTrigger> parseResponse(String response, APIContext context, APIRequest<AdRuleTrigger> request, String header) throws MalformedResponseException {
+        return AdRuleTrigger.parseResponse(response, context, request, header);
       }
     };
   }

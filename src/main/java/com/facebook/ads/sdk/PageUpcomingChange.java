@@ -78,6 +78,7 @@ public class PageUpcomingChange extends APINode {
 
   public PageUpcomingChange(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -96,19 +97,17 @@ public class PageUpcomingChange extends APINode {
   }
 
   public static PageUpcomingChange fetchById(String id, APIContext context) throws APIException {
-    PageUpcomingChange pageUpcomingChange =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return pageUpcomingChange;
   }
 
   public static ListenableFuture<PageUpcomingChange> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<PageUpcomingChange> pageUpcomingChange =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return pageUpcomingChange;
   }
 
   public static APINodeList<PageUpcomingChange> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -121,12 +120,11 @@ public class PageUpcomingChange extends APINode {
   }
 
   public static ListenableFuture<APINodeList<PageUpcomingChange>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<PageUpcomingChange>> pageUpcomingChange =
+    return
       new APIRequest(context, "", "/", "GET", PageUpcomingChange.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return pageUpcomingChange;
   }
 
   private String getPrefixedId() {
@@ -136,7 +134,7 @@ public class PageUpcomingChange extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static PageUpcomingChange loadJSON(String json, APIContext context) {
+  public static PageUpcomingChange loadJSON(String json, APIContext context, String header) {
     PageUpcomingChange pageUpcomingChange = getGson().fromJson(json, PageUpcomingChange.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -153,11 +151,12 @@ public class PageUpcomingChange extends APINode {
     }
     pageUpcomingChange.context = context;
     pageUpcomingChange.rawValue = json;
+    pageUpcomingChange.header = header;
     return pageUpcomingChange;
   }
 
-  public static APINodeList<PageUpcomingChange> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<PageUpcomingChange> pageUpcomingChanges = new APINodeList<PageUpcomingChange>(request, json);
+  public static APINodeList<PageUpcomingChange> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<PageUpcomingChange> pageUpcomingChanges = new APINodeList<PageUpcomingChange>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -168,7 +167,7 @@ public class PageUpcomingChange extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          pageUpcomingChanges.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          pageUpcomingChanges.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return pageUpcomingChanges;
       } else if (result.isJsonObject()) {
@@ -193,7 +192,7 @@ public class PageUpcomingChange extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              pageUpcomingChanges.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              pageUpcomingChanges.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -204,13 +203,13 @@ public class PageUpcomingChange extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  pageUpcomingChanges.add(loadJSON(entry.getValue().toString(), context));
+                  pageUpcomingChanges.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              pageUpcomingChanges.add(loadJSON(obj.toString(), context));
+              pageUpcomingChanges.add(loadJSON(obj.toString(), context, header));
             }
           }
           return pageUpcomingChanges;
@@ -218,7 +217,7 @@ public class PageUpcomingChange extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              pageUpcomingChanges.add(loadJSON(entry.getValue().toString(), context));
+              pageUpcomingChanges.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return pageUpcomingChanges;
         } else {
@@ -237,7 +236,7 @@ public class PageUpcomingChange extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              pageUpcomingChanges.add(loadJSON(value.toString(), context));
+              pageUpcomingChanges.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -249,7 +248,7 @@ public class PageUpcomingChange extends APINode {
 
           // Sixth, check if it's pure JsonObject
           pageUpcomingChanges.clear();
-          pageUpcomingChanges.add(loadJSON(json, context));
+          pageUpcomingChanges.add(loadJSON(json, context, header));
           return pageUpcomingChanges;
         }
       }
@@ -338,8 +337,8 @@ public class PageUpcomingChange extends APINode {
     };
 
     @Override
-    public PageUpcomingChange parseResponse(String response) throws APIException {
-      return PageUpcomingChange.parseResponse(response, getContext(), this).head();
+    public PageUpcomingChange parseResponse(String response, String header) throws APIException {
+      return PageUpcomingChange.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -349,7 +348,8 @@ public class PageUpcomingChange extends APINode {
 
     @Override
     public PageUpcomingChange execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -360,10 +360,10 @@ public class PageUpcomingChange extends APINode {
     public ListenableFuture<PageUpcomingChange> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, PageUpcomingChange>() {
-           public PageUpcomingChange apply(String result) {
+        new Function<ResponseWrapper, PageUpcomingChange>() {
+           public PageUpcomingChange apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -484,8 +484,8 @@ public class PageUpcomingChange extends APINode {
     };
 
     @Override
-    public PageUpcomingChange parseResponse(String response) throws APIException {
-      return PageUpcomingChange.parseResponse(response, getContext(), this).head();
+    public PageUpcomingChange parseResponse(String response, String header) throws APIException {
+      return PageUpcomingChange.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -495,7 +495,8 @@ public class PageUpcomingChange extends APINode {
 
     @Override
     public PageUpcomingChange execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -506,10 +507,10 @@ public class PageUpcomingChange extends APINode {
     public ListenableFuture<PageUpcomingChange> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, PageUpcomingChange>() {
-           public PageUpcomingChange apply(String result) {
+        new Function<ResponseWrapper, PageUpcomingChange>() {
+           public PageUpcomingChange apply(ResponseWrapper result) {
              try {
-               return APIRequestUpdate.this.parseResponse(result);
+               return APIRequestUpdate.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -610,8 +611,8 @@ public class PageUpcomingChange extends APINode {
 
   public static APIRequest.ResponseParser<PageUpcomingChange> getParser() {
     return new APIRequest.ResponseParser<PageUpcomingChange>() {
-      public APINodeList<PageUpcomingChange> parseResponse(String response, APIContext context, APIRequest<PageUpcomingChange> request) throws MalformedResponseException {
-        return PageUpcomingChange.parseResponse(response, context, request);
+      public APINodeList<PageUpcomingChange> parseResponse(String response, APIContext context, APIRequest<PageUpcomingChange> request, String header) throws MalformedResponseException {
+        return PageUpcomingChange.parseResponse(response, context, request, header);
       }
     };
   }

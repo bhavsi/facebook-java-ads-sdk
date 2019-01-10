@@ -61,15 +61,17 @@ public class ScreenName extends APINode {
   private String mServiceType = null;
   @SerializedName("value")
   private String mValue = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public ScreenName() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static ScreenName loadJSON(String json, APIContext context) {
+  public static ScreenName loadJSON(String json, APIContext context, String header) {
     ScreenName screenName = getGson().fromJson(json, ScreenName.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -86,11 +88,12 @@ public class ScreenName extends APINode {
     }
     screenName.context = context;
     screenName.rawValue = json;
+    screenName.header = header;
     return screenName;
   }
 
-  public static APINodeList<ScreenName> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<ScreenName> screenNames = new APINodeList<ScreenName>(request, json);
+  public static APINodeList<ScreenName> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<ScreenName> screenNames = new APINodeList<ScreenName>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -101,7 +104,7 @@ public class ScreenName extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          screenNames.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          screenNames.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return screenNames;
       } else if (result.isJsonObject()) {
@@ -126,7 +129,7 @@ public class ScreenName extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              screenNames.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              screenNames.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -137,13 +140,13 @@ public class ScreenName extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  screenNames.add(loadJSON(entry.getValue().toString(), context));
+                  screenNames.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              screenNames.add(loadJSON(obj.toString(), context));
+              screenNames.add(loadJSON(obj.toString(), context, header));
             }
           }
           return screenNames;
@@ -151,7 +154,7 @@ public class ScreenName extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              screenNames.add(loadJSON(entry.getValue().toString(), context));
+              screenNames.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return screenNames;
         } else {
@@ -170,7 +173,7 @@ public class ScreenName extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              screenNames.add(loadJSON(value.toString(), context));
+              screenNames.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -182,7 +185,7 @@ public class ScreenName extends APINode {
 
           // Sixth, check if it's pure JsonObject
           screenNames.clear();
-          screenNames.add(loadJSON(json, context));
+          screenNames.add(loadJSON(json, context, header));
           return screenNames;
         }
       }
@@ -238,6 +241,15 @@ public class ScreenName extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public ScreenName setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -258,6 +270,7 @@ public class ScreenName extends APINode {
     this.mServiceName = instance.mServiceName;
     this.mServiceType = instance.mServiceType;
     this.mValue = instance.mValue;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -265,8 +278,8 @@ public class ScreenName extends APINode {
 
   public static APIRequest.ResponseParser<ScreenName> getParser() {
     return new APIRequest.ResponseParser<ScreenName>() {
-      public APINodeList<ScreenName> parseResponse(String response, APIContext context, APIRequest<ScreenName> request) throws MalformedResponseException {
-        return ScreenName.parseResponse(response, context, request);
+      public APINodeList<ScreenName> parseResponse(String response, APIContext context, APIRequest<ScreenName> request, String header) throws MalformedResponseException {
+        return ScreenName.parseResponse(response, context, request, header);
       }
     };
   }

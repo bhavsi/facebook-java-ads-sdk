@@ -60,9 +60,9 @@ public class OracleTransaction extends APINode {
   @SerializedName("amount")
   private String mAmount = null;
   @SerializedName("amount_due")
-  private Object mAmountDue = null;
+  private CurrencyAmount mAmountDue = null;
   @SerializedName("billed_amount_details")
-  private Object mBilledAmountDetails = null;
+  private BilledAmountDetails mBilledAmountDetails = null;
   @SerializedName("billing_period")
   private String mBillingPeriod = null;
   @SerializedName("currency")
@@ -100,6 +100,7 @@ public class OracleTransaction extends APINode {
 
   public OracleTransaction(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -118,19 +119,17 @@ public class OracleTransaction extends APINode {
   }
 
   public static OracleTransaction fetchById(String id, APIContext context) throws APIException {
-    OracleTransaction oracleTransaction =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return oracleTransaction;
   }
 
   public static ListenableFuture<OracleTransaction> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<OracleTransaction> oracleTransaction =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return oracleTransaction;
   }
 
   public static APINodeList<OracleTransaction> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -143,12 +142,11 @@ public class OracleTransaction extends APINode {
   }
 
   public static ListenableFuture<APINodeList<OracleTransaction>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<OracleTransaction>> oracleTransaction =
+    return
       new APIRequest(context, "", "/", "GET", OracleTransaction.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return oracleTransaction;
   }
 
   private String getPrefixedId() {
@@ -158,7 +156,7 @@ public class OracleTransaction extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static OracleTransaction loadJSON(String json, APIContext context) {
+  public static OracleTransaction loadJSON(String json, APIContext context, String header) {
     OracleTransaction oracleTransaction = getGson().fromJson(json, OracleTransaction.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -175,11 +173,12 @@ public class OracleTransaction extends APINode {
     }
     oracleTransaction.context = context;
     oracleTransaction.rawValue = json;
+    oracleTransaction.header = header;
     return oracleTransaction;
   }
 
-  public static APINodeList<OracleTransaction> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<OracleTransaction> oracleTransactions = new APINodeList<OracleTransaction>(request, json);
+  public static APINodeList<OracleTransaction> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<OracleTransaction> oracleTransactions = new APINodeList<OracleTransaction>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -190,7 +189,7 @@ public class OracleTransaction extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          oracleTransactions.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          oracleTransactions.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return oracleTransactions;
       } else if (result.isJsonObject()) {
@@ -215,7 +214,7 @@ public class OracleTransaction extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              oracleTransactions.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              oracleTransactions.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -226,13 +225,13 @@ public class OracleTransaction extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  oracleTransactions.add(loadJSON(entry.getValue().toString(), context));
+                  oracleTransactions.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              oracleTransactions.add(loadJSON(obj.toString(), context));
+              oracleTransactions.add(loadJSON(obj.toString(), context, header));
             }
           }
           return oracleTransactions;
@@ -240,7 +239,7 @@ public class OracleTransaction extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              oracleTransactions.add(loadJSON(entry.getValue().toString(), context));
+              oracleTransactions.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return oracleTransactions;
         } else {
@@ -259,7 +258,7 @@ public class OracleTransaction extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              oracleTransactions.add(loadJSON(value.toString(), context));
+              oracleTransactions.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -271,7 +270,7 @@ public class OracleTransaction extends APINode {
 
           // Sixth, check if it's pure JsonObject
           oracleTransactions.clear();
-          oracleTransactions.add(loadJSON(json, context));
+          oracleTransactions.add(loadJSON(json, context, header));
           return oracleTransactions;
         }
       }
@@ -299,6 +298,14 @@ public class OracleTransaction extends APINode {
     return getGson().toJson(this);
   }
 
+  public APIRequestGetCampaigns getCampaigns() {
+    return new APIRequestGetCampaigns(this.getPrefixedId().toString(), context);
+  }
+
+  public APIRequestGetData getData() {
+    return new APIRequestGetData(this.getPrefixedId().toString(), context);
+  }
+
   public APIRequestGet get() {
     return new APIRequestGet(this.getPrefixedId().toString(), context);
   }
@@ -312,11 +319,11 @@ public class OracleTransaction extends APINode {
     return mAmount;
   }
 
-  public Object getFieldAmountDue() {
+  public CurrencyAmount getFieldAmountDue() {
     return mAmountDue;
   }
 
-  public Object getFieldBilledAmountDetails() {
+  public BilledAmountDetails getFieldBilledAmountDetails() {
     return mBilledAmountDetails;
   }
 
@@ -374,6 +381,312 @@ public class OracleTransaction extends APINode {
 
 
 
+  public static class APIRequestGetCampaigns extends APIRequest<InvoiceCampaign> {
+
+    APINodeList<InvoiceCampaign> lastResponse = null;
+    @Override
+    public APINodeList<InvoiceCampaign> getLastResponse() {
+      return lastResponse;
+    }
+    public static final String[] PARAMS = {
+    };
+
+    public static final String[] FIELDS = {
+      "ad_account_id",
+      "billed_amount_details",
+      "campaign_id",
+      "campaign_name",
+      "clicks",
+      "conversions",
+      "impressions",
+      "tags",
+      "id",
+    };
+
+    @Override
+    public APINodeList<InvoiceCampaign> parseResponse(String response, String header) throws APIException {
+      return InvoiceCampaign.parseResponse(response, getContext(), this, header);
+    }
+
+    @Override
+    public APINodeList<InvoiceCampaign> execute() throws APIException {
+      return execute(new HashMap<String, Object>());
+    }
+
+    @Override
+    public APINodeList<InvoiceCampaign> execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
+      return lastResponse;
+    }
+
+    public ListenableFuture<APINodeList<InvoiceCampaign>> executeAsync() throws APIException {
+      return executeAsync(new HashMap<String, Object>());
+    };
+
+    public ListenableFuture<APINodeList<InvoiceCampaign>> executeAsync(Map<String, Object> extraParams) throws APIException {
+      return Futures.transform(
+        executeAsyncInternal(extraParams),
+        new Function<ResponseWrapper, APINodeList<InvoiceCampaign>>() {
+           public APINodeList<InvoiceCampaign> apply(ResponseWrapper result) {
+             try {
+               return APIRequestGetCampaigns.this.parseResponse(result.getBody(), result.getHeader());
+             } catch (Exception e) {
+               throw new RuntimeException(e);
+             }
+           }
+         }
+      );
+    };
+
+    public APIRequestGetCampaigns(String nodeId, APIContext context) {
+      super(context, nodeId, "/campaigns", "GET", Arrays.asList(PARAMS));
+    }
+
+    @Override
+    public APIRequestGetCampaigns setParam(String param, Object value) {
+      setParamInternal(param, value);
+      return this;
+    }
+
+    @Override
+    public APIRequestGetCampaigns setParams(Map<String, Object> params) {
+      setParamsInternal(params);
+      return this;
+    }
+
+
+    public APIRequestGetCampaigns requestAllFields () {
+      return this.requestAllFields(true);
+    }
+
+    public APIRequestGetCampaigns requestAllFields (boolean value) {
+      for (String field : FIELDS) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestGetCampaigns requestFields (List<String> fields) {
+      return this.requestFields(fields, true);
+    }
+
+    @Override
+    public APIRequestGetCampaigns requestFields (List<String> fields, boolean value) {
+      for (String field : fields) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestGetCampaigns requestField (String field) {
+      this.requestField(field, true);
+      return this;
+    }
+
+    @Override
+    public APIRequestGetCampaigns requestField (String field, boolean value) {
+      this.requestFieldInternal(field, value);
+      return this;
+    }
+
+    public APIRequestGetCampaigns requestAdAccountIdField () {
+      return this.requestAdAccountIdField(true);
+    }
+    public APIRequestGetCampaigns requestAdAccountIdField (boolean value) {
+      this.requestField("ad_account_id", value);
+      return this;
+    }
+    public APIRequestGetCampaigns requestBilledAmountDetailsField () {
+      return this.requestBilledAmountDetailsField(true);
+    }
+    public APIRequestGetCampaigns requestBilledAmountDetailsField (boolean value) {
+      this.requestField("billed_amount_details", value);
+      return this;
+    }
+    public APIRequestGetCampaigns requestCampaignIdField () {
+      return this.requestCampaignIdField(true);
+    }
+    public APIRequestGetCampaigns requestCampaignIdField (boolean value) {
+      this.requestField("campaign_id", value);
+      return this;
+    }
+    public APIRequestGetCampaigns requestCampaignNameField () {
+      return this.requestCampaignNameField(true);
+    }
+    public APIRequestGetCampaigns requestCampaignNameField (boolean value) {
+      this.requestField("campaign_name", value);
+      return this;
+    }
+    public APIRequestGetCampaigns requestClicksField () {
+      return this.requestClicksField(true);
+    }
+    public APIRequestGetCampaigns requestClicksField (boolean value) {
+      this.requestField("clicks", value);
+      return this;
+    }
+    public APIRequestGetCampaigns requestConversionsField () {
+      return this.requestConversionsField(true);
+    }
+    public APIRequestGetCampaigns requestConversionsField (boolean value) {
+      this.requestField("conversions", value);
+      return this;
+    }
+    public APIRequestGetCampaigns requestImpressionsField () {
+      return this.requestImpressionsField(true);
+    }
+    public APIRequestGetCampaigns requestImpressionsField (boolean value) {
+      this.requestField("impressions", value);
+      return this;
+    }
+    public APIRequestGetCampaigns requestTagsField () {
+      return this.requestTagsField(true);
+    }
+    public APIRequestGetCampaigns requestTagsField (boolean value) {
+      this.requestField("tags", value);
+      return this;
+    }
+    public APIRequestGetCampaigns requestIdField () {
+      return this.requestIdField(true);
+    }
+    public APIRequestGetCampaigns requestIdField (boolean value) {
+      this.requestField("id", value);
+      return this;
+    }
+  }
+
+  public static class APIRequestGetData extends APIRequest<AtlasURL> {
+
+    APINodeList<AtlasURL> lastResponse = null;
+    @Override
+    public APINodeList<AtlasURL> getLastResponse() {
+      return lastResponse;
+    }
+    public static final String[] PARAMS = {
+      "redirect",
+    };
+
+    public static final String[] FIELDS = {
+      "url",
+      "id",
+    };
+
+    @Override
+    public APINodeList<AtlasURL> parseResponse(String response, String header) throws APIException {
+      return AtlasURL.parseResponse(response, getContext(), this, header);
+    }
+
+    @Override
+    public APINodeList<AtlasURL> execute() throws APIException {
+      return execute(new HashMap<String, Object>());
+    }
+
+    @Override
+    public APINodeList<AtlasURL> execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
+      return lastResponse;
+    }
+
+    public ListenableFuture<APINodeList<AtlasURL>> executeAsync() throws APIException {
+      return executeAsync(new HashMap<String, Object>());
+    };
+
+    public ListenableFuture<APINodeList<AtlasURL>> executeAsync(Map<String, Object> extraParams) throws APIException {
+      return Futures.transform(
+        executeAsyncInternal(extraParams),
+        new Function<ResponseWrapper, APINodeList<AtlasURL>>() {
+           public APINodeList<AtlasURL> apply(ResponseWrapper result) {
+             try {
+               return APIRequestGetData.this.parseResponse(result.getBody(), result.getHeader());
+             } catch (Exception e) {
+               throw new RuntimeException(e);
+             }
+           }
+         }
+      );
+    };
+
+    public APIRequestGetData(String nodeId, APIContext context) {
+      super(context, nodeId, "/data", "GET", Arrays.asList(PARAMS));
+    }
+
+    @Override
+    public APIRequestGetData setParam(String param, Object value) {
+      setParamInternal(param, value);
+      return this;
+    }
+
+    @Override
+    public APIRequestGetData setParams(Map<String, Object> params) {
+      setParamsInternal(params);
+      return this;
+    }
+
+
+    public APIRequestGetData setRedirect (Boolean redirect) {
+      this.setParam("redirect", redirect);
+      return this;
+    }
+    public APIRequestGetData setRedirect (String redirect) {
+      this.setParam("redirect", redirect);
+      return this;
+    }
+
+    public APIRequestGetData requestAllFields () {
+      return this.requestAllFields(true);
+    }
+
+    public APIRequestGetData requestAllFields (boolean value) {
+      for (String field : FIELDS) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestGetData requestFields (List<String> fields) {
+      return this.requestFields(fields, true);
+    }
+
+    @Override
+    public APIRequestGetData requestFields (List<String> fields, boolean value) {
+      for (String field : fields) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestGetData requestField (String field) {
+      this.requestField(field, true);
+      return this;
+    }
+
+    @Override
+    public APIRequestGetData requestField (String field, boolean value) {
+      this.requestFieldInternal(field, value);
+      return this;
+    }
+
+    public APIRequestGetData requestUrlField () {
+      return this.requestUrlField(true);
+    }
+    public APIRequestGetData requestUrlField (boolean value) {
+      this.requestField("url", value);
+      return this;
+    }
+    public APIRequestGetData requestIdField () {
+      return this.requestIdField(true);
+    }
+    public APIRequestGetData requestIdField (boolean value) {
+      this.requestField("id", value);
+      return this;
+    }
+  }
+
   public static class APIRequestGet extends APIRequest<OracleTransaction> {
 
     OracleTransaction lastResponse = null;
@@ -405,8 +718,8 @@ public class OracleTransaction extends APINode {
     };
 
     @Override
-    public OracleTransaction parseResponse(String response) throws APIException {
-      return OracleTransaction.parseResponse(response, getContext(), this).head();
+    public OracleTransaction parseResponse(String response, String header) throws APIException {
+      return OracleTransaction.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -416,7 +729,8 @@ public class OracleTransaction extends APINode {
 
     @Override
     public OracleTransaction execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -427,10 +741,10 @@ public class OracleTransaction extends APINode {
     public ListenableFuture<OracleTransaction> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, OracleTransaction>() {
-           public OracleTransaction apply(String result) {
+        new Function<ResponseWrapper, OracleTransaction>() {
+           public OracleTransaction apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -652,8 +966,8 @@ public class OracleTransaction extends APINode {
 
   public static APIRequest.ResponseParser<OracleTransaction> getParser() {
     return new APIRequest.ResponseParser<OracleTransaction>() {
-      public APINodeList<OracleTransaction> parseResponse(String response, APIContext context, APIRequest<OracleTransaction> request) throws MalformedResponseException {
-        return OracleTransaction.parseResponse(response, context, request);
+      public APINodeList<OracleTransaction> parseResponse(String response, APIContext context, APIRequest<OracleTransaction> request, String header) throws MalformedResponseException {
+        return OracleTransaction.parseResponse(response, context, request, header);
       }
     };
   }

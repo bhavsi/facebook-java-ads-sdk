@@ -81,8 +81,10 @@ public class Lead extends APINode {
   private Boolean mIsOrganic = null;
   @SerializedName("partner_name")
   private String mPartnerName = null;
+  @SerializedName("platform")
+  private String mPlatform = null;
   @SerializedName("post")
-  private Object mPost = null;
+  private Link mPost = null;
   @SerializedName("retailer_item_id")
   private String mRetailerItemId = null;
   protected static Gson gson = null;
@@ -96,6 +98,7 @@ public class Lead extends APINode {
 
   public Lead(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -114,19 +117,17 @@ public class Lead extends APINode {
   }
 
   public static Lead fetchById(String id, APIContext context) throws APIException {
-    Lead lead =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return lead;
   }
 
   public static ListenableFuture<Lead> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<Lead> lead =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return lead;
   }
 
   public static APINodeList<Lead> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -139,12 +140,11 @@ public class Lead extends APINode {
   }
 
   public static ListenableFuture<APINodeList<Lead>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<Lead>> lead =
+    return
       new APIRequest(context, "", "/", "GET", Lead.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return lead;
   }
 
   private String getPrefixedId() {
@@ -154,7 +154,7 @@ public class Lead extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static Lead loadJSON(String json, APIContext context) {
+  public static Lead loadJSON(String json, APIContext context, String header) {
     Lead lead = getGson().fromJson(json, Lead.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -171,11 +171,12 @@ public class Lead extends APINode {
     }
     lead.context = context;
     lead.rawValue = json;
+    lead.header = header;
     return lead;
   }
 
-  public static APINodeList<Lead> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<Lead> leads = new APINodeList<Lead>(request, json);
+  public static APINodeList<Lead> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<Lead> leads = new APINodeList<Lead>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -186,7 +187,7 @@ public class Lead extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          leads.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          leads.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return leads;
       } else if (result.isJsonObject()) {
@@ -211,7 +212,7 @@ public class Lead extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              leads.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              leads.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -222,13 +223,13 @@ public class Lead extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  leads.add(loadJSON(entry.getValue().toString(), context));
+                  leads.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              leads.add(loadJSON(obj.toString(), context));
+              leads.add(loadJSON(obj.toString(), context, header));
             }
           }
           return leads;
@@ -236,7 +237,7 @@ public class Lead extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              leads.add(loadJSON(entry.getValue().toString(), context));
+              leads.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return leads;
         } else {
@@ -255,7 +256,7 @@ public class Lead extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              leads.add(loadJSON(value.toString(), context));
+              leads.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -267,7 +268,7 @@ public class Lead extends APINode {
 
           // Sixth, check if it's pure JsonObject
           leads.clear();
-          leads.add(loadJSON(json, context));
+          leads.add(loadJSON(json, context, header));
           return leads;
         }
       }
@@ -356,7 +357,14 @@ public class Lead extends APINode {
     return mPartnerName;
   }
 
-  public Object getFieldPost() {
+  public String getFieldPlatform() {
+    return mPlatform;
+  }
+
+  public Link getFieldPost() {
+    if (mPost != null) {
+      mPost.context = getContext();
+    }
     return mPost;
   }
 
@@ -380,8 +388,8 @@ public class Lead extends APINode {
     };
 
     @Override
-    public APINode parseResponse(String response) throws APIException {
-      return APINode.parseResponse(response, getContext(), this).head();
+    public APINode parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -391,7 +399,8 @@ public class Lead extends APINode {
 
     @Override
     public APINode execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -402,10 +411,10 @@ public class Lead extends APINode {
     public ListenableFuture<APINode> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINode>() {
-           public APINode apply(String result) {
+        new Function<ResponseWrapper, APINode>() {
+           public APINode apply(ResponseWrapper result) {
              try {
-               return APIRequestDelete.this.parseResponse(result);
+               return APIRequestDelete.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -493,13 +502,14 @@ public class Lead extends APINode {
       "id",
       "is_organic",
       "partner_name",
+      "platform",
       "post",
       "retailer_item_id",
     };
 
     @Override
-    public Lead parseResponse(String response) throws APIException {
-      return Lead.parseResponse(response, getContext(), this).head();
+    public Lead parseResponse(String response, String header) throws APIException {
+      return Lead.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -509,7 +519,8 @@ public class Lead extends APINode {
 
     @Override
     public Lead execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -520,10 +531,10 @@ public class Lead extends APINode {
     public ListenableFuture<Lead> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, Lead>() {
-           public Lead apply(String result) {
+        new Function<ResponseWrapper, Lead>() {
+           public Lead apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -676,6 +687,13 @@ public class Lead extends APINode {
       this.requestField("partner_name", value);
       return this;
     }
+    public APIRequestGet requestPlatformField () {
+      return this.requestPlatformField(true);
+    }
+    public APIRequestGet requestPlatformField (boolean value) {
+      this.requestField("platform", value);
+      return this;
+    }
     public APIRequestGet requestPostField () {
       return this.requestPostField(true);
     }
@@ -720,6 +738,7 @@ public class Lead extends APINode {
     this.mId = instance.mId;
     this.mIsOrganic = instance.mIsOrganic;
     this.mPartnerName = instance.mPartnerName;
+    this.mPlatform = instance.mPlatform;
     this.mPost = instance.mPost;
     this.mRetailerItemId = instance.mRetailerItemId;
     this.context = instance.context;
@@ -729,8 +748,8 @@ public class Lead extends APINode {
 
   public static APIRequest.ResponseParser<Lead> getParser() {
     return new APIRequest.ResponseParser<Lead>() {
-      public APINodeList<Lead> parseResponse(String response, APIContext context, APIRequest<Lead> request) throws MalformedResponseException {
-        return Lead.parseResponse(response, context, request);
+      public APINodeList<Lead> parseResponse(String response, APIContext context, APIRequest<Lead> request, String header) throws MalformedResponseException {
+        return Lead.parseResponse(response, context, request, header);
       }
     };
   }

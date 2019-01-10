@@ -80,6 +80,7 @@ public class PageSavedFilter extends APINode {
 
   public PageSavedFilter(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -98,19 +99,17 @@ public class PageSavedFilter extends APINode {
   }
 
   public static PageSavedFilter fetchById(String id, APIContext context) throws APIException {
-    PageSavedFilter pageSavedFilter =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return pageSavedFilter;
   }
 
   public static ListenableFuture<PageSavedFilter> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<PageSavedFilter> pageSavedFilter =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return pageSavedFilter;
   }
 
   public static APINodeList<PageSavedFilter> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -123,12 +122,11 @@ public class PageSavedFilter extends APINode {
   }
 
   public static ListenableFuture<APINodeList<PageSavedFilter>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<PageSavedFilter>> pageSavedFilter =
+    return
       new APIRequest(context, "", "/", "GET", PageSavedFilter.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return pageSavedFilter;
   }
 
   private String getPrefixedId() {
@@ -138,7 +136,7 @@ public class PageSavedFilter extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static PageSavedFilter loadJSON(String json, APIContext context) {
+  public static PageSavedFilter loadJSON(String json, APIContext context, String header) {
     PageSavedFilter pageSavedFilter = getGson().fromJson(json, PageSavedFilter.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -155,11 +153,12 @@ public class PageSavedFilter extends APINode {
     }
     pageSavedFilter.context = context;
     pageSavedFilter.rawValue = json;
+    pageSavedFilter.header = header;
     return pageSavedFilter;
   }
 
-  public static APINodeList<PageSavedFilter> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<PageSavedFilter> pageSavedFilters = new APINodeList<PageSavedFilter>(request, json);
+  public static APINodeList<PageSavedFilter> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<PageSavedFilter> pageSavedFilters = new APINodeList<PageSavedFilter>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -170,7 +169,7 @@ public class PageSavedFilter extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          pageSavedFilters.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          pageSavedFilters.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return pageSavedFilters;
       } else if (result.isJsonObject()) {
@@ -195,7 +194,7 @@ public class PageSavedFilter extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              pageSavedFilters.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              pageSavedFilters.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -206,13 +205,13 @@ public class PageSavedFilter extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  pageSavedFilters.add(loadJSON(entry.getValue().toString(), context));
+                  pageSavedFilters.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              pageSavedFilters.add(loadJSON(obj.toString(), context));
+              pageSavedFilters.add(loadJSON(obj.toString(), context, header));
             }
           }
           return pageSavedFilters;
@@ -220,7 +219,7 @@ public class PageSavedFilter extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              pageSavedFilters.add(loadJSON(entry.getValue().toString(), context));
+              pageSavedFilters.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return pageSavedFilters;
         } else {
@@ -239,7 +238,7 @@ public class PageSavedFilter extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              pageSavedFilters.add(loadJSON(value.toString(), context));
+              pageSavedFilters.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -251,7 +250,7 @@ public class PageSavedFilter extends APINode {
 
           // Sixth, check if it's pure JsonObject
           pageSavedFilters.clear();
-          pageSavedFilters.add(loadJSON(json, context));
+          pageSavedFilters.add(loadJSON(json, context, header));
           return pageSavedFilters;
         }
       }
@@ -277,6 +276,10 @@ public class PageSavedFilter extends APINode {
   @Override
   public String toString() {
     return getGson().toJson(this);
+  }
+
+  public APIRequestDelete delete() {
+    return new APIRequestDelete(this.getPrefixedId().toString(), context);
   }
 
   public APIRequestGet get() {
@@ -314,6 +317,110 @@ public class PageSavedFilter extends APINode {
 
 
 
+  public static class APIRequestDelete extends APIRequest<APINode> {
+
+    APINode lastResponse = null;
+    @Override
+    public APINode getLastResponse() {
+      return lastResponse;
+    }
+    public static final String[] PARAMS = {
+    };
+
+    public static final String[] FIELDS = {
+    };
+
+    @Override
+    public APINode parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header).head();
+    }
+
+    @Override
+    public APINode execute() throws APIException {
+      return execute(new HashMap<String, Object>());
+    }
+
+    @Override
+    public APINode execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
+      return lastResponse;
+    }
+
+    public ListenableFuture<APINode> executeAsync() throws APIException {
+      return executeAsync(new HashMap<String, Object>());
+    };
+
+    public ListenableFuture<APINode> executeAsync(Map<String, Object> extraParams) throws APIException {
+      return Futures.transform(
+        executeAsyncInternal(extraParams),
+        new Function<ResponseWrapper, APINode>() {
+           public APINode apply(ResponseWrapper result) {
+             try {
+               return APIRequestDelete.this.parseResponse(result.getBody(), result.getHeader());
+             } catch (Exception e) {
+               throw new RuntimeException(e);
+             }
+           }
+         }
+      );
+    };
+
+    public APIRequestDelete(String nodeId, APIContext context) {
+      super(context, nodeId, "/", "DELETE", Arrays.asList(PARAMS));
+    }
+
+    @Override
+    public APIRequestDelete setParam(String param, Object value) {
+      setParamInternal(param, value);
+      return this;
+    }
+
+    @Override
+    public APIRequestDelete setParams(Map<String, Object> params) {
+      setParamsInternal(params);
+      return this;
+    }
+
+
+    public APIRequestDelete requestAllFields () {
+      return this.requestAllFields(true);
+    }
+
+    public APIRequestDelete requestAllFields (boolean value) {
+      for (String field : FIELDS) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestDelete requestFields (List<String> fields) {
+      return this.requestFields(fields, true);
+    }
+
+    @Override
+    public APIRequestDelete requestFields (List<String> fields, boolean value) {
+      for (String field : fields) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestDelete requestField (String field) {
+      this.requestField(field, true);
+      return this;
+    }
+
+    @Override
+    public APIRequestDelete requestField (String field, boolean value) {
+      this.requestFieldInternal(field, value);
+      return this;
+    }
+
+  }
+
   public static class APIRequestGet extends APIRequest<PageSavedFilter> {
 
     PageSavedFilter lastResponse = null;
@@ -335,8 +442,8 @@ public class PageSavedFilter extends APINode {
     };
 
     @Override
-    public PageSavedFilter parseResponse(String response) throws APIException {
-      return PageSavedFilter.parseResponse(response, getContext(), this).head();
+    public PageSavedFilter parseResponse(String response, String header) throws APIException {
+      return PageSavedFilter.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -346,7 +453,8 @@ public class PageSavedFilter extends APINode {
 
     @Override
     public PageSavedFilter execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -357,10 +465,10 @@ public class PageSavedFilter extends APINode {
     public ListenableFuture<PageSavedFilter> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, PageSavedFilter>() {
-           public PageSavedFilter apply(String result) {
+        new Function<ResponseWrapper, PageSavedFilter>() {
+           public PageSavedFilter apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -474,10 +582,8 @@ public class PageSavedFilter extends APINode {
   }
 
   public static enum EnumSection {
-      @SerializedName("AUDIENCE_ALERTS")
-      VALUE_AUDIENCE_ALERTS("AUDIENCE_ALERTS"),
-      @SerializedName("CAMPAIGN_CENTER")
-      VALUE_CAMPAIGN_CENTER("CAMPAIGN_CENTER"),
+      @SerializedName("CANDIDATE_VIDEOS")
+      VALUE_CANDIDATE_VIDEOS("CANDIDATE_VIDEOS"),
       @SerializedName("CHEX_PENDING_ORDERS")
       VALUE_CHEX_PENDING_ORDERS("CHEX_PENDING_ORDERS"),
       @SerializedName("CHEX_COMPLETED_ORDERS")
@@ -492,8 +598,6 @@ public class PageSavedFilter extends APINode {
       VALUE_COMMERCE_PENDING_ORDERS("COMMERCE_PENDING_ORDERS"),
       @SerializedName("COMMERCE_PAST_ORDERS")
       VALUE_COMMERCE_PAST_ORDERS("COMMERCE_PAST_ORDERS"),
-      @SerializedName("COMMERCE_DISCOUNT_CODES")
-      VALUE_COMMERCE_DISCOUNT_CODES("COMMERCE_DISCOUNT_CODES"),
       @SerializedName("COMMERCE_MERCHANT_SETTINGS")
       VALUE_COMMERCE_MERCHANT_SETTINGS("COMMERCE_MERCHANT_SETTINGS"),
       @SerializedName("COMMERCE_SHOP_LINK")
@@ -536,6 +640,10 @@ public class PageSavedFilter extends APINode {
       VALUE_LEAD_ADS_CRM_SETUP("LEAD_ADS_CRM_SETUP"),
       @SerializedName("LEAD_ADS_CUSTOM_CRM_SETUP")
       VALUE_LEAD_ADS_CUSTOM_CRM_SETUP("LEAD_ADS_CUSTOM_CRM_SETUP"),
+      @SerializedName("STORY_ARCHIVE")
+      VALUE_STORY_ARCHIVE("STORY_ARCHIVE"),
+      @SerializedName("POST_IDEAS")
+      VALUE_POST_IDEAS("POST_IDEAS"),
       @SerializedName("PUBLISHED_POSTS")
       VALUE_PUBLISHED_POSTS("PUBLISHED_POSTS"),
       @SerializedName("SCHEDULED_POSTS")
@@ -556,6 +664,12 @@ public class PageSavedFilter extends APINode {
       VALUE_PLAYLISTS("PLAYLISTS"),
       @SerializedName("PLAYLIST_DETAILS")
       VALUE_PLAYLIST_DETAILS("PLAYLIST_DETAILS"),
+      @SerializedName("MANUAL_CLAIMS")
+      VALUE_MANUAL_CLAIMS("MANUAL_CLAIMS"),
+      @SerializedName("MANUAL_CLAIM_FACEBOOK_VIDEOS")
+      VALUE_MANUAL_CLAIM_FACEBOOK_VIDEOS("MANUAL_CLAIM_FACEBOOK_VIDEOS"),
+      @SerializedName("MANUAL_CLAIM_INSTAGRAM_VIDEOS")
+      VALUE_MANUAL_CLAIM_INSTAGRAM_VIDEOS("MANUAL_CLAIM_INSTAGRAM_VIDEOS"),
       @SerializedName("POSTS_CONFIG")
       VALUE_POSTS_CONFIG("POSTS_CONFIG"),
       @SerializedName("SEASONS")
@@ -612,12 +726,6 @@ public class PageSavedFilter extends APINode {
       VALUE_PUBLISHED_PROFILE_PICTURE_FRAMES("PUBLISHED_PROFILE_PICTURE_FRAMES"),
       @SerializedName("PENDING_PROFILE_PICTURE_FRAMES")
       VALUE_PENDING_PROFILE_PICTURE_FRAMES("PENDING_PROFILE_PICTURE_FRAMES"),
-      @SerializedName("TAROT_COMPOSER")
-      VALUE_TAROT_COMPOSER("TAROT_COMPOSER"),
-      @SerializedName("DRAFT_EDITIONS")
-      VALUE_DRAFT_EDITIONS("DRAFT_EDITIONS"),
-      @SerializedName("PUBLISHED_EDITIONS")
-      VALUE_PUBLISHED_EDITIONS("PUBLISHED_EDITIONS"),
       @SerializedName("PUBLISHED_EVENTS")
       VALUE_PUBLISHED_EVENTS("PUBLISHED_EVENTS"),
       @SerializedName("DRAFT_EVENTS")
@@ -630,8 +738,6 @@ public class PageSavedFilter extends APINode {
       VALUE_TOURS("TOURS"),
       @SerializedName("POLLS_COMPOSER")
       VALUE_POLLS_COMPOSER("POLLS_COMPOSER"),
-      @SerializedName("BRAND_ASSET_LIBRARY")
-      VALUE_BRAND_ASSET_LIBRARY("BRAND_ASSET_LIBRARY"),
       @SerializedName("JOB_APPLICATIONS")
       VALUE_JOB_APPLICATIONS("JOB_APPLICATIONS"),
       @SerializedName("SUBSCRIPTIONS")
@@ -642,12 +748,16 @@ public class PageSavedFilter extends APINode {
       VALUE_NEWS_SUBSCRIPTIONS_PUBLISHER_ASSET_MANAGEMENT("NEWS_SUBSCRIPTIONS_PUBLISHER_ASSET_MANAGEMENT"),
       @SerializedName("NEWS_SUBSCRIPTIONS_PUBLISHER_OFFER_MANAGEMENT")
       VALUE_NEWS_SUBSCRIPTIONS_PUBLISHER_OFFER_MANAGEMENT("NEWS_SUBSCRIPTIONS_PUBLISHER_OFFER_MANAGEMENT"),
+      @SerializedName("NEWS_SUBSCRIPTIONS_PUBLISHER_CONFIG")
+      VALUE_NEWS_SUBSCRIPTIONS_PUBLISHER_CONFIG("NEWS_SUBSCRIPTIONS_PUBLISHER_CONFIG"),
+      @SerializedName("NEWS_SUBSCRIPTIONS_PUBLISHER_INSIGHTS")
+      VALUE_NEWS_SUBSCRIPTIONS_PUBLISHER_INSIGHTS("NEWS_SUBSCRIPTIONS_PUBLISHER_INSIGHTS"),
+      @SerializedName("NEWS_SUBSCRIPTIONS_PUBLISHER_TEST_USERS")
+      VALUE_NEWS_SUBSCRIPTIONS_PUBLISHER_TEST_USERS("NEWS_SUBSCRIPTIONS_PUBLISHER_TEST_USERS"),
       @SerializedName("QR_CODE")
       VALUE_QR_CODE("QR_CODE"),
       @SerializedName("ORGANIC_PIXEL")
       VALUE_ORGANIC_PIXEL("ORGANIC_PIXEL"),
-      @SerializedName("CREDIBILITY_INDICATORS")
-      VALUE_CREDIBILITY_INDICATORS("CREDIBILITY_INDICATORS"),
       @SerializedName("ATTRIBUTIONS")
       VALUE_ATTRIBUTIONS("ATTRIBUTIONS"),
       @SerializedName("BROADCASTED_MESSAGES")
@@ -658,6 +768,8 @@ public class PageSavedFilter extends APINode {
       VALUE_BRANDED_CONTENT_CREATOR("BRANDED_CONTENT_CREATOR"),
       @SerializedName("SOUNDS_COLLECTION")
       VALUE_SOUNDS_COLLECTION("SOUNDS_COLLECTION"),
+      @SerializedName("CREATOR_STUDIO")
+      VALUE_CREATOR_STUDIO("CREATOR_STUDIO"),
       @SerializedName("CONTENT_TESTS")
       VALUE_CONTENT_TESTS("CONTENT_TESTS"),
       @SerializedName("GEM_PRODUCER_DASHBOARD")
@@ -672,6 +784,30 @@ public class PageSavedFilter extends APINode {
       VALUE_REGISTRATIONS("REGISTRATIONS"),
       @SerializedName("IA_REGIWALL_SETTINGS")
       VALUE_IA_REGIWALL_SETTINGS("IA_REGIWALL_SETTINGS"),
+      @SerializedName("CREATOR_STUDIO_TRACKED")
+      VALUE_CREATOR_STUDIO_TRACKED("CREATOR_STUDIO_TRACKED"),
+      @SerializedName("CREATOR_STUDIO_BLOCKED")
+      VALUE_CREATOR_STUDIO_BLOCKED("CREATOR_STUDIO_BLOCKED"),
+      @SerializedName("CREATOR_STUDIO_TAKEDOWNS")
+      VALUE_CREATOR_STUDIO_TAKEDOWNS("CREATOR_STUDIO_TAKEDOWNS"),
+      @SerializedName("CREATOR_STUDIO_DISPUTES")
+      VALUE_CREATOR_STUDIO_DISPUTES("CREATOR_STUDIO_DISPUTES"),
+      @SerializedName("CREATOR_STUDIO_ALL_REFERENCE_FILES")
+      VALUE_CREATOR_STUDIO_ALL_REFERENCE_FILES("CREATOR_STUDIO_ALL_REFERENCE_FILES"),
+      @SerializedName("CREATOR_STUDIO_REFERENCE_CONFLICTS")
+      VALUE_CREATOR_STUDIO_REFERENCE_CONFLICTS("CREATOR_STUDIO_REFERENCE_CONFLICTS"),
+      @SerializedName("CREATOR_STUDIO_REFERENCE_RESOLUTIONS")
+      VALUE_CREATOR_STUDIO_REFERENCE_RESOLUTIONS("CREATOR_STUDIO_REFERENCE_RESOLUTIONS"),
+      @SerializedName("CREATOR_STUDIO_REFERENCE_POSSIBLE_CONFLICTS")
+      VALUE_CREATOR_STUDIO_REFERENCE_POSSIBLE_CONFLICTS("CREATOR_STUDIO_REFERENCE_POSSIBLE_CONFLICTS"),
+      @SerializedName("CREATOR_STUDIO_PUBLISHED_TRACKED")
+      VALUE_CREATOR_STUDIO_PUBLISHED_TRACKED("CREATOR_STUDIO_PUBLISHED_TRACKED"),
+      @SerializedName("CREATOR_STUDIO_PUBLISHED_BLOCKED")
+      VALUE_CREATOR_STUDIO_PUBLISHED_BLOCKED("CREATOR_STUDIO_PUBLISHED_BLOCKED"),
+      @SerializedName("CREATOR_STUDIO_PUBLISHED_DISPUTES")
+      VALUE_CREATOR_STUDIO_PUBLISHED_DISPUTES("CREATOR_STUDIO_PUBLISHED_DISPUTES"),
+      @SerializedName("CREATOR_STUDIO_PUBLISHED_ALL_REFERENCE_FILES")
+      VALUE_CREATOR_STUDIO_PUBLISHED_ALL_REFERENCE_FILES("CREATOR_STUDIO_PUBLISHED_ALL_REFERENCE_FILES"),
       NULL(null);
 
       private String value;
@@ -715,8 +851,8 @@ public class PageSavedFilter extends APINode {
 
   public static APIRequest.ResponseParser<PageSavedFilter> getParser() {
     return new APIRequest.ResponseParser<PageSavedFilter>() {
-      public APINodeList<PageSavedFilter> parseResponse(String response, APIContext context, APIRequest<PageSavedFilter> request) throws MalformedResponseException {
-        return PageSavedFilter.parseResponse(response, context, request);
+      public APINodeList<PageSavedFilter> parseResponse(String response, APIContext context, APIRequest<PageSavedFilter> request, String header) throws MalformedResponseException {
+        return PageSavedFilter.parseResponse(response, context, request, header);
       }
     };
   }

@@ -63,15 +63,17 @@ public class DayPart extends APINode {
   private Long mStartMinute = null;
   @SerializedName("timezone_type")
   private String mTimezoneType = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public DayPart() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static DayPart loadJSON(String json, APIContext context) {
+  public static DayPart loadJSON(String json, APIContext context, String header) {
     DayPart dayPart = getGson().fromJson(json, DayPart.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -88,11 +90,12 @@ public class DayPart extends APINode {
     }
     dayPart.context = context;
     dayPart.rawValue = json;
+    dayPart.header = header;
     return dayPart;
   }
 
-  public static APINodeList<DayPart> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<DayPart> dayParts = new APINodeList<DayPart>(request, json);
+  public static APINodeList<DayPart> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<DayPart> dayParts = new APINodeList<DayPart>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -103,7 +106,7 @@ public class DayPart extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          dayParts.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          dayParts.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return dayParts;
       } else if (result.isJsonObject()) {
@@ -128,7 +131,7 @@ public class DayPart extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              dayParts.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              dayParts.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -139,13 +142,13 @@ public class DayPart extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  dayParts.add(loadJSON(entry.getValue().toString(), context));
+                  dayParts.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              dayParts.add(loadJSON(obj.toString(), context));
+              dayParts.add(loadJSON(obj.toString(), context, header));
             }
           }
           return dayParts;
@@ -153,7 +156,7 @@ public class DayPart extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              dayParts.add(loadJSON(entry.getValue().toString(), context));
+              dayParts.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return dayParts;
         } else {
@@ -172,7 +175,7 @@ public class DayPart extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              dayParts.add(loadJSON(value.toString(), context));
+              dayParts.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -184,7 +187,7 @@ public class DayPart extends APINode {
 
           // Sixth, check if it's pure JsonObject
           dayParts.clear();
-          dayParts.add(loadJSON(json, context));
+          dayParts.add(loadJSON(json, context, header));
           return dayParts;
         }
       }
@@ -249,6 +252,15 @@ public class DayPart extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public DayPart setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -270,6 +282,7 @@ public class DayPart extends APINode {
     this.mEndMinute = instance.mEndMinute;
     this.mStartMinute = instance.mStartMinute;
     this.mTimezoneType = instance.mTimezoneType;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -277,8 +290,8 @@ public class DayPart extends APINode {
 
   public static APIRequest.ResponseParser<DayPart> getParser() {
     return new APIRequest.ResponseParser<DayPart>() {
-      public APINodeList<DayPart> parseResponse(String response, APIContext context, APIRequest<DayPart> request) throws MalformedResponseException {
-        return DayPart.parseResponse(response, context, request);
+      public APINodeList<DayPart> parseResponse(String response, APIContext context, APIRequest<DayPart> request, String header) throws MalformedResponseException {
+        return DayPart.parseResponse(response, context, request, header);
       }
     };
   }

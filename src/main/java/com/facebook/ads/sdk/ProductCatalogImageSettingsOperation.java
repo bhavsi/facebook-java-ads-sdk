@@ -57,15 +57,17 @@ import com.facebook.ads.sdk.APIException.MalformedResponseException;
 public class ProductCatalogImageSettingsOperation extends APINode {
   @SerializedName("transformation_type")
   private String mTransformationType = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public ProductCatalogImageSettingsOperation() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static ProductCatalogImageSettingsOperation loadJSON(String json, APIContext context) {
+  public static ProductCatalogImageSettingsOperation loadJSON(String json, APIContext context, String header) {
     ProductCatalogImageSettingsOperation productCatalogImageSettingsOperation = getGson().fromJson(json, ProductCatalogImageSettingsOperation.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -82,11 +84,12 @@ public class ProductCatalogImageSettingsOperation extends APINode {
     }
     productCatalogImageSettingsOperation.context = context;
     productCatalogImageSettingsOperation.rawValue = json;
+    productCatalogImageSettingsOperation.header = header;
     return productCatalogImageSettingsOperation;
   }
 
-  public static APINodeList<ProductCatalogImageSettingsOperation> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<ProductCatalogImageSettingsOperation> productCatalogImageSettingsOperations = new APINodeList<ProductCatalogImageSettingsOperation>(request, json);
+  public static APINodeList<ProductCatalogImageSettingsOperation> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<ProductCatalogImageSettingsOperation> productCatalogImageSettingsOperations = new APINodeList<ProductCatalogImageSettingsOperation>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -97,7 +100,7 @@ public class ProductCatalogImageSettingsOperation extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          productCatalogImageSettingsOperations.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          productCatalogImageSettingsOperations.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return productCatalogImageSettingsOperations;
       } else if (result.isJsonObject()) {
@@ -122,7 +125,7 @@ public class ProductCatalogImageSettingsOperation extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              productCatalogImageSettingsOperations.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              productCatalogImageSettingsOperations.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -133,13 +136,13 @@ public class ProductCatalogImageSettingsOperation extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  productCatalogImageSettingsOperations.add(loadJSON(entry.getValue().toString(), context));
+                  productCatalogImageSettingsOperations.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              productCatalogImageSettingsOperations.add(loadJSON(obj.toString(), context));
+              productCatalogImageSettingsOperations.add(loadJSON(obj.toString(), context, header));
             }
           }
           return productCatalogImageSettingsOperations;
@@ -147,7 +150,7 @@ public class ProductCatalogImageSettingsOperation extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              productCatalogImageSettingsOperations.add(loadJSON(entry.getValue().toString(), context));
+              productCatalogImageSettingsOperations.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return productCatalogImageSettingsOperations;
         } else {
@@ -166,7 +169,7 @@ public class ProductCatalogImageSettingsOperation extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              productCatalogImageSettingsOperations.add(loadJSON(value.toString(), context));
+              productCatalogImageSettingsOperations.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -178,7 +181,7 @@ public class ProductCatalogImageSettingsOperation extends APINode {
 
           // Sixth, check if it's pure JsonObject
           productCatalogImageSettingsOperations.clear();
-          productCatalogImageSettingsOperations.add(loadJSON(json, context));
+          productCatalogImageSettingsOperations.add(loadJSON(json, context, header));
           return productCatalogImageSettingsOperations;
         }
       }
@@ -216,6 +219,15 @@ public class ProductCatalogImageSettingsOperation extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public ProductCatalogImageSettingsOperation setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -234,6 +246,7 @@ public class ProductCatalogImageSettingsOperation extends APINode {
 
   public ProductCatalogImageSettingsOperation copyFrom(ProductCatalogImageSettingsOperation instance) {
     this.mTransformationType = instance.mTransformationType;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -241,8 +254,8 @@ public class ProductCatalogImageSettingsOperation extends APINode {
 
   public static APIRequest.ResponseParser<ProductCatalogImageSettingsOperation> getParser() {
     return new APIRequest.ResponseParser<ProductCatalogImageSettingsOperation>() {
-      public APINodeList<ProductCatalogImageSettingsOperation> parseResponse(String response, APIContext context, APIRequest<ProductCatalogImageSettingsOperation> request) throws MalformedResponseException {
-        return ProductCatalogImageSettingsOperation.parseResponse(response, context, request);
+      public APINodeList<ProductCatalogImageSettingsOperation> parseResponse(String response, APIContext context, APIRequest<ProductCatalogImageSettingsOperation> request, String header) throws MalformedResponseException {
+        return ProductCatalogImageSettingsOperation.parseResponse(response, context, request, header);
       }
     };
   }

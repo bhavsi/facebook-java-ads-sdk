@@ -77,15 +77,17 @@ public class ProductEventStat extends APINode {
   private Long mUniqueMatchedContentIds = null;
   @SerializedName("unique_unmatched_content_ids")
   private Long mUniqueUnmatchedContentIds = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public ProductEventStat() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static ProductEventStat loadJSON(String json, APIContext context) {
+  public static ProductEventStat loadJSON(String json, APIContext context, String header) {
     ProductEventStat productEventStat = getGson().fromJson(json, ProductEventStat.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -102,11 +104,12 @@ public class ProductEventStat extends APINode {
     }
     productEventStat.context = context;
     productEventStat.rawValue = json;
+    productEventStat.header = header;
     return productEventStat;
   }
 
-  public static APINodeList<ProductEventStat> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<ProductEventStat> productEventStats = new APINodeList<ProductEventStat>(request, json);
+  public static APINodeList<ProductEventStat> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<ProductEventStat> productEventStats = new APINodeList<ProductEventStat>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -117,7 +120,7 @@ public class ProductEventStat extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          productEventStats.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          productEventStats.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return productEventStats;
       } else if (result.isJsonObject()) {
@@ -142,7 +145,7 @@ public class ProductEventStat extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              productEventStats.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              productEventStats.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -153,13 +156,13 @@ public class ProductEventStat extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  productEventStats.add(loadJSON(entry.getValue().toString(), context));
+                  productEventStats.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              productEventStats.add(loadJSON(obj.toString(), context));
+              productEventStats.add(loadJSON(obj.toString(), context, header));
             }
           }
           return productEventStats;
@@ -167,7 +170,7 @@ public class ProductEventStat extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              productEventStats.add(loadJSON(entry.getValue().toString(), context));
+              productEventStats.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return productEventStats;
         } else {
@@ -186,7 +189,7 @@ public class ProductEventStat extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              productEventStats.add(loadJSON(value.toString(), context));
+              productEventStats.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -198,7 +201,7 @@ public class ProductEventStat extends APINode {
 
           // Sixth, check if it's pure JsonObject
           productEventStats.clear();
-          productEventStats.add(loadJSON(json, context));
+          productEventStats.add(loadJSON(json, context, header));
           return productEventStats;
         }
       }
@@ -334,6 +337,15 @@ public class ProductEventStat extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public ProductEventStat setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
   public static enum EnumDeviceType {
@@ -443,6 +455,7 @@ public class ProductEventStat extends APINode {
     this.mUniqueContentIdsMatchedOtherCatalogs = instance.mUniqueContentIdsMatchedOtherCatalogs;
     this.mUniqueMatchedContentIds = instance.mUniqueMatchedContentIds;
     this.mUniqueUnmatchedContentIds = instance.mUniqueUnmatchedContentIds;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -450,8 +463,8 @@ public class ProductEventStat extends APINode {
 
   public static APIRequest.ResponseParser<ProductEventStat> getParser() {
     return new APIRequest.ResponseParser<ProductEventStat>() {
-      public APINodeList<ProductEventStat> parseResponse(String response, APIContext context, APIRequest<ProductEventStat> request) throws MalformedResponseException {
-        return ProductEventStat.parseResponse(response, context, request);
+      public APINodeList<ProductEventStat> parseResponse(String response, APIContext context, APIRequest<ProductEventStat> request, String header) throws MalformedResponseException {
+        return ProductEventStat.parseResponse(response, context, request, header);
       }
     };
   }

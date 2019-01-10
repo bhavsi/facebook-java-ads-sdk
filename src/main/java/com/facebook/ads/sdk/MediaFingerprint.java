@@ -84,6 +84,7 @@ public class MediaFingerprint extends APINode {
 
   public MediaFingerprint(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -102,19 +103,17 @@ public class MediaFingerprint extends APINode {
   }
 
   public static MediaFingerprint fetchById(String id, APIContext context) throws APIException {
-    MediaFingerprint mediaFingerprint =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return mediaFingerprint;
   }
 
   public static ListenableFuture<MediaFingerprint> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<MediaFingerprint> mediaFingerprint =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return mediaFingerprint;
   }
 
   public static APINodeList<MediaFingerprint> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -127,12 +126,11 @@ public class MediaFingerprint extends APINode {
   }
 
   public static ListenableFuture<APINodeList<MediaFingerprint>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<MediaFingerprint>> mediaFingerprint =
+    return
       new APIRequest(context, "", "/", "GET", MediaFingerprint.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return mediaFingerprint;
   }
 
   private String getPrefixedId() {
@@ -142,7 +140,7 @@ public class MediaFingerprint extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static MediaFingerprint loadJSON(String json, APIContext context) {
+  public static MediaFingerprint loadJSON(String json, APIContext context, String header) {
     MediaFingerprint mediaFingerprint = getGson().fromJson(json, MediaFingerprint.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -159,11 +157,12 @@ public class MediaFingerprint extends APINode {
     }
     mediaFingerprint.context = context;
     mediaFingerprint.rawValue = json;
+    mediaFingerprint.header = header;
     return mediaFingerprint;
   }
 
-  public static APINodeList<MediaFingerprint> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<MediaFingerprint> mediaFingerprints = new APINodeList<MediaFingerprint>(request, json);
+  public static APINodeList<MediaFingerprint> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<MediaFingerprint> mediaFingerprints = new APINodeList<MediaFingerprint>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -174,7 +173,7 @@ public class MediaFingerprint extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          mediaFingerprints.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          mediaFingerprints.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return mediaFingerprints;
       } else if (result.isJsonObject()) {
@@ -199,7 +198,7 @@ public class MediaFingerprint extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              mediaFingerprints.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              mediaFingerprints.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -210,13 +209,13 @@ public class MediaFingerprint extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  mediaFingerprints.add(loadJSON(entry.getValue().toString(), context));
+                  mediaFingerprints.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              mediaFingerprints.add(loadJSON(obj.toString(), context));
+              mediaFingerprints.add(loadJSON(obj.toString(), context, header));
             }
           }
           return mediaFingerprints;
@@ -224,7 +223,7 @@ public class MediaFingerprint extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              mediaFingerprints.add(loadJSON(entry.getValue().toString(), context));
+              mediaFingerprints.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return mediaFingerprints;
         } else {
@@ -243,7 +242,7 @@ public class MediaFingerprint extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              mediaFingerprints.add(loadJSON(value.toString(), context));
+              mediaFingerprints.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -255,7 +254,7 @@ public class MediaFingerprint extends APINode {
 
           // Sixth, check if it's pure JsonObject
           mediaFingerprints.clear();
-          mediaFingerprints.add(loadJSON(json, context));
+          mediaFingerprints.add(loadJSON(json, context, header));
           return mediaFingerprints;
         }
       }
@@ -348,8 +347,8 @@ public class MediaFingerprint extends APINode {
     };
 
     @Override
-    public APINode parseResponse(String response) throws APIException {
-      return APINode.parseResponse(response, getContext(), this).head();
+    public APINode parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -359,7 +358,8 @@ public class MediaFingerprint extends APINode {
 
     @Override
     public APINode execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -370,10 +370,10 @@ public class MediaFingerprint extends APINode {
     public ListenableFuture<APINode> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINode>() {
-           public APINode apply(String result) {
+        new Function<ResponseWrapper, APINode>() {
+           public APINode apply(ResponseWrapper result) {
              try {
-               return APIRequestDelete.this.parseResponse(result);
+               return APIRequestDelete.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -460,8 +460,8 @@ public class MediaFingerprint extends APINode {
     };
 
     @Override
-    public MediaFingerprint parseResponse(String response) throws APIException {
-      return MediaFingerprint.parseResponse(response, getContext(), this).head();
+    public MediaFingerprint parseResponse(String response, String header) throws APIException {
+      return MediaFingerprint.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -471,7 +471,8 @@ public class MediaFingerprint extends APINode {
 
     @Override
     public MediaFingerprint execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -482,10 +483,10 @@ public class MediaFingerprint extends APINode {
     public ListenableFuture<MediaFingerprint> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, MediaFingerprint>() {
-           public MediaFingerprint apply(String result) {
+        new Function<ResponseWrapper, MediaFingerprint>() {
+           public MediaFingerprint apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -620,8 +621,8 @@ public class MediaFingerprint extends APINode {
       return lastResponse;
     }
     public static final String[] PARAMS = {
-      "metadata",
       "title",
+      "metadata",
       "universal_content_id",
     };
 
@@ -629,8 +630,8 @@ public class MediaFingerprint extends APINode {
     };
 
     @Override
-    public MediaFingerprint parseResponse(String response) throws APIException {
-      return MediaFingerprint.parseResponse(response, getContext(), this).head();
+    public MediaFingerprint parseResponse(String response, String header) throws APIException {
+      return MediaFingerprint.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -640,7 +641,8 @@ public class MediaFingerprint extends APINode {
 
     @Override
     public MediaFingerprint execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -651,10 +653,10 @@ public class MediaFingerprint extends APINode {
     public ListenableFuture<MediaFingerprint> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, MediaFingerprint>() {
-           public MediaFingerprint apply(String result) {
+        new Function<ResponseWrapper, MediaFingerprint>() {
+           public MediaFingerprint apply(ResponseWrapper result) {
              try {
-               return APIRequestUpdate.this.parseResponse(result);
+               return APIRequestUpdate.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -680,17 +682,17 @@ public class MediaFingerprint extends APINode {
     }
 
 
+    public APIRequestUpdate setTitle (String title) {
+      this.setParam("title", title);
+      return this;
+    }
+
     public APIRequestUpdate setMetadata (Object metadata) {
       this.setParam("metadata", metadata);
       return this;
     }
     public APIRequestUpdate setMetadata (String metadata) {
       this.setParam("metadata", metadata);
-      return this;
-    }
-
-    public APIRequestUpdate setTitle (String title) {
-      this.setParam("title", title);
       return this;
     }
 
@@ -762,6 +764,27 @@ public class MediaFingerprint extends APINode {
       }
   }
 
+  public static enum EnumFingerprintValidity {
+      @SerializedName("VALID")
+      VALUE_VALID("VALID"),
+      @SerializedName("EXPIRING")
+      VALUE_EXPIRING("EXPIRING"),
+      @SerializedName("EXPIRED")
+      VALUE_EXPIRED("EXPIRED"),
+      NULL(null);
+
+      private String value;
+
+      private EnumFingerprintValidity(String value) {
+        this.value = value;
+      }
+
+      @Override
+      public String toString() {
+        return value;
+      }
+  }
+
 
   synchronized /*package*/ static Gson getGson() {
     if (gson != null) {
@@ -793,8 +816,8 @@ public class MediaFingerprint extends APINode {
 
   public static APIRequest.ResponseParser<MediaFingerprint> getParser() {
     return new APIRequest.ResponseParser<MediaFingerprint>() {
-      public APINodeList<MediaFingerprint> parseResponse(String response, APIContext context, APIRequest<MediaFingerprint> request) throws MalformedResponseException {
-        return MediaFingerprint.parseResponse(response, context, request);
+      public APINodeList<MediaFingerprint> parseResponse(String response, APIContext context, APIRequest<MediaFingerprint> request, String header) throws MalformedResponseException {
+        return MediaFingerprint.parseResponse(response, context, request, header);
       }
     };
   }

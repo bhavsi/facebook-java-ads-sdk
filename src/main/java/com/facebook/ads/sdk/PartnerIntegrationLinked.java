@@ -58,7 +58,7 @@ public class PartnerIntegrationLinked extends APINode {
   @SerializedName("ads_pixel")
   private AdsPixel mAdsPixel = null;
   @SerializedName("application")
-  private Object mApplication = null;
+  private Application mApplication = null;
   @SerializedName("completed_integration_types")
   private List<String> mCompletedIntegrationTypes = null;
   @SerializedName("external_id")
@@ -90,6 +90,7 @@ public class PartnerIntegrationLinked extends APINode {
 
   public PartnerIntegrationLinked(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -108,19 +109,17 @@ public class PartnerIntegrationLinked extends APINode {
   }
 
   public static PartnerIntegrationLinked fetchById(String id, APIContext context) throws APIException {
-    PartnerIntegrationLinked partnerIntegrationLinked =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return partnerIntegrationLinked;
   }
 
   public static ListenableFuture<PartnerIntegrationLinked> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<PartnerIntegrationLinked> partnerIntegrationLinked =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return partnerIntegrationLinked;
   }
 
   public static APINodeList<PartnerIntegrationLinked> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -133,12 +132,11 @@ public class PartnerIntegrationLinked extends APINode {
   }
 
   public static ListenableFuture<APINodeList<PartnerIntegrationLinked>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<PartnerIntegrationLinked>> partnerIntegrationLinked =
+    return
       new APIRequest(context, "", "/", "GET", PartnerIntegrationLinked.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return partnerIntegrationLinked;
   }
 
   private String getPrefixedId() {
@@ -148,7 +146,7 @@ public class PartnerIntegrationLinked extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static PartnerIntegrationLinked loadJSON(String json, APIContext context) {
+  public static PartnerIntegrationLinked loadJSON(String json, APIContext context, String header) {
     PartnerIntegrationLinked partnerIntegrationLinked = getGson().fromJson(json, PartnerIntegrationLinked.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -165,11 +163,12 @@ public class PartnerIntegrationLinked extends APINode {
     }
     partnerIntegrationLinked.context = context;
     partnerIntegrationLinked.rawValue = json;
+    partnerIntegrationLinked.header = header;
     return partnerIntegrationLinked;
   }
 
-  public static APINodeList<PartnerIntegrationLinked> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<PartnerIntegrationLinked> partnerIntegrationLinkeds = new APINodeList<PartnerIntegrationLinked>(request, json);
+  public static APINodeList<PartnerIntegrationLinked> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<PartnerIntegrationLinked> partnerIntegrationLinkeds = new APINodeList<PartnerIntegrationLinked>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -180,7 +179,7 @@ public class PartnerIntegrationLinked extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          partnerIntegrationLinkeds.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          partnerIntegrationLinkeds.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return partnerIntegrationLinkeds;
       } else if (result.isJsonObject()) {
@@ -205,7 +204,7 @@ public class PartnerIntegrationLinked extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              partnerIntegrationLinkeds.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              partnerIntegrationLinkeds.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -216,13 +215,13 @@ public class PartnerIntegrationLinked extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  partnerIntegrationLinkeds.add(loadJSON(entry.getValue().toString(), context));
+                  partnerIntegrationLinkeds.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              partnerIntegrationLinkeds.add(loadJSON(obj.toString(), context));
+              partnerIntegrationLinkeds.add(loadJSON(obj.toString(), context, header));
             }
           }
           return partnerIntegrationLinkeds;
@@ -230,7 +229,7 @@ public class PartnerIntegrationLinked extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              partnerIntegrationLinkeds.add(loadJSON(entry.getValue().toString(), context));
+              partnerIntegrationLinkeds.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return partnerIntegrationLinkeds;
         } else {
@@ -249,7 +248,7 @@ public class PartnerIntegrationLinked extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              partnerIntegrationLinkeds.add(loadJSON(value.toString(), context));
+              partnerIntegrationLinkeds.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -261,7 +260,7 @@ public class PartnerIntegrationLinked extends APINode {
 
           // Sixth, check if it's pure JsonObject
           partnerIntegrationLinkeds.clear();
-          partnerIntegrationLinkeds.add(loadJSON(json, context));
+          partnerIntegrationLinkeds.add(loadJSON(json, context, header));
           return partnerIntegrationLinkeds;
         }
       }
@@ -289,8 +288,16 @@ public class PartnerIntegrationLinked extends APINode {
     return getGson().toJson(this);
   }
 
+  public APIRequestDelete delete() {
+    return new APIRequestDelete(this.getPrefixedId().toString(), context);
+  }
+
   public APIRequestGet get() {
     return new APIRequestGet(this.getPrefixedId().toString(), context);
+  }
+
+  public APIRequestUpdate update() {
+    return new APIRequestUpdate(this.getPrefixedId().toString(), context);
   }
 
 
@@ -301,7 +308,10 @@ public class PartnerIntegrationLinked extends APINode {
     return mAdsPixel;
   }
 
-  public Object getFieldApplication() {
+  public Application getFieldApplication() {
+    if (mApplication != null) {
+      mApplication.context = getContext();
+    }
     return mApplication;
   }
 
@@ -353,6 +363,120 @@ public class PartnerIntegrationLinked extends APINode {
 
 
 
+  public static class APIRequestDelete extends APIRequest<APINode> {
+
+    APINode lastResponse = null;
+    @Override
+    public APINode getLastResponse() {
+      return lastResponse;
+    }
+    public static final String[] PARAMS = {
+      "asset_type",
+    };
+
+    public static final String[] FIELDS = {
+    };
+
+    @Override
+    public APINode parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header).head();
+    }
+
+    @Override
+    public APINode execute() throws APIException {
+      return execute(new HashMap<String, Object>());
+    }
+
+    @Override
+    public APINode execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
+      return lastResponse;
+    }
+
+    public ListenableFuture<APINode> executeAsync() throws APIException {
+      return executeAsync(new HashMap<String, Object>());
+    };
+
+    public ListenableFuture<APINode> executeAsync(Map<String, Object> extraParams) throws APIException {
+      return Futures.transform(
+        executeAsyncInternal(extraParams),
+        new Function<ResponseWrapper, APINode>() {
+           public APINode apply(ResponseWrapper result) {
+             try {
+               return APIRequestDelete.this.parseResponse(result.getBody(), result.getHeader());
+             } catch (Exception e) {
+               throw new RuntimeException(e);
+             }
+           }
+         }
+      );
+    };
+
+    public APIRequestDelete(String nodeId, APIContext context) {
+      super(context, nodeId, "/", "DELETE", Arrays.asList(PARAMS));
+    }
+
+    @Override
+    public APIRequestDelete setParam(String param, Object value) {
+      setParamInternal(param, value);
+      return this;
+    }
+
+    @Override
+    public APIRequestDelete setParams(Map<String, Object> params) {
+      setParamsInternal(params);
+      return this;
+    }
+
+
+    public APIRequestDelete setAssetType (EnumAssetType assetType) {
+      this.setParam("asset_type", assetType);
+      return this;
+    }
+    public APIRequestDelete setAssetType (String assetType) {
+      this.setParam("asset_type", assetType);
+      return this;
+    }
+
+    public APIRequestDelete requestAllFields () {
+      return this.requestAllFields(true);
+    }
+
+    public APIRequestDelete requestAllFields (boolean value) {
+      for (String field : FIELDS) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestDelete requestFields (List<String> fields) {
+      return this.requestFields(fields, true);
+    }
+
+    @Override
+    public APIRequestDelete requestFields (List<String> fields, boolean value) {
+      for (String field : fields) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestDelete requestField (String field) {
+      this.requestField(field, true);
+      return this;
+    }
+
+    @Override
+    public APIRequestDelete requestField (String field, boolean value) {
+      this.requestFieldInternal(field, value);
+      return this;
+    }
+
+  }
+
   public static class APIRequestGet extends APIRequest<PartnerIntegrationLinked> {
 
     PartnerIntegrationLinked lastResponse = null;
@@ -379,8 +503,8 @@ public class PartnerIntegrationLinked extends APINode {
     };
 
     @Override
-    public PartnerIntegrationLinked parseResponse(String response) throws APIException {
-      return PartnerIntegrationLinked.parseResponse(response, getContext(), this).head();
+    public PartnerIntegrationLinked parseResponse(String response, String header) throws APIException {
+      return PartnerIntegrationLinked.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -390,7 +514,8 @@ public class PartnerIntegrationLinked extends APINode {
 
     @Override
     public PartnerIntegrationLinked execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -401,10 +526,10 @@ public class PartnerIntegrationLinked extends APINode {
     public ListenableFuture<PartnerIntegrationLinked> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, PartnerIntegrationLinked>() {
-           public PartnerIntegrationLinked apply(String result) {
+        new Function<ResponseWrapper, PartnerIntegrationLinked>() {
+           public PartnerIntegrationLinked apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -552,6 +677,366 @@ public class PartnerIntegrationLinked extends APINode {
     }
   }
 
+  public static class APIRequestUpdate extends APIRequest<PartnerIntegrationLinked> {
+
+    PartnerIntegrationLinked lastResponse = null;
+    @Override
+    public PartnerIntegrationLinked getLastResponse() {
+      return lastResponse;
+    }
+    public static final String[] PARAMS = {
+      "ads_pixel_id",
+      "application_id",
+      "completed_integration_types",
+      "name",
+      "oauth_partner_integration_id",
+      "offline_conversion_data_set_id",
+      "product_catalog_id",
+      "setup_status",
+    };
+
+    public static final String[] FIELDS = {
+    };
+
+    @Override
+    public PartnerIntegrationLinked parseResponse(String response, String header) throws APIException {
+      return PartnerIntegrationLinked.parseResponse(response, getContext(), this, header).head();
+    }
+
+    @Override
+    public PartnerIntegrationLinked execute() throws APIException {
+      return execute(new HashMap<String, Object>());
+    }
+
+    @Override
+    public PartnerIntegrationLinked execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
+      return lastResponse;
+    }
+
+    public ListenableFuture<PartnerIntegrationLinked> executeAsync() throws APIException {
+      return executeAsync(new HashMap<String, Object>());
+    };
+
+    public ListenableFuture<PartnerIntegrationLinked> executeAsync(Map<String, Object> extraParams) throws APIException {
+      return Futures.transform(
+        executeAsyncInternal(extraParams),
+        new Function<ResponseWrapper, PartnerIntegrationLinked>() {
+           public PartnerIntegrationLinked apply(ResponseWrapper result) {
+             try {
+               return APIRequestUpdate.this.parseResponse(result.getBody(), result.getHeader());
+             } catch (Exception e) {
+               throw new RuntimeException(e);
+             }
+           }
+         }
+      );
+    };
+
+    public APIRequestUpdate(String nodeId, APIContext context) {
+      super(context, nodeId, "/", "POST", Arrays.asList(PARAMS));
+    }
+
+    @Override
+    public APIRequestUpdate setParam(String param, Object value) {
+      setParamInternal(param, value);
+      return this;
+    }
+
+    @Override
+    public APIRequestUpdate setParams(Map<String, Object> params) {
+      setParamsInternal(params);
+      return this;
+    }
+
+
+    public APIRequestUpdate setAdsPixelId (Object adsPixelId) {
+      this.setParam("ads_pixel_id", adsPixelId);
+      return this;
+    }
+    public APIRequestUpdate setAdsPixelId (String adsPixelId) {
+      this.setParam("ads_pixel_id", adsPixelId);
+      return this;
+    }
+
+    public APIRequestUpdate setApplicationId (Object applicationId) {
+      this.setParam("application_id", applicationId);
+      return this;
+    }
+    public APIRequestUpdate setApplicationId (String applicationId) {
+      this.setParam("application_id", applicationId);
+      return this;
+    }
+
+    public APIRequestUpdate setCompletedIntegrationTypes (List<PartnerIntegrationLinked.EnumCompletedIntegrationTypes> completedIntegrationTypes) {
+      this.setParam("completed_integration_types", completedIntegrationTypes);
+      return this;
+    }
+    public APIRequestUpdate setCompletedIntegrationTypes (String completedIntegrationTypes) {
+      this.setParam("completed_integration_types", completedIntegrationTypes);
+      return this;
+    }
+
+    public APIRequestUpdate setName (String name) {
+      this.setParam("name", name);
+      return this;
+    }
+
+    public APIRequestUpdate setOauthPartnerIntegrationId (Object oauthPartnerIntegrationId) {
+      this.setParam("oauth_partner_integration_id", oauthPartnerIntegrationId);
+      return this;
+    }
+    public APIRequestUpdate setOauthPartnerIntegrationId (String oauthPartnerIntegrationId) {
+      this.setParam("oauth_partner_integration_id", oauthPartnerIntegrationId);
+      return this;
+    }
+
+    public APIRequestUpdate setOfflineConversionDataSetId (Object offlineConversionDataSetId) {
+      this.setParam("offline_conversion_data_set_id", offlineConversionDataSetId);
+      return this;
+    }
+    public APIRequestUpdate setOfflineConversionDataSetId (String offlineConversionDataSetId) {
+      this.setParam("offline_conversion_data_set_id", offlineConversionDataSetId);
+      return this;
+    }
+
+    public APIRequestUpdate setProductCatalogId (Object productCatalogId) {
+      this.setParam("product_catalog_id", productCatalogId);
+      return this;
+    }
+    public APIRequestUpdate setProductCatalogId (String productCatalogId) {
+      this.setParam("product_catalog_id", productCatalogId);
+      return this;
+    }
+
+    public APIRequestUpdate setSetupStatus (PartnerIntegrationLinked.EnumSetupStatus setupStatus) {
+      this.setParam("setup_status", setupStatus);
+      return this;
+    }
+    public APIRequestUpdate setSetupStatus (String setupStatus) {
+      this.setParam("setup_status", setupStatus);
+      return this;
+    }
+
+    public APIRequestUpdate requestAllFields () {
+      return this.requestAllFields(true);
+    }
+
+    public APIRequestUpdate requestAllFields (boolean value) {
+      for (String field : FIELDS) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestUpdate requestFields (List<String> fields) {
+      return this.requestFields(fields, true);
+    }
+
+    @Override
+    public APIRequestUpdate requestFields (List<String> fields, boolean value) {
+      for (String field : fields) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestUpdate requestField (String field) {
+      this.requestField(field, true);
+      return this;
+    }
+
+    @Override
+    public APIRequestUpdate requestField (String field, boolean value) {
+      this.requestFieldInternal(field, value);
+      return this;
+    }
+
+  }
+
+  public static enum EnumPartner {
+      @SerializedName("adjust")
+      VALUE_ADJUST("adjust"),
+      @SerializedName("appsflyer")
+      VALUE_APPSFLYER("appsflyer"),
+      @SerializedName("avana")
+      VALUE_AVANA("avana"),
+      @SerializedName("backer_founder")
+      VALUE_BACKER_FOUNDER("backer_founder"),
+      @SerializedName("big_commerce")
+      VALUE_BIG_COMMERCE("big_commerce"),
+      @SerializedName("cart_3d")
+      VALUE_CART_3D("cart_3d"),
+      @SerializedName("default")
+      VALUE_DEFAULT("default"),
+      @SerializedName("drupal")
+      VALUE_DRUPAL("drupal"),
+      @SerializedName("ec_cube3")
+      VALUE_EC_CUBE3("ec_cube3"),
+      @SerializedName("eventbrite")
+      VALUE_EVENTBRITE("eventbrite"),
+      @SerializedName("feedonomics")
+      VALUE_FEEDONOMICS("feedonomics"),
+      @SerializedName("foodkit")
+      VALUE_FOODKIT("foodkit"),
+      @SerializedName("google_tag_manager")
+      VALUE_GOOGLE_TAG_MANAGER("google_tag_manager"),
+      @SerializedName("haravan")
+      VALUE_HARAVAN("haravan"),
+      @SerializedName("infusionsoft_zap")
+      VALUE_INFUSIONSOFT_ZAP("infusionsoft_zap"),
+      @SerializedName("intern")
+      VALUE_INTERN("intern"),
+      @SerializedName("invoca")
+      VALUE_INVOCA("invoca"),
+      @SerializedName("jimdo")
+      VALUE_JIMDO("jimdo"),
+      @SerializedName("joomla")
+      VALUE_JOOMLA("joomla"),
+      @SerializedName("jumpseller")
+      VALUE_JUMPSELLER("jumpseller"),
+      @SerializedName("kraftly")
+      VALUE_KRAFTLY("kraftly"),
+      @SerializedName("magento")
+      VALUE_MAGENTO("magento"),
+      @SerializedName("magento_2")
+      VALUE_MAGENTO_2("magento_2"),
+      @SerializedName("marketo")
+      VALUE_MARKETO("marketo"),
+      @SerializedName("meesho")
+      VALUE_MEESHO("meesho"),
+      @SerializedName("m_particle")
+      VALUE_M_PARTICLE("m_particle"),
+      @SerializedName("now_floats")
+      VALUE_NOW_FLOATS("now_floats"),
+      @SerializedName("opencart")
+      VALUE_OPENCART("opencart"),
+      @SerializedName("prestashop")
+      VALUE_PRESTASHOP("prestashop"),
+      @SerializedName("productsup")
+      VALUE_PRODUCTSUP("productsup"),
+      @SerializedName("ruby_on_rails")
+      VALUE_RUBY_ON_RAILS("ruby_on_rails"),
+      @SerializedName("riversoft")
+      VALUE_RIVERSOFT("riversoft"),
+      @SerializedName("salesforce_zap")
+      VALUE_SALESFORCE_ZAP("salesforce_zap"),
+      @SerializedName("segment")
+      VALUE_SEGMENT("segment"),
+      @SerializedName("shopify")
+      VALUE_SHOPIFY("shopify"),
+      @SerializedName("shopify_online")
+      VALUE_SHOPIFY_ONLINE("shopify_online"),
+      @SerializedName("shopline")
+      VALUE_SHOPLINE("shopline"),
+      @SerializedName("shop_up")
+      VALUE_SHOP_UP("shop_up"),
+      @SerializedName("sirclo")
+      VALUE_SIRCLO("sirclo"),
+      @SerializedName("squarespace")
+      VALUE_SQUARESPACE("squarespace"),
+      @SerializedName("storeden")
+      VALUE_STOREDEN("storeden"),
+      @SerializedName("test")
+      VALUE_TEST("test"),
+      @SerializedName("verifone")
+      VALUE_VERIFONE("verifone"),
+      @SerializedName("waca")
+      VALUE_WACA("waca"),
+      @SerializedName("weebly")
+      VALUE_WEEBLY("weebly"),
+      @SerializedName("wix")
+      VALUE_WIX("wix"),
+      @SerializedName("woocommerce")
+      VALUE_WOOCOMMERCE("woocommerce"),
+      @SerializedName("wordpress")
+      VALUE_WORDPRESS("wordpress"),
+      @SerializedName("zoho_zap")
+      VALUE_ZOHO_ZAP("zoho_zap"),
+      @SerializedName("ticketmaster")
+      VALUE_TICKETMASTER("ticketmaster"),
+      NULL(null);
+
+      private String value;
+
+      private EnumPartner(String value) {
+        this.value = value;
+      }
+
+      @Override
+      public String toString() {
+        return value;
+      }
+  }
+
+  public static enum EnumCompletedIntegrationTypes {
+      @SerializedName("0")
+      VALUE_0("0"),
+      @SerializedName("1")
+      VALUE_1("1"),
+      @SerializedName("2")
+      VALUE_2("2"),
+      @SerializedName("3")
+      VALUE_3("3"),
+      NULL(null);
+
+      private String value;
+
+      private EnumCompletedIntegrationTypes(String value) {
+        this.value = value;
+      }
+
+      @Override
+      public String toString() {
+        return value;
+      }
+  }
+
+  public static enum EnumSetupStatus {
+      @SerializedName("START")
+      VALUE_START("START"),
+      @SerializedName("COMPLETE")
+      VALUE_COMPLETE("COMPLETE"),
+      NULL(null);
+
+      private String value;
+
+      private EnumSetupStatus(String value) {
+        this.value = value;
+      }
+
+      @Override
+      public String toString() {
+        return value;
+      }
+  }
+
+  public static enum EnumAssetType {
+      @SerializedName("0")
+      VALUE_0("0"),
+      @SerializedName("1")
+      VALUE_1("1"),
+      @SerializedName("2")
+      VALUE_2("2"),
+      @SerializedName("3")
+      VALUE_3("3"),
+      NULL(null);
+
+      private String value;
+
+      private EnumAssetType(String value) {
+        this.value = value;
+      }
+
+      @Override
+      public String toString() {
+        return value;
+      }
+  }
+
 
   synchronized /*package*/ static Gson getGson() {
     if (gson != null) {
@@ -586,8 +1071,8 @@ public class PartnerIntegrationLinked extends APINode {
 
   public static APIRequest.ResponseParser<PartnerIntegrationLinked> getParser() {
     return new APIRequest.ResponseParser<PartnerIntegrationLinked>() {
-      public APINodeList<PartnerIntegrationLinked> parseResponse(String response, APIContext context, APIRequest<PartnerIntegrationLinked> request) throws MalformedResponseException {
-        return PartnerIntegrationLinked.parseResponse(response, context, request);
+      public APINodeList<PartnerIntegrationLinked> parseResponse(String response, APIContext context, APIRequest<PartnerIntegrationLinked> request, String header) throws MalformedResponseException {
+        return PartnerIntegrationLinked.parseResponse(response, context, request, header);
       }
     };
   }

@@ -65,74 +65,13 @@ public class AssignedUser extends APINode {
   private String mUserType = null;
   protected static Gson gson = null;
 
-  AssignedUser() {
-  }
-
-  public AssignedUser(Long id, APIContext context) {
-    this(id.toString(), context);
-  }
-
-  public AssignedUser(String id, APIContext context) {
-    this.mId = id;
-    this.context = context;
-  }
-
-  public AssignedUser fetch() throws APIException{
-    AssignedUser newInstance = fetchById(this.getPrefixedId().toString(), this.context);
-    this.copyFrom(newInstance);
-    return this;
-  }
-
-  public static AssignedUser fetchById(Long id, APIContext context) throws APIException {
-    return fetchById(id.toString(), context);
-  }
-
-  public static ListenableFuture<AssignedUser> fetchByIdAsync(Long id, APIContext context) throws APIException {
-    return fetchByIdAsync(id.toString(), context);
-  }
-
-  public static AssignedUser fetchById(String id, APIContext context) throws APIException {
-    AssignedUser assignedUser =
-      new APIRequestGet(id, context)
-      .requestAllFields()
-      .execute();
-    return assignedUser;
-  }
-
-  public static ListenableFuture<AssignedUser> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<AssignedUser> assignedUser =
-      new APIRequestGet(id, context)
-      .requestAllFields()
-      .executeAsync();
-    return assignedUser;
-  }
-
-  public static APINodeList<AssignedUser> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    return (APINodeList<AssignedUser>)(
-      new APIRequest<AssignedUser>(context, "", "/", "GET", AssignedUser.getParser())
-        .setParam("ids", APIRequest.joinStringList(ids))
-        .requestFields(fields)
-        .execute()
-    );
-  }
-
-  public static ListenableFuture<APINodeList<AssignedUser>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<AssignedUser>> assignedUser =
-      new APIRequest(context, "", "/", "GET", AssignedUser.getParser())
-        .setParam("ids", APIRequest.joinStringList(ids))
-        .requestFields(fields)
-        .executeAsyncBase();
-    return assignedUser;
-  }
-
-  private String getPrefixedId() {
-    return getId();
+  public AssignedUser() {
   }
 
   public String getId() {
     return getFieldId().toString();
   }
-  public static AssignedUser loadJSON(String json, APIContext context) {
+  public static AssignedUser loadJSON(String json, APIContext context, String header) {
     AssignedUser assignedUser = getGson().fromJson(json, AssignedUser.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -149,11 +88,12 @@ public class AssignedUser extends APINode {
     }
     assignedUser.context = context;
     assignedUser.rawValue = json;
+    assignedUser.header = header;
     return assignedUser;
   }
 
-  public static APINodeList<AssignedUser> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AssignedUser> assignedUsers = new APINodeList<AssignedUser>(request, json);
+  public static APINodeList<AssignedUser> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AssignedUser> assignedUsers = new APINodeList<AssignedUser>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -164,7 +104,7 @@ public class AssignedUser extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          assignedUsers.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          assignedUsers.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return assignedUsers;
       } else if (result.isJsonObject()) {
@@ -189,7 +129,7 @@ public class AssignedUser extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              assignedUsers.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              assignedUsers.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -200,13 +140,13 @@ public class AssignedUser extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  assignedUsers.add(loadJSON(entry.getValue().toString(), context));
+                  assignedUsers.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              assignedUsers.add(loadJSON(obj.toString(), context));
+              assignedUsers.add(loadJSON(obj.toString(), context, header));
             }
           }
           return assignedUsers;
@@ -214,7 +154,7 @@ public class AssignedUser extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              assignedUsers.add(loadJSON(entry.getValue().toString(), context));
+              assignedUsers.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return assignedUsers;
         } else {
@@ -233,7 +173,7 @@ public class AssignedUser extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              assignedUsers.add(loadJSON(value.toString(), context));
+              assignedUsers.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -245,7 +185,7 @@ public class AssignedUser extends APINode {
 
           // Sixth, check if it's pure JsonObject
           assignedUsers.clear();
-          assignedUsers.add(loadJSON(json, context));
+          assignedUsers.add(loadJSON(json, context, header));
           return assignedUsers;
         }
       }
@@ -273,10 +213,6 @@ public class AssignedUser extends APINode {
     return getGson().toJson(this);
   }
 
-  public APIRequestGet get() {
-    return new APIRequestGet(this.getPrefixedId().toString(), context);
-  }
-
 
   public Business getFieldBusiness() {
     if (mBusiness != null) {
@@ -285,154 +221,44 @@ public class AssignedUser extends APINode {
     return mBusiness;
   }
 
+  public AssignedUser setFieldBusiness(Business value) {
+    this.mBusiness = value;
+    return this;
+  }
+
+  public AssignedUser setFieldBusiness(String value) {
+    Type type = new TypeToken<Business>(){}.getType();
+    this.mBusiness = Business.getGson().fromJson(value, type);
+    return this;
+  }
   public String getFieldId() {
     return mId;
+  }
+
+  public AssignedUser setFieldId(String value) {
+    this.mId = value;
+    return this;
   }
 
   public String getFieldName() {
     return mName;
   }
 
+  public AssignedUser setFieldName(String value) {
+    this.mName = value;
+    return this;
+  }
+
   public String getFieldUserType() {
     return mUserType;
   }
 
-
-
-  public static class APIRequestGet extends APIRequest<AssignedUser> {
-
-    AssignedUser lastResponse = null;
-    @Override
-    public AssignedUser getLastResponse() {
-      return lastResponse;
-    }
-    public static final String[] PARAMS = {
-    };
-
-    public static final String[] FIELDS = {
-      "business",
-      "id",
-      "name",
-      "user_type",
-    };
-
-    @Override
-    public AssignedUser parseResponse(String response) throws APIException {
-      return AssignedUser.parseResponse(response, getContext(), this).head();
-    }
-
-    @Override
-    public AssignedUser execute() throws APIException {
-      return execute(new HashMap<String, Object>());
-    }
-
-    @Override
-    public AssignedUser execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
-      return lastResponse;
-    }
-
-    public ListenableFuture<AssignedUser> executeAsync() throws APIException {
-      return executeAsync(new HashMap<String, Object>());
-    };
-
-    public ListenableFuture<AssignedUser> executeAsync(Map<String, Object> extraParams) throws APIException {
-      return Futures.transform(
-        executeAsyncInternal(extraParams),
-        new Function<String, AssignedUser>() {
-           public AssignedUser apply(String result) {
-             try {
-               return APIRequestGet.this.parseResponse(result);
-             } catch (Exception e) {
-               throw new RuntimeException(e);
-             }
-           }
-         }
-      );
-    };
-
-    public APIRequestGet(String nodeId, APIContext context) {
-      super(context, nodeId, "/", "GET", Arrays.asList(PARAMS));
-    }
-
-    @Override
-    public APIRequestGet setParam(String param, Object value) {
-      setParamInternal(param, value);
-      return this;
-    }
-
-    @Override
-    public APIRequestGet setParams(Map<String, Object> params) {
-      setParamsInternal(params);
-      return this;
-    }
-
-
-    public APIRequestGet requestAllFields () {
-      return this.requestAllFields(true);
-    }
-
-    public APIRequestGet requestAllFields (boolean value) {
-      for (String field : FIELDS) {
-        this.requestField(field, value);
-      }
-      return this;
-    }
-
-    @Override
-    public APIRequestGet requestFields (List<String> fields) {
-      return this.requestFields(fields, true);
-    }
-
-    @Override
-    public APIRequestGet requestFields (List<String> fields, boolean value) {
-      for (String field : fields) {
-        this.requestField(field, value);
-      }
-      return this;
-    }
-
-    @Override
-    public APIRequestGet requestField (String field) {
-      this.requestField(field, true);
-      return this;
-    }
-
-    @Override
-    public APIRequestGet requestField (String field, boolean value) {
-      this.requestFieldInternal(field, value);
-      return this;
-    }
-
-    public APIRequestGet requestBusinessField () {
-      return this.requestBusinessField(true);
-    }
-    public APIRequestGet requestBusinessField (boolean value) {
-      this.requestField("business", value);
-      return this;
-    }
-    public APIRequestGet requestIdField () {
-      return this.requestIdField(true);
-    }
-    public APIRequestGet requestIdField (boolean value) {
-      this.requestField("id", value);
-      return this;
-    }
-    public APIRequestGet requestNameField () {
-      return this.requestNameField(true);
-    }
-    public APIRequestGet requestNameField (boolean value) {
-      this.requestField("name", value);
-      return this;
-    }
-    public APIRequestGet requestUserTypeField () {
-      return this.requestUserTypeField(true);
-    }
-    public APIRequestGet requestUserTypeField (boolean value) {
-      this.requestField("user_type", value);
-      return this;
-    }
+  public AssignedUser setFieldUserType(String value) {
+    this.mUserType = value;
+    return this;
   }
+
+
 
 
   synchronized /*package*/ static Gson getGson() {
@@ -460,8 +286,8 @@ public class AssignedUser extends APINode {
 
   public static APIRequest.ResponseParser<AssignedUser> getParser() {
     return new APIRequest.ResponseParser<AssignedUser>() {
-      public APINodeList<AssignedUser> parseResponse(String response, APIContext context, APIRequest<AssignedUser> request) throws MalformedResponseException {
-        return AssignedUser.parseResponse(response, context, request);
+      public APINodeList<AssignedUser> parseResponse(String response, APIContext context, APIRequest<AssignedUser> request, String header) throws MalformedResponseException {
+        return AssignedUser.parseResponse(response, context, request, header);
       }
     };
   }

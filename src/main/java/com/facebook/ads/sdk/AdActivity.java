@@ -79,15 +79,17 @@ public class AdActivity extends APINode {
   private String mObjectType = null;
   @SerializedName("translated_event_type")
   private String mTranslatedEventType = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdActivity() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdActivity loadJSON(String json, APIContext context) {
+  public static AdActivity loadJSON(String json, APIContext context, String header) {
     AdActivity adActivity = getGson().fromJson(json, AdActivity.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -104,11 +106,12 @@ public class AdActivity extends APINode {
     }
     adActivity.context = context;
     adActivity.rawValue = json;
+    adActivity.header = header;
     return adActivity;
   }
 
-  public static APINodeList<AdActivity> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdActivity> adActivitys = new APINodeList<AdActivity>(request, json);
+  public static APINodeList<AdActivity> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdActivity> adActivitys = new APINodeList<AdActivity>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -119,7 +122,7 @@ public class AdActivity extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adActivitys.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adActivitys.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adActivitys;
       } else if (result.isJsonObject()) {
@@ -144,7 +147,7 @@ public class AdActivity extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adActivitys.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adActivitys.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -155,13 +158,13 @@ public class AdActivity extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adActivitys.add(loadJSON(entry.getValue().toString(), context));
+                  adActivitys.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adActivitys.add(loadJSON(obj.toString(), context));
+              adActivitys.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adActivitys;
@@ -169,7 +172,7 @@ public class AdActivity extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adActivitys.add(loadJSON(entry.getValue().toString(), context));
+              adActivitys.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adActivitys;
         } else {
@@ -188,7 +191,7 @@ public class AdActivity extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adActivitys.add(loadJSON(value.toString(), context));
+              adActivitys.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -200,7 +203,7 @@ public class AdActivity extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adActivitys.clear();
-          adActivitys.add(loadJSON(json, context));
+          adActivitys.add(loadJSON(json, context, header));
           return adActivitys;
         }
       }
@@ -334,6 +337,15 @@ public class AdActivity extends APINode {
 
   public AdActivity setFieldTranslatedEventType(String value) {
     this.mTranslatedEventType = value;
+    return this;
+  }
+
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AdActivity setFieldId(String value) {
+    this.mId = value;
     return this;
   }
 
@@ -546,6 +558,7 @@ public class AdActivity extends APINode {
     this.mObjectName = instance.mObjectName;
     this.mObjectType = instance.mObjectType;
     this.mTranslatedEventType = instance.mTranslatedEventType;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -553,8 +566,8 @@ public class AdActivity extends APINode {
 
   public static APIRequest.ResponseParser<AdActivity> getParser() {
     return new APIRequest.ResponseParser<AdActivity>() {
-      public APINodeList<AdActivity> parseResponse(String response, APIContext context, APIRequest<AdActivity> request) throws MalformedResponseException {
-        return AdActivity.parseResponse(response, context, request);
+      public APINodeList<AdActivity> parseResponse(String response, APIContext context, APIRequest<AdActivity> request, String header) throws MalformedResponseException {
+        return AdActivity.parseResponse(response, context, request, header);
       }
     };
   }

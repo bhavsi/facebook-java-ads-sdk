@@ -88,6 +88,7 @@ public class Profile extends APINode {
 
   public Profile(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -106,19 +107,17 @@ public class Profile extends APINode {
   }
 
   public static Profile fetchById(String id, APIContext context) throws APIException {
-    Profile profile =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return profile;
   }
 
   public static ListenableFuture<Profile> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<Profile> profile =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return profile;
   }
 
   public static APINodeList<Profile> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -131,12 +130,11 @@ public class Profile extends APINode {
   }
 
   public static ListenableFuture<APINodeList<Profile>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<Profile>> profile =
+    return
       new APIRequest(context, "", "/", "GET", Profile.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return profile;
   }
 
   private String getPrefixedId() {
@@ -146,7 +144,7 @@ public class Profile extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static Profile loadJSON(String json, APIContext context) {
+  public static Profile loadJSON(String json, APIContext context, String header) {
     Profile profile = getGson().fromJson(json, Profile.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -163,11 +161,12 @@ public class Profile extends APINode {
     }
     profile.context = context;
     profile.rawValue = json;
+    profile.header = header;
     return profile;
   }
 
-  public static APINodeList<Profile> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<Profile> profiles = new APINodeList<Profile>(request, json);
+  public static APINodeList<Profile> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<Profile> profiles = new APINodeList<Profile>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -178,7 +177,7 @@ public class Profile extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          profiles.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          profiles.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return profiles;
       } else if (result.isJsonObject()) {
@@ -203,7 +202,7 @@ public class Profile extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              profiles.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              profiles.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -214,13 +213,13 @@ public class Profile extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  profiles.add(loadJSON(entry.getValue().toString(), context));
+                  profiles.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              profiles.add(loadJSON(obj.toString(), context));
+              profiles.add(loadJSON(obj.toString(), context, header));
             }
           }
           return profiles;
@@ -228,7 +227,7 @@ public class Profile extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              profiles.add(loadJSON(entry.getValue().toString(), context));
+              profiles.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return profiles;
         } else {
@@ -247,7 +246,7 @@ public class Profile extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              profiles.add(loadJSON(value.toString(), context));
+              profiles.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -259,7 +258,7 @@ public class Profile extends APINode {
 
           // Sixth, check if it's pure JsonObject
           profiles.clear();
-          profiles.add(loadJSON(json, context));
+          profiles.add(loadJSON(json, context, header));
           return profiles;
         }
       }
@@ -351,9 +350,9 @@ public class Profile extends APINode {
     }
     public static final String[] PARAMS = {
       "height",
-      "redirect",
-      "type",
       "width",
+      "type",
+      "redirect",
     };
 
     public static final String[] FIELDS = {
@@ -366,11 +365,12 @@ public class Profile extends APINode {
       "top",
       "url",
       "width",
+      "id",
     };
 
     @Override
-    public APINodeList<ProfilePictureSource> parseResponse(String response) throws APIException {
-      return ProfilePictureSource.parseResponse(response, getContext(), this);
+    public APINodeList<ProfilePictureSource> parseResponse(String response, String header) throws APIException {
+      return ProfilePictureSource.parseResponse(response, getContext(), this, header);
     }
 
     @Override
@@ -380,7 +380,8 @@ public class Profile extends APINode {
 
     @Override
     public APINodeList<ProfilePictureSource> execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
       return lastResponse;
     }
 
@@ -391,10 +392,10 @@ public class Profile extends APINode {
     public ListenableFuture<APINodeList<ProfilePictureSource>> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINodeList<ProfilePictureSource>>() {
-           public APINodeList<ProfilePictureSource> apply(String result) {
+        new Function<ResponseWrapper, APINodeList<ProfilePictureSource>>() {
+           public APINodeList<ProfilePictureSource> apply(ResponseWrapper result) {
              try {
-               return APIRequestGetPicture.this.parseResponse(result);
+               return APIRequestGetPicture.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -429,12 +430,12 @@ public class Profile extends APINode {
       return this;
     }
 
-    public APIRequestGetPicture setRedirect (Boolean redirect) {
-      this.setParam("redirect", redirect);
+    public APIRequestGetPicture setWidth (Long width) {
+      this.setParam("width", width);
       return this;
     }
-    public APIRequestGetPicture setRedirect (String redirect) {
-      this.setParam("redirect", redirect);
+    public APIRequestGetPicture setWidth (String width) {
+      this.setParam("width", width);
       return this;
     }
 
@@ -447,12 +448,12 @@ public class Profile extends APINode {
       return this;
     }
 
-    public APIRequestGetPicture setWidth (Long width) {
-      this.setParam("width", width);
+    public APIRequestGetPicture setRedirect (Boolean redirect) {
+      this.setParam("redirect", redirect);
       return this;
     }
-    public APIRequestGetPicture setWidth (String width) {
-      this.setParam("width", width);
+    public APIRequestGetPicture setRedirect (String redirect) {
+      this.setParam("redirect", redirect);
       return this;
     }
 
@@ -555,6 +556,13 @@ public class Profile extends APINode {
       this.requestField("width", value);
       return this;
     }
+    public APIRequestGetPicture requestIdField () {
+      return this.requestIdField(true);
+    }
+    public APIRequestGetPicture requestIdField (boolean value) {
+      this.requestField("id", value);
+      return this;
+    }
   }
 
   public static class APIRequestGet extends APIRequest<Profile> {
@@ -582,8 +590,8 @@ public class Profile extends APINode {
     };
 
     @Override
-    public Profile parseResponse(String response) throws APIException {
-      return Profile.parseResponse(response, getContext(), this).head();
+    public Profile parseResponse(String response, String header) throws APIException {
+      return Profile.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -593,7 +601,8 @@ public class Profile extends APINode {
 
     @Override
     public Profile execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -604,10 +613,10 @@ public class Profile extends APINode {
     public ListenableFuture<Profile> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, Profile>() {
-           public Profile apply(String result) {
+        new Function<ResponseWrapper, Profile>() {
+           public Profile apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -773,6 +782,39 @@ public class Profile extends APINode {
       }
   }
 
+  public static enum EnumType {
+      @SerializedName("NONE")
+      VALUE_NONE("NONE"),
+      @SerializedName("LIKE")
+      VALUE_LIKE("LIKE"),
+      @SerializedName("LOVE")
+      VALUE_LOVE("LOVE"),
+      @SerializedName("WOW")
+      VALUE_WOW("WOW"),
+      @SerializedName("HAHA")
+      VALUE_HAHA("HAHA"),
+      @SerializedName("SAD")
+      VALUE_SAD("SAD"),
+      @SerializedName("ANGRY")
+      VALUE_ANGRY("ANGRY"),
+      @SerializedName("THANKFUL")
+      VALUE_THANKFUL("THANKFUL"),
+      @SerializedName("PRIDE")
+      VALUE_PRIDE("PRIDE"),
+      NULL(null);
+
+      private String value;
+
+      private EnumType(String value) {
+        this.value = value;
+      }
+
+      @Override
+      public String toString() {
+        return value;
+      }
+  }
+
 
   synchronized /*package*/ static Gson getGson() {
     if (gson != null) {
@@ -806,8 +848,8 @@ public class Profile extends APINode {
 
   public static APIRequest.ResponseParser<Profile> getParser() {
     return new APIRequest.ResponseParser<Profile>() {
-      public APINodeList<Profile> parseResponse(String response, APIContext context, APIRequest<Profile> request) throws MalformedResponseException {
-        return Profile.parseResponse(response, context, request);
+      public APINodeList<Profile> parseResponse(String response, APIContext context, APIRequest<Profile> request, String header) throws MalformedResponseException {
+        return Profile.parseResponse(response, context, request, header);
       }
     };
   }

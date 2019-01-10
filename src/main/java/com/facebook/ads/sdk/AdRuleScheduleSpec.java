@@ -59,15 +59,17 @@ public class AdRuleScheduleSpec extends APINode {
   private List<AdRuleSchedule> mSchedule = null;
   @SerializedName("schedule_type")
   private String mScheduleType = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdRuleScheduleSpec() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdRuleScheduleSpec loadJSON(String json, APIContext context) {
+  public static AdRuleScheduleSpec loadJSON(String json, APIContext context, String header) {
     AdRuleScheduleSpec adRuleScheduleSpec = getGson().fromJson(json, AdRuleScheduleSpec.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -84,11 +86,12 @@ public class AdRuleScheduleSpec extends APINode {
     }
     adRuleScheduleSpec.context = context;
     adRuleScheduleSpec.rawValue = json;
+    adRuleScheduleSpec.header = header;
     return adRuleScheduleSpec;
   }
 
-  public static APINodeList<AdRuleScheduleSpec> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdRuleScheduleSpec> adRuleScheduleSpecs = new APINodeList<AdRuleScheduleSpec>(request, json);
+  public static APINodeList<AdRuleScheduleSpec> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdRuleScheduleSpec> adRuleScheduleSpecs = new APINodeList<AdRuleScheduleSpec>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -99,7 +102,7 @@ public class AdRuleScheduleSpec extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adRuleScheduleSpecs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adRuleScheduleSpecs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adRuleScheduleSpecs;
       } else if (result.isJsonObject()) {
@@ -124,7 +127,7 @@ public class AdRuleScheduleSpec extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adRuleScheduleSpecs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adRuleScheduleSpecs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -135,13 +138,13 @@ public class AdRuleScheduleSpec extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adRuleScheduleSpecs.add(loadJSON(entry.getValue().toString(), context));
+                  adRuleScheduleSpecs.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adRuleScheduleSpecs.add(loadJSON(obj.toString(), context));
+              adRuleScheduleSpecs.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adRuleScheduleSpecs;
@@ -149,7 +152,7 @@ public class AdRuleScheduleSpec extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adRuleScheduleSpecs.add(loadJSON(entry.getValue().toString(), context));
+              adRuleScheduleSpecs.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adRuleScheduleSpecs;
         } else {
@@ -168,7 +171,7 @@ public class AdRuleScheduleSpec extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adRuleScheduleSpecs.add(loadJSON(value.toString(), context));
+              adRuleScheduleSpecs.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -180,7 +183,7 @@ public class AdRuleScheduleSpec extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adRuleScheduleSpecs.clear();
-          adRuleScheduleSpecs.add(loadJSON(json, context));
+          adRuleScheduleSpecs.add(loadJSON(json, context, header));
           return adRuleScheduleSpecs;
         }
       }
@@ -232,6 +235,15 @@ public class AdRuleScheduleSpec extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AdRuleScheduleSpec setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -251,6 +263,7 @@ public class AdRuleScheduleSpec extends APINode {
   public AdRuleScheduleSpec copyFrom(AdRuleScheduleSpec instance) {
     this.mSchedule = instance.mSchedule;
     this.mScheduleType = instance.mScheduleType;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -258,8 +271,8 @@ public class AdRuleScheduleSpec extends APINode {
 
   public static APIRequest.ResponseParser<AdRuleScheduleSpec> getParser() {
     return new APIRequest.ResponseParser<AdRuleScheduleSpec>() {
-      public APINodeList<AdRuleScheduleSpec> parseResponse(String response, APIContext context, APIRequest<AdRuleScheduleSpec> request) throws MalformedResponseException {
-        return AdRuleScheduleSpec.parseResponse(response, context, request);
+      public APINodeList<AdRuleScheduleSpec> parseResponse(String response, APIContext context, APIRequest<AdRuleScheduleSpec> request, String header) throws MalformedResponseException {
+        return AdRuleScheduleSpec.parseResponse(response, context, request, header);
       }
     };
   }

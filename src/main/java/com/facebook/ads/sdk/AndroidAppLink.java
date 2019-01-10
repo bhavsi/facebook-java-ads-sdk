@@ -63,15 +63,17 @@ public class AndroidAppLink extends APINode {
   private String mPackage = null;
   @SerializedName("url")
   private String mUrl = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AndroidAppLink() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AndroidAppLink loadJSON(String json, APIContext context) {
+  public static AndroidAppLink loadJSON(String json, APIContext context, String header) {
     AndroidAppLink androidAppLink = getGson().fromJson(json, AndroidAppLink.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -88,11 +90,12 @@ public class AndroidAppLink extends APINode {
     }
     androidAppLink.context = context;
     androidAppLink.rawValue = json;
+    androidAppLink.header = header;
     return androidAppLink;
   }
 
-  public static APINodeList<AndroidAppLink> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AndroidAppLink> androidAppLinks = new APINodeList<AndroidAppLink>(request, json);
+  public static APINodeList<AndroidAppLink> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AndroidAppLink> androidAppLinks = new APINodeList<AndroidAppLink>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -103,7 +106,7 @@ public class AndroidAppLink extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          androidAppLinks.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          androidAppLinks.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return androidAppLinks;
       } else if (result.isJsonObject()) {
@@ -128,7 +131,7 @@ public class AndroidAppLink extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              androidAppLinks.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              androidAppLinks.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -139,13 +142,13 @@ public class AndroidAppLink extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  androidAppLinks.add(loadJSON(entry.getValue().toString(), context));
+                  androidAppLinks.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              androidAppLinks.add(loadJSON(obj.toString(), context));
+              androidAppLinks.add(loadJSON(obj.toString(), context, header));
             }
           }
           return androidAppLinks;
@@ -153,7 +156,7 @@ public class AndroidAppLink extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              androidAppLinks.add(loadJSON(entry.getValue().toString(), context));
+              androidAppLinks.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return androidAppLinks;
         } else {
@@ -172,7 +175,7 @@ public class AndroidAppLink extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              androidAppLinks.add(loadJSON(value.toString(), context));
+              androidAppLinks.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -184,7 +187,7 @@ public class AndroidAppLink extends APINode {
 
           // Sixth, check if it's pure JsonObject
           androidAppLinks.clear();
-          androidAppLinks.add(loadJSON(json, context));
+          androidAppLinks.add(loadJSON(json, context, header));
           return androidAppLinks;
         }
       }
@@ -249,6 +252,15 @@ public class AndroidAppLink extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AndroidAppLink setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -270,6 +282,7 @@ public class AndroidAppLink extends APINode {
     this.mClass = instance.mClass;
     this.mPackage = instance.mPackage;
     this.mUrl = instance.mUrl;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -277,8 +290,8 @@ public class AndroidAppLink extends APINode {
 
   public static APIRequest.ResponseParser<AndroidAppLink> getParser() {
     return new APIRequest.ResponseParser<AndroidAppLink>() {
-      public APINodeList<AndroidAppLink> parseResponse(String response, APIContext context, APIRequest<AndroidAppLink> request) throws MalformedResponseException {
-        return AndroidAppLink.parseResponse(response, context, request);
+      public APINodeList<AndroidAppLink> parseResponse(String response, APIContext context, APIRequest<AndroidAppLink> request, String header) throws MalformedResponseException {
+        return AndroidAppLink.parseResponse(response, context, request, header);
       }
     };
   }

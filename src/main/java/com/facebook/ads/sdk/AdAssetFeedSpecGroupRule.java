@@ -69,15 +69,17 @@ public class AdAssetFeedSpecGroupRule extends APINode {
   private AdAssetFeedSpecAssetLabel mTitleLabel = null;
   @SerializedName("video_label")
   private AdAssetFeedSpecAssetLabel mVideoLabel = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdAssetFeedSpecGroupRule() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdAssetFeedSpecGroupRule loadJSON(String json, APIContext context) {
+  public static AdAssetFeedSpecGroupRule loadJSON(String json, APIContext context, String header) {
     AdAssetFeedSpecGroupRule adAssetFeedSpecGroupRule = getGson().fromJson(json, AdAssetFeedSpecGroupRule.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -94,11 +96,12 @@ public class AdAssetFeedSpecGroupRule extends APINode {
     }
     adAssetFeedSpecGroupRule.context = context;
     adAssetFeedSpecGroupRule.rawValue = json;
+    adAssetFeedSpecGroupRule.header = header;
     return adAssetFeedSpecGroupRule;
   }
 
-  public static APINodeList<AdAssetFeedSpecGroupRule> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdAssetFeedSpecGroupRule> adAssetFeedSpecGroupRules = new APINodeList<AdAssetFeedSpecGroupRule>(request, json);
+  public static APINodeList<AdAssetFeedSpecGroupRule> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdAssetFeedSpecGroupRule> adAssetFeedSpecGroupRules = new APINodeList<AdAssetFeedSpecGroupRule>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -109,7 +112,7 @@ public class AdAssetFeedSpecGroupRule extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adAssetFeedSpecGroupRules.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adAssetFeedSpecGroupRules.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adAssetFeedSpecGroupRules;
       } else if (result.isJsonObject()) {
@@ -134,7 +137,7 @@ public class AdAssetFeedSpecGroupRule extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adAssetFeedSpecGroupRules.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adAssetFeedSpecGroupRules.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -145,13 +148,13 @@ public class AdAssetFeedSpecGroupRule extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adAssetFeedSpecGroupRules.add(loadJSON(entry.getValue().toString(), context));
+                  adAssetFeedSpecGroupRules.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adAssetFeedSpecGroupRules.add(loadJSON(obj.toString(), context));
+              adAssetFeedSpecGroupRules.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adAssetFeedSpecGroupRules;
@@ -159,7 +162,7 @@ public class AdAssetFeedSpecGroupRule extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adAssetFeedSpecGroupRules.add(loadJSON(entry.getValue().toString(), context));
+              adAssetFeedSpecGroupRules.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adAssetFeedSpecGroupRules;
         } else {
@@ -178,7 +181,7 @@ public class AdAssetFeedSpecGroupRule extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adAssetFeedSpecGroupRules.add(loadJSON(value.toString(), context));
+              adAssetFeedSpecGroupRules.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -190,7 +193,7 @@ public class AdAssetFeedSpecGroupRule extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adAssetFeedSpecGroupRules.clear();
-          adAssetFeedSpecGroupRules.add(loadJSON(json, context));
+          adAssetFeedSpecGroupRules.add(loadJSON(json, context, header));
           return adAssetFeedSpecGroupRules;
         }
       }
@@ -317,6 +320,15 @@ public class AdAssetFeedSpecGroupRule extends APINode {
     this.mVideoLabel = AdAssetFeedSpecAssetLabel.getGson().fromJson(value, type);
     return this;
   }
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AdAssetFeedSpecGroupRule setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -341,6 +353,7 @@ public class AdAssetFeedSpecGroupRule extends APINode {
     this.mLinkUrlLabel = instance.mLinkUrlLabel;
     this.mTitleLabel = instance.mTitleLabel;
     this.mVideoLabel = instance.mVideoLabel;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -348,8 +361,8 @@ public class AdAssetFeedSpecGroupRule extends APINode {
 
   public static APIRequest.ResponseParser<AdAssetFeedSpecGroupRule> getParser() {
     return new APIRequest.ResponseParser<AdAssetFeedSpecGroupRule>() {
-      public APINodeList<AdAssetFeedSpecGroupRule> parseResponse(String response, APIContext context, APIRequest<AdAssetFeedSpecGroupRule> request) throws MalformedResponseException {
-        return AdAssetFeedSpecGroupRule.parseResponse(response, context, request);
+      public APINodeList<AdAssetFeedSpecGroupRule> parseResponse(String response, APIContext context, APIRequest<AdAssetFeedSpecGroupRule> request, String header) throws MalformedResponseException {
+        return AdAssetFeedSpecGroupRule.parseResponse(response, context, request, header);
       }
     };
   }

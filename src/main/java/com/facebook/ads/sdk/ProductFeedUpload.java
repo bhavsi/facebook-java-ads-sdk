@@ -59,6 +59,8 @@ public class ProductFeedUpload extends APINode {
   private String mEndTime = null;
   @SerializedName("error_count")
   private Long mErrorCount = null;
+  @SerializedName("error_report")
+  private ProductFeedUploadErrorReport mErrorReport = null;
   @SerializedName("filename")
   private String mFilename = null;
   @SerializedName("id")
@@ -90,6 +92,7 @@ public class ProductFeedUpload extends APINode {
 
   public ProductFeedUpload(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -108,19 +111,17 @@ public class ProductFeedUpload extends APINode {
   }
 
   public static ProductFeedUpload fetchById(String id, APIContext context) throws APIException {
-    ProductFeedUpload productFeedUpload =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return productFeedUpload;
   }
 
   public static ListenableFuture<ProductFeedUpload> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<ProductFeedUpload> productFeedUpload =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return productFeedUpload;
   }
 
   public static APINodeList<ProductFeedUpload> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -133,12 +134,11 @@ public class ProductFeedUpload extends APINode {
   }
 
   public static ListenableFuture<APINodeList<ProductFeedUpload>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<ProductFeedUpload>> productFeedUpload =
+    return
       new APIRequest(context, "", "/", "GET", ProductFeedUpload.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return productFeedUpload;
   }
 
   private String getPrefixedId() {
@@ -148,7 +148,7 @@ public class ProductFeedUpload extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static ProductFeedUpload loadJSON(String json, APIContext context) {
+  public static ProductFeedUpload loadJSON(String json, APIContext context, String header) {
     ProductFeedUpload productFeedUpload = getGson().fromJson(json, ProductFeedUpload.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -165,11 +165,12 @@ public class ProductFeedUpload extends APINode {
     }
     productFeedUpload.context = context;
     productFeedUpload.rawValue = json;
+    productFeedUpload.header = header;
     return productFeedUpload;
   }
 
-  public static APINodeList<ProductFeedUpload> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<ProductFeedUpload> productFeedUploads = new APINodeList<ProductFeedUpload>(request, json);
+  public static APINodeList<ProductFeedUpload> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<ProductFeedUpload> productFeedUploads = new APINodeList<ProductFeedUpload>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -180,7 +181,7 @@ public class ProductFeedUpload extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          productFeedUploads.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          productFeedUploads.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return productFeedUploads;
       } else if (result.isJsonObject()) {
@@ -205,7 +206,7 @@ public class ProductFeedUpload extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              productFeedUploads.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              productFeedUploads.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -216,13 +217,13 @@ public class ProductFeedUpload extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  productFeedUploads.add(loadJSON(entry.getValue().toString(), context));
+                  productFeedUploads.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              productFeedUploads.add(loadJSON(obj.toString(), context));
+              productFeedUploads.add(loadJSON(obj.toString(), context, header));
             }
           }
           return productFeedUploads;
@@ -230,7 +231,7 @@ public class ProductFeedUpload extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              productFeedUploads.add(loadJSON(entry.getValue().toString(), context));
+              productFeedUploads.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return productFeedUploads;
         } else {
@@ -249,7 +250,7 @@ public class ProductFeedUpload extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              productFeedUploads.add(loadJSON(value.toString(), context));
+              productFeedUploads.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -261,7 +262,7 @@ public class ProductFeedUpload extends APINode {
 
           // Sixth, check if it's pure JsonObject
           productFeedUploads.clear();
-          productFeedUploads.add(loadJSON(json, context));
+          productFeedUploads.add(loadJSON(json, context, header));
           return productFeedUploads;
         }
       }
@@ -289,6 +290,10 @@ public class ProductFeedUpload extends APINode {
     return getGson().toJson(this);
   }
 
+  public APIRequestCreateErrorReport createErrorReport() {
+    return new APIRequestCreateErrorReport(this.getPrefixedId().toString(), context);
+  }
+
   public APIRequestGetErrors getErrors() {
     return new APIRequestGetErrors(this.getPrefixedId().toString(), context);
   }
@@ -304,6 +309,10 @@ public class ProductFeedUpload extends APINode {
 
   public Long getFieldErrorCount() {
     return mErrorCount;
+  }
+
+  public ProductFeedUploadErrorReport getFieldErrorReport() {
+    return mErrorReport;
   }
 
   public String getFieldFilename() {
@@ -348,6 +357,110 @@ public class ProductFeedUpload extends APINode {
 
 
 
+  public static class APIRequestCreateErrorReport extends APIRequest<ProductFeedUpload> {
+
+    ProductFeedUpload lastResponse = null;
+    @Override
+    public ProductFeedUpload getLastResponse() {
+      return lastResponse;
+    }
+    public static final String[] PARAMS = {
+    };
+
+    public static final String[] FIELDS = {
+    };
+
+    @Override
+    public ProductFeedUpload parseResponse(String response, String header) throws APIException {
+      return ProductFeedUpload.parseResponse(response, getContext(), this, header).head();
+    }
+
+    @Override
+    public ProductFeedUpload execute() throws APIException {
+      return execute(new HashMap<String, Object>());
+    }
+
+    @Override
+    public ProductFeedUpload execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
+      return lastResponse;
+    }
+
+    public ListenableFuture<ProductFeedUpload> executeAsync() throws APIException {
+      return executeAsync(new HashMap<String, Object>());
+    };
+
+    public ListenableFuture<ProductFeedUpload> executeAsync(Map<String, Object> extraParams) throws APIException {
+      return Futures.transform(
+        executeAsyncInternal(extraParams),
+        new Function<ResponseWrapper, ProductFeedUpload>() {
+           public ProductFeedUpload apply(ResponseWrapper result) {
+             try {
+               return APIRequestCreateErrorReport.this.parseResponse(result.getBody(), result.getHeader());
+             } catch (Exception e) {
+               throw new RuntimeException(e);
+             }
+           }
+         }
+      );
+    };
+
+    public APIRequestCreateErrorReport(String nodeId, APIContext context) {
+      super(context, nodeId, "/error_report", "POST", Arrays.asList(PARAMS));
+    }
+
+    @Override
+    public APIRequestCreateErrorReport setParam(String param, Object value) {
+      setParamInternal(param, value);
+      return this;
+    }
+
+    @Override
+    public APIRequestCreateErrorReport setParams(Map<String, Object> params) {
+      setParamsInternal(params);
+      return this;
+    }
+
+
+    public APIRequestCreateErrorReport requestAllFields () {
+      return this.requestAllFields(true);
+    }
+
+    public APIRequestCreateErrorReport requestAllFields (boolean value) {
+      for (String field : FIELDS) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestCreateErrorReport requestFields (List<String> fields) {
+      return this.requestFields(fields, true);
+    }
+
+    @Override
+    public APIRequestCreateErrorReport requestFields (List<String> fields, boolean value) {
+      for (String field : fields) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestCreateErrorReport requestField (String field) {
+      this.requestField(field, true);
+      return this;
+    }
+
+    @Override
+    public APIRequestCreateErrorReport requestField (String field, boolean value) {
+      this.requestFieldInternal(field, value);
+      return this;
+    }
+
+  }
+
   public static class APIRequestGetErrors extends APIRequest<ProductFeedUploadError> {
 
     APINodeList<ProductFeedUploadError> lastResponse = null;
@@ -369,8 +482,8 @@ public class ProductFeedUpload extends APINode {
     };
 
     @Override
-    public APINodeList<ProductFeedUploadError> parseResponse(String response) throws APIException {
-      return ProductFeedUploadError.parseResponse(response, getContext(), this);
+    public APINodeList<ProductFeedUploadError> parseResponse(String response, String header) throws APIException {
+      return ProductFeedUploadError.parseResponse(response, getContext(), this, header);
     }
 
     @Override
@@ -380,7 +493,8 @@ public class ProductFeedUpload extends APINode {
 
     @Override
     public APINodeList<ProductFeedUploadError> execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
       return lastResponse;
     }
 
@@ -391,10 +505,10 @@ public class ProductFeedUpload extends APINode {
     public ListenableFuture<APINodeList<ProductFeedUploadError>> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, APINodeList<ProductFeedUploadError>>() {
-           public APINodeList<ProductFeedUploadError> apply(String result) {
+        new Function<ResponseWrapper, APINodeList<ProductFeedUploadError>>() {
+           public APINodeList<ProductFeedUploadError> apply(ResponseWrapper result) {
              try {
-               return APIRequestGetErrors.this.parseResponse(result);
+               return APIRequestGetErrors.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -520,6 +634,7 @@ public class ProductFeedUpload extends APINode {
     public static final String[] FIELDS = {
       "end_time",
       "error_count",
+      "error_report",
       "filename",
       "id",
       "input_method",
@@ -533,8 +648,8 @@ public class ProductFeedUpload extends APINode {
     };
 
     @Override
-    public ProductFeedUpload parseResponse(String response) throws APIException {
-      return ProductFeedUpload.parseResponse(response, getContext(), this).head();
+    public ProductFeedUpload parseResponse(String response, String header) throws APIException {
+      return ProductFeedUpload.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -544,7 +659,8 @@ public class ProductFeedUpload extends APINode {
 
     @Override
     public ProductFeedUpload execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -555,10 +671,10 @@ public class ProductFeedUpload extends APINode {
     public ListenableFuture<ProductFeedUpload> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, ProductFeedUpload>() {
-           public ProductFeedUpload apply(String result) {
+        new Function<ResponseWrapper, ProductFeedUpload>() {
+           public ProductFeedUpload apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -632,6 +748,13 @@ public class ProductFeedUpload extends APINode {
     }
     public APIRequestGet requestErrorCountField (boolean value) {
       this.requestField("error_count", value);
+      return this;
+    }
+    public APIRequestGet requestErrorReportField () {
+      return this.requestErrorReportField(true);
+    }
+    public APIRequestGet requestErrorReportField (boolean value) {
+      this.requestField("error_report", value);
       return this;
     }
     public APIRequestGet requestFilenameField () {
@@ -746,6 +869,7 @@ public class ProductFeedUpload extends APINode {
   public ProductFeedUpload copyFrom(ProductFeedUpload instance) {
     this.mEndTime = instance.mEndTime;
     this.mErrorCount = instance.mErrorCount;
+    this.mErrorReport = instance.mErrorReport;
     this.mFilename = instance.mFilename;
     this.mId = instance.mId;
     this.mInputMethod = instance.mInputMethod;
@@ -763,8 +887,8 @@ public class ProductFeedUpload extends APINode {
 
   public static APIRequest.ResponseParser<ProductFeedUpload> getParser() {
     return new APIRequest.ResponseParser<ProductFeedUpload>() {
-      public APINodeList<ProductFeedUpload> parseResponse(String response, APIContext context, APIRequest<ProductFeedUpload> request) throws MalformedResponseException {
-        return ProductFeedUpload.parseResponse(response, context, request);
+      public APINodeList<ProductFeedUpload> parseResponse(String response, APIContext context, APIRequest<ProductFeedUpload> request, String header) throws MalformedResponseException {
+        return ProductFeedUpload.parseResponse(response, context, request, header);
       }
     };
   }

@@ -63,15 +63,17 @@ public class AdgroupRelevanceScore extends APINode {
   private String mScore = null;
   @SerializedName("status")
   private String mStatus = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdgroupRelevanceScore() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdgroupRelevanceScore loadJSON(String json, APIContext context) {
+  public static AdgroupRelevanceScore loadJSON(String json, APIContext context, String header) {
     AdgroupRelevanceScore adgroupRelevanceScore = getGson().fromJson(json, AdgroupRelevanceScore.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -88,11 +90,12 @@ public class AdgroupRelevanceScore extends APINode {
     }
     adgroupRelevanceScore.context = context;
     adgroupRelevanceScore.rawValue = json;
+    adgroupRelevanceScore.header = header;
     return adgroupRelevanceScore;
   }
 
-  public static APINodeList<AdgroupRelevanceScore> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdgroupRelevanceScore> adgroupRelevanceScores = new APINodeList<AdgroupRelevanceScore>(request, json);
+  public static APINodeList<AdgroupRelevanceScore> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdgroupRelevanceScore> adgroupRelevanceScores = new APINodeList<AdgroupRelevanceScore>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -103,7 +106,7 @@ public class AdgroupRelevanceScore extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adgroupRelevanceScores.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adgroupRelevanceScores.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adgroupRelevanceScores;
       } else if (result.isJsonObject()) {
@@ -128,7 +131,7 @@ public class AdgroupRelevanceScore extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adgroupRelevanceScores.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adgroupRelevanceScores.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -139,13 +142,13 @@ public class AdgroupRelevanceScore extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adgroupRelevanceScores.add(loadJSON(entry.getValue().toString(), context));
+                  adgroupRelevanceScores.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adgroupRelevanceScores.add(loadJSON(obj.toString(), context));
+              adgroupRelevanceScores.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adgroupRelevanceScores;
@@ -153,7 +156,7 @@ public class AdgroupRelevanceScore extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adgroupRelevanceScores.add(loadJSON(entry.getValue().toString(), context));
+              adgroupRelevanceScores.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adgroupRelevanceScores;
         } else {
@@ -172,7 +175,7 @@ public class AdgroupRelevanceScore extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adgroupRelevanceScores.add(loadJSON(value.toString(), context));
+              adgroupRelevanceScores.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -184,7 +187,7 @@ public class AdgroupRelevanceScore extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adgroupRelevanceScores.clear();
-          adgroupRelevanceScores.add(loadJSON(json, context));
+          adgroupRelevanceScores.add(loadJSON(json, context, header));
           return adgroupRelevanceScores;
         }
       }
@@ -249,6 +252,15 @@ public class AdgroupRelevanceScore extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AdgroupRelevanceScore setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -270,6 +282,7 @@ public class AdgroupRelevanceScore extends APINode {
     this.mPositiveFeedback = instance.mPositiveFeedback;
     this.mScore = instance.mScore;
     this.mStatus = instance.mStatus;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -277,8 +290,8 @@ public class AdgroupRelevanceScore extends APINode {
 
   public static APIRequest.ResponseParser<AdgroupRelevanceScore> getParser() {
     return new APIRequest.ResponseParser<AdgroupRelevanceScore>() {
-      public APINodeList<AdgroupRelevanceScore> parseResponse(String response, APIContext context, APIRequest<AdgroupRelevanceScore> request) throws MalformedResponseException {
-        return AdgroupRelevanceScore.parseResponse(response, context, request);
+      public APINodeList<AdgroupRelevanceScore> parseResponse(String response, APIContext context, APIRequest<AdgroupRelevanceScore> request, String header) throws MalformedResponseException {
+        return AdgroupRelevanceScore.parseResponse(response, context, request, header);
       }
     };
   }

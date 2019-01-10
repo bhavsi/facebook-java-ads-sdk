@@ -61,15 +61,17 @@ public class ProductDaEventSamplesBatch extends APINode {
   private Long mTimeStart = null;
   @SerializedName("time_stop")
   private Long mTimeStop = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public ProductDaEventSamplesBatch() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static ProductDaEventSamplesBatch loadJSON(String json, APIContext context) {
+  public static ProductDaEventSamplesBatch loadJSON(String json, APIContext context, String header) {
     ProductDaEventSamplesBatch productDaEventSamplesBatch = getGson().fromJson(json, ProductDaEventSamplesBatch.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -86,11 +88,12 @@ public class ProductDaEventSamplesBatch extends APINode {
     }
     productDaEventSamplesBatch.context = context;
     productDaEventSamplesBatch.rawValue = json;
+    productDaEventSamplesBatch.header = header;
     return productDaEventSamplesBatch;
   }
 
-  public static APINodeList<ProductDaEventSamplesBatch> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<ProductDaEventSamplesBatch> productDaEventSamplesBatchs = new APINodeList<ProductDaEventSamplesBatch>(request, json);
+  public static APINodeList<ProductDaEventSamplesBatch> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<ProductDaEventSamplesBatch> productDaEventSamplesBatchs = new APINodeList<ProductDaEventSamplesBatch>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -101,7 +104,7 @@ public class ProductDaEventSamplesBatch extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          productDaEventSamplesBatchs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          productDaEventSamplesBatchs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return productDaEventSamplesBatchs;
       } else if (result.isJsonObject()) {
@@ -126,7 +129,7 @@ public class ProductDaEventSamplesBatch extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              productDaEventSamplesBatchs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              productDaEventSamplesBatchs.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -137,13 +140,13 @@ public class ProductDaEventSamplesBatch extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  productDaEventSamplesBatchs.add(loadJSON(entry.getValue().toString(), context));
+                  productDaEventSamplesBatchs.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              productDaEventSamplesBatchs.add(loadJSON(obj.toString(), context));
+              productDaEventSamplesBatchs.add(loadJSON(obj.toString(), context, header));
             }
           }
           return productDaEventSamplesBatchs;
@@ -151,7 +154,7 @@ public class ProductDaEventSamplesBatch extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              productDaEventSamplesBatchs.add(loadJSON(entry.getValue().toString(), context));
+              productDaEventSamplesBatchs.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return productDaEventSamplesBatchs;
         } else {
@@ -170,7 +173,7 @@ public class ProductDaEventSamplesBatch extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              productDaEventSamplesBatchs.add(loadJSON(value.toString(), context));
+              productDaEventSamplesBatchs.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -182,7 +185,7 @@ public class ProductDaEventSamplesBatch extends APINode {
 
           // Sixth, check if it's pure JsonObject
           productDaEventSamplesBatchs.clear();
-          productDaEventSamplesBatchs.add(loadJSON(json, context));
+          productDaEventSamplesBatchs.add(loadJSON(json, context, header));
           return productDaEventSamplesBatchs;
         }
       }
@@ -235,6 +238,15 @@ public class ProductDaEventSamplesBatch extends APINode {
 
   public ProductDaEventSamplesBatch setFieldTimeStop(Long value) {
     this.mTimeStop = value;
+    return this;
+  }
+
+  public String getFieldId() {
+    return mId;
+  }
+
+  public ProductDaEventSamplesBatch setFieldId(String value) {
+    this.mId = value;
     return this;
   }
 
@@ -306,6 +318,7 @@ public class ProductDaEventSamplesBatch extends APINode {
     this.mSamples = instance.mSamples;
     this.mTimeStart = instance.mTimeStart;
     this.mTimeStop = instance.mTimeStop;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -313,8 +326,8 @@ public class ProductDaEventSamplesBatch extends APINode {
 
   public static APIRequest.ResponseParser<ProductDaEventSamplesBatch> getParser() {
     return new APIRequest.ResponseParser<ProductDaEventSamplesBatch>() {
-      public APINodeList<ProductDaEventSamplesBatch> parseResponse(String response, APIContext context, APIRequest<ProductDaEventSamplesBatch> request) throws MalformedResponseException {
-        return ProductDaEventSamplesBatch.parseResponse(response, context, request);
+      public APINodeList<ProductDaEventSamplesBatch> parseResponse(String response, APIContext context, APIRequest<ProductDaEventSamplesBatch> request, String header) throws MalformedResponseException {
+        return ProductDaEventSamplesBatch.parseResponse(response, context, request, header);
       }
     };
   }

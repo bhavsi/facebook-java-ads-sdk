@@ -72,6 +72,7 @@ public class AdsDataPartner extends APINode {
 
   public AdsDataPartner(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -90,19 +91,17 @@ public class AdsDataPartner extends APINode {
   }
 
   public static AdsDataPartner fetchById(String id, APIContext context) throws APIException {
-    AdsDataPartner adsDataPartner =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return adsDataPartner;
   }
 
   public static ListenableFuture<AdsDataPartner> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<AdsDataPartner> adsDataPartner =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return adsDataPartner;
   }
 
   public static APINodeList<AdsDataPartner> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -115,12 +114,11 @@ public class AdsDataPartner extends APINode {
   }
 
   public static ListenableFuture<APINodeList<AdsDataPartner>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<AdsDataPartner>> adsDataPartner =
+    return
       new APIRequest(context, "", "/", "GET", AdsDataPartner.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return adsDataPartner;
   }
 
   private String getPrefixedId() {
@@ -130,7 +128,7 @@ public class AdsDataPartner extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static AdsDataPartner loadJSON(String json, APIContext context) {
+  public static AdsDataPartner loadJSON(String json, APIContext context, String header) {
     AdsDataPartner adsDataPartner = getGson().fromJson(json, AdsDataPartner.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -147,11 +145,12 @@ public class AdsDataPartner extends APINode {
     }
     adsDataPartner.context = context;
     adsDataPartner.rawValue = json;
+    adsDataPartner.header = header;
     return adsDataPartner;
   }
 
-  public static APINodeList<AdsDataPartner> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdsDataPartner> adsDataPartners = new APINodeList<AdsDataPartner>(request, json);
+  public static APINodeList<AdsDataPartner> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdsDataPartner> adsDataPartners = new APINodeList<AdsDataPartner>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -162,7 +161,7 @@ public class AdsDataPartner extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adsDataPartners.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adsDataPartners.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adsDataPartners;
       } else if (result.isJsonObject()) {
@@ -187,7 +186,7 @@ public class AdsDataPartner extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adsDataPartners.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adsDataPartners.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -198,13 +197,13 @@ public class AdsDataPartner extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adsDataPartners.add(loadJSON(entry.getValue().toString(), context));
+                  adsDataPartners.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adsDataPartners.add(loadJSON(obj.toString(), context));
+              adsDataPartners.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adsDataPartners;
@@ -212,7 +211,7 @@ public class AdsDataPartner extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adsDataPartners.add(loadJSON(entry.getValue().toString(), context));
+              adsDataPartners.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adsDataPartners;
         } else {
@@ -231,7 +230,7 @@ public class AdsDataPartner extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adsDataPartners.add(loadJSON(value.toString(), context));
+              adsDataPartners.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -243,7 +242,7 @@ public class AdsDataPartner extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adsDataPartners.clear();
-          adsDataPartners.add(loadJSON(json, context));
+          adsDataPartners.add(loadJSON(json, context, header));
           return adsDataPartners;
         }
       }
@@ -271,6 +270,10 @@ public class AdsDataPartner extends APINode {
     return getGson().toJson(this);
   }
 
+  public APIRequestDeleteUsersOfAnyAudience deleteUsersOfAnyAudience() {
+    return new APIRequestDeleteUsersOfAnyAudience(this.getPrefixedId().toString(), context);
+  }
+
   public APIRequestGet get() {
     return new APIRequestGet(this.getPrefixedId().toString(), context);
   }
@@ -290,6 +293,120 @@ public class AdsDataPartner extends APINode {
 
 
 
+  public static class APIRequestDeleteUsersOfAnyAudience extends APIRequest<APINode> {
+
+    APINodeList<APINode> lastResponse = null;
+    @Override
+    public APINodeList<APINode> getLastResponse() {
+      return lastResponse;
+    }
+    public static final String[] PARAMS = {
+      "external_ids",
+    };
+
+    public static final String[] FIELDS = {
+    };
+
+    @Override
+    public APINodeList<APINode> parseResponse(String response, String header) throws APIException {
+      return APINode.parseResponse(response, getContext(), this, header);
+    }
+
+    @Override
+    public APINodeList<APINode> execute() throws APIException {
+      return execute(new HashMap<String, Object>());
+    }
+
+    @Override
+    public APINodeList<APINode> execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(),rw.getHeader());
+      return lastResponse;
+    }
+
+    public ListenableFuture<APINodeList<APINode>> executeAsync() throws APIException {
+      return executeAsync(new HashMap<String, Object>());
+    };
+
+    public ListenableFuture<APINodeList<APINode>> executeAsync(Map<String, Object> extraParams) throws APIException {
+      return Futures.transform(
+        executeAsyncInternal(extraParams),
+        new Function<ResponseWrapper, APINodeList<APINode>>() {
+           public APINodeList<APINode> apply(ResponseWrapper result) {
+             try {
+               return APIRequestDeleteUsersOfAnyAudience.this.parseResponse(result.getBody(), result.getHeader());
+             } catch (Exception e) {
+               throw new RuntimeException(e);
+             }
+           }
+         }
+      );
+    };
+
+    public APIRequestDeleteUsersOfAnyAudience(String nodeId, APIContext context) {
+      super(context, nodeId, "/usersofanyaudience", "DELETE", Arrays.asList(PARAMS));
+    }
+
+    @Override
+    public APIRequestDeleteUsersOfAnyAudience setParam(String param, Object value) {
+      setParamInternal(param, value);
+      return this;
+    }
+
+    @Override
+    public APIRequestDeleteUsersOfAnyAudience setParams(Map<String, Object> params) {
+      setParamsInternal(params);
+      return this;
+    }
+
+
+    public APIRequestDeleteUsersOfAnyAudience setExternalIds (List<String> externalIds) {
+      this.setParam("external_ids", externalIds);
+      return this;
+    }
+    public APIRequestDeleteUsersOfAnyAudience setExternalIds (String externalIds) {
+      this.setParam("external_ids", externalIds);
+      return this;
+    }
+
+    public APIRequestDeleteUsersOfAnyAudience requestAllFields () {
+      return this.requestAllFields(true);
+    }
+
+    public APIRequestDeleteUsersOfAnyAudience requestAllFields (boolean value) {
+      for (String field : FIELDS) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestDeleteUsersOfAnyAudience requestFields (List<String> fields) {
+      return this.requestFields(fields, true);
+    }
+
+    @Override
+    public APIRequestDeleteUsersOfAnyAudience requestFields (List<String> fields, boolean value) {
+      for (String field : fields) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestDeleteUsersOfAnyAudience requestField (String field) {
+      this.requestField(field, true);
+      return this;
+    }
+
+    @Override
+    public APIRequestDeleteUsersOfAnyAudience requestField (String field, boolean value) {
+      this.requestFieldInternal(field, value);
+      return this;
+    }
+
+  }
+
   public static class APIRequestGet extends APIRequest<AdsDataPartner> {
 
     AdsDataPartner lastResponse = null;
@@ -307,8 +424,8 @@ public class AdsDataPartner extends APINode {
     };
 
     @Override
-    public AdsDataPartner parseResponse(String response) throws APIException {
-      return AdsDataPartner.parseResponse(response, getContext(), this).head();
+    public AdsDataPartner parseResponse(String response, String header) throws APIException {
+      return AdsDataPartner.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -318,7 +435,8 @@ public class AdsDataPartner extends APINode {
 
     @Override
     public AdsDataPartner execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -329,10 +447,10 @@ public class AdsDataPartner extends APINode {
     public ListenableFuture<AdsDataPartner> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, AdsDataPartner>() {
-           public AdsDataPartner apply(String result) {
+        new Function<ResponseWrapper, AdsDataPartner>() {
+           public AdsDataPartner apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -442,8 +560,8 @@ public class AdsDataPartner extends APINode {
 
   public static APIRequest.ResponseParser<AdsDataPartner> getParser() {
     return new APIRequest.ResponseParser<AdsDataPartner>() {
-      public APINodeList<AdsDataPartner> parseResponse(String response, APIContext context, APIRequest<AdsDataPartner> request) throws MalformedResponseException {
-        return AdsDataPartner.parseResponse(response, context, request);
+      public APINodeList<AdsDataPartner> parseResponse(String response, APIContext context, APIRequest<AdsDataPartner> request, String header) throws MalformedResponseException {
+        return AdsDataPartner.parseResponse(response, context, request, header);
       }
     };
   }

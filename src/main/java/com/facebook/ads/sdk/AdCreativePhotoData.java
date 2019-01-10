@@ -69,15 +69,17 @@ public class AdCreativePhotoData extends APINode {
   private String mPageWelcomeMessage = null;
   @SerializedName("url")
   private String mUrl = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdCreativePhotoData() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdCreativePhotoData loadJSON(String json, APIContext context) {
+  public static AdCreativePhotoData loadJSON(String json, APIContext context, String header) {
     AdCreativePhotoData adCreativePhotoData = getGson().fromJson(json, AdCreativePhotoData.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -94,11 +96,12 @@ public class AdCreativePhotoData extends APINode {
     }
     adCreativePhotoData.context = context;
     adCreativePhotoData.rawValue = json;
+    adCreativePhotoData.header = header;
     return adCreativePhotoData;
   }
 
-  public static APINodeList<AdCreativePhotoData> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdCreativePhotoData> adCreativePhotoDatas = new APINodeList<AdCreativePhotoData>(request, json);
+  public static APINodeList<AdCreativePhotoData> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdCreativePhotoData> adCreativePhotoDatas = new APINodeList<AdCreativePhotoData>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -109,7 +112,7 @@ public class AdCreativePhotoData extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adCreativePhotoDatas.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adCreativePhotoDatas.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adCreativePhotoDatas;
       } else if (result.isJsonObject()) {
@@ -134,7 +137,7 @@ public class AdCreativePhotoData extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adCreativePhotoDatas.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adCreativePhotoDatas.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -145,13 +148,13 @@ public class AdCreativePhotoData extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adCreativePhotoDatas.add(loadJSON(entry.getValue().toString(), context));
+                  adCreativePhotoDatas.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adCreativePhotoDatas.add(loadJSON(obj.toString(), context));
+              adCreativePhotoDatas.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adCreativePhotoDatas;
@@ -159,7 +162,7 @@ public class AdCreativePhotoData extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adCreativePhotoDatas.add(loadJSON(entry.getValue().toString(), context));
+              adCreativePhotoDatas.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adCreativePhotoDatas;
         } else {
@@ -178,7 +181,7 @@ public class AdCreativePhotoData extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adCreativePhotoDatas.add(loadJSON(value.toString(), context));
+              adCreativePhotoDatas.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -190,7 +193,7 @@ public class AdCreativePhotoData extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adCreativePhotoDatas.clear();
-          adCreativePhotoDatas.add(loadJSON(json, context));
+          adCreativePhotoDatas.add(loadJSON(json, context, header));
           return adCreativePhotoDatas;
         }
       }
@@ -282,6 +285,15 @@ public class AdCreativePhotoData extends APINode {
     return this;
   }
 
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AdCreativePhotoData setFieldId(String value) {
+    this.mId = value;
+    return this;
+  }
+
 
 
 
@@ -306,6 +318,7 @@ public class AdCreativePhotoData extends APINode {
     this.mImageHash = instance.mImageHash;
     this.mPageWelcomeMessage = instance.mPageWelcomeMessage;
     this.mUrl = instance.mUrl;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -313,8 +326,8 @@ public class AdCreativePhotoData extends APINode {
 
   public static APIRequest.ResponseParser<AdCreativePhotoData> getParser() {
     return new APIRequest.ResponseParser<AdCreativePhotoData>() {
-      public APINodeList<AdCreativePhotoData> parseResponse(String response, APIContext context, APIRequest<AdCreativePhotoData> request) throws MalformedResponseException {
-        return AdCreativePhotoData.parseResponse(response, context, request);
+      public APINodeList<AdCreativePhotoData> parseResponse(String response, APIContext context, APIRequest<AdCreativePhotoData> request, String header) throws MalformedResponseException {
+        return AdCreativePhotoData.parseResponse(response, context, request, header);
       }
     };
   }

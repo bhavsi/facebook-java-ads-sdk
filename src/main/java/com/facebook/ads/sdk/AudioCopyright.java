@@ -90,6 +90,7 @@ public class AudioCopyright extends APINode {
 
   public AudioCopyright(String id, APIContext context) {
     this.mId = id;
+
     this.context = context;
   }
 
@@ -108,19 +109,17 @@ public class AudioCopyright extends APINode {
   }
 
   public static AudioCopyright fetchById(String id, APIContext context) throws APIException {
-    AudioCopyright audioCopyright =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .execute();
-    return audioCopyright;
   }
 
   public static ListenableFuture<AudioCopyright> fetchByIdAsync(String id, APIContext context) throws APIException {
-    ListenableFuture<AudioCopyright> audioCopyright =
+    return
       new APIRequestGet(id, context)
       .requestAllFields()
       .executeAsync();
-    return audioCopyright;
   }
 
   public static APINodeList<AudioCopyright> fetchByIds(List<String> ids, List<String> fields, APIContext context) throws APIException {
@@ -133,12 +132,11 @@ public class AudioCopyright extends APINode {
   }
 
   public static ListenableFuture<APINodeList<AudioCopyright>> fetchByIdsAsync(List<String> ids, List<String> fields, APIContext context) throws APIException {
-    ListenableFuture<APINodeList<AudioCopyright>> audioCopyright =
+    return
       new APIRequest(context, "", "/", "GET", AudioCopyright.getParser())
         .setParam("ids", APIRequest.joinStringList(ids))
         .requestFields(fields)
         .executeAsyncBase();
-    return audioCopyright;
   }
 
   private String getPrefixedId() {
@@ -148,7 +146,7 @@ public class AudioCopyright extends APINode {
   public String getId() {
     return getFieldId().toString();
   }
-  public static AudioCopyright loadJSON(String json, APIContext context) {
+  public static AudioCopyright loadJSON(String json, APIContext context, String header) {
     AudioCopyright audioCopyright = getGson().fromJson(json, AudioCopyright.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -165,11 +163,12 @@ public class AudioCopyright extends APINode {
     }
     audioCopyright.context = context;
     audioCopyright.rawValue = json;
+    audioCopyright.header = header;
     return audioCopyright;
   }
 
-  public static APINodeList<AudioCopyright> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AudioCopyright> audioCopyrights = new APINodeList<AudioCopyright>(request, json);
+  public static APINodeList<AudioCopyright> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AudioCopyright> audioCopyrights = new APINodeList<AudioCopyright>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -180,7 +179,7 @@ public class AudioCopyright extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          audioCopyrights.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          audioCopyrights.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return audioCopyrights;
       } else if (result.isJsonObject()) {
@@ -205,7 +204,7 @@ public class AudioCopyright extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              audioCopyrights.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              audioCopyrights.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -216,13 +215,13 @@ public class AudioCopyright extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  audioCopyrights.add(loadJSON(entry.getValue().toString(), context));
+                  audioCopyrights.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              audioCopyrights.add(loadJSON(obj.toString(), context));
+              audioCopyrights.add(loadJSON(obj.toString(), context, header));
             }
           }
           return audioCopyrights;
@@ -230,7 +229,7 @@ public class AudioCopyright extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              audioCopyrights.add(loadJSON(entry.getValue().toString(), context));
+              audioCopyrights.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return audioCopyrights;
         } else {
@@ -249,7 +248,7 @@ public class AudioCopyright extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              audioCopyrights.add(loadJSON(value.toString(), context));
+              audioCopyrights.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -261,7 +260,7 @@ public class AudioCopyright extends APINode {
 
           // Sixth, check if it's pure JsonObject
           audioCopyrights.clear();
-          audioCopyrights.add(loadJSON(json, context));
+          audioCopyrights.add(loadJSON(json, context, header));
           return audioCopyrights;
         }
       }
@@ -291,6 +290,10 @@ public class AudioCopyright extends APINode {
 
   public APIRequestGet get() {
     return new APIRequestGet(this.getPrefixedId().toString(), context);
+  }
+
+  public APIRequestUpdate update() {
+    return new APIRequestUpdate(this.getPrefixedId().toString(), context);
   }
 
 
@@ -373,8 +376,8 @@ public class AudioCopyright extends APINode {
     };
 
     @Override
-    public AudioCopyright parseResponse(String response) throws APIException {
-      return AudioCopyright.parseResponse(response, getContext(), this).head();
+    public AudioCopyright parseResponse(String response, String header) throws APIException {
+      return AudioCopyright.parseResponse(response, getContext(), this, header).head();
     }
 
     @Override
@@ -384,7 +387,8 @@ public class AudioCopyright extends APINode {
 
     @Override
     public AudioCopyright execute(Map<String, Object> extraParams) throws APIException {
-      lastResponse = parseResponse(executeInternal(extraParams));
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
       return lastResponse;
     }
 
@@ -395,10 +399,10 @@ public class AudioCopyright extends APINode {
     public ListenableFuture<AudioCopyright> executeAsync(Map<String, Object> extraParams) throws APIException {
       return Futures.transform(
         executeAsyncInternal(extraParams),
-        new Function<String, AudioCopyright>() {
-           public AudioCopyright apply(String result) {
+        new Function<ResponseWrapper, AudioCopyright>() {
+           public AudioCopyright apply(ResponseWrapper result) {
              try {
-               return APIRequestGet.this.parseResponse(result);
+               return APIRequestGet.this.parseResponse(result.getBody(), result.getHeader());
              } catch (Exception e) {
                throw new RuntimeException(e);
              }
@@ -546,6 +550,197 @@ public class AudioCopyright extends APINode {
     }
   }
 
+  public static class APIRequestUpdate extends APIRequest<AudioCopyright> {
+
+    AudioCopyright lastResponse = null;
+    @Override
+    public AudioCopyright getLastResponse() {
+      return lastResponse;
+    }
+    public static final String[] PARAMS = {
+      "update_source",
+      "match_rule",
+      "ownership_countries",
+      "whitelisted_fb_users",
+      "whitelisted_ig_users",
+      "append_excluded_ownership_segments",
+      "excluded_ownership_segments",
+    };
+
+    public static final String[] FIELDS = {
+    };
+
+    @Override
+    public AudioCopyright parseResponse(String response, String header) throws APIException {
+      return AudioCopyright.parseResponse(response, getContext(), this, header).head();
+    }
+
+    @Override
+    public AudioCopyright execute() throws APIException {
+      return execute(new HashMap<String, Object>());
+    }
+
+    @Override
+    public AudioCopyright execute(Map<String, Object> extraParams) throws APIException {
+      ResponseWrapper rw = executeInternal(extraParams);
+      lastResponse = parseResponse(rw.getBody(), rw.getHeader());
+      return lastResponse;
+    }
+
+    public ListenableFuture<AudioCopyright> executeAsync() throws APIException {
+      return executeAsync(new HashMap<String, Object>());
+    };
+
+    public ListenableFuture<AudioCopyright> executeAsync(Map<String, Object> extraParams) throws APIException {
+      return Futures.transform(
+        executeAsyncInternal(extraParams),
+        new Function<ResponseWrapper, AudioCopyright>() {
+           public AudioCopyright apply(ResponseWrapper result) {
+             try {
+               return APIRequestUpdate.this.parseResponse(result.getBody(), result.getHeader());
+             } catch (Exception e) {
+               throw new RuntimeException(e);
+             }
+           }
+         }
+      );
+    };
+
+    public APIRequestUpdate(String nodeId, APIContext context) {
+      super(context, nodeId, "/", "POST", Arrays.asList(PARAMS));
+    }
+
+    @Override
+    public APIRequestUpdate setParam(String param, Object value) {
+      setParamInternal(param, value);
+      return this;
+    }
+
+    @Override
+    public APIRequestUpdate setParams(Map<String, Object> params) {
+      setParamsInternal(params);
+      return this;
+    }
+
+
+    public APIRequestUpdate setUpdateSource (AudioCopyright.EnumUpdateSource updateSource) {
+      this.setParam("update_source", updateSource);
+      return this;
+    }
+    public APIRequestUpdate setUpdateSource (String updateSource) {
+      this.setParam("update_source", updateSource);
+      return this;
+    }
+
+    public APIRequestUpdate setMatchRule (String matchRule) {
+      this.setParam("match_rule", matchRule);
+      return this;
+    }
+
+    public APIRequestUpdate setOwnershipCountries (List<String> ownershipCountries) {
+      this.setParam("ownership_countries", ownershipCountries);
+      return this;
+    }
+    public APIRequestUpdate setOwnershipCountries (String ownershipCountries) {
+      this.setParam("ownership_countries", ownershipCountries);
+      return this;
+    }
+
+    public APIRequestUpdate setWhitelistedFbUsers (List<String> whitelistedFbUsers) {
+      this.setParam("whitelisted_fb_users", whitelistedFbUsers);
+      return this;
+    }
+    public APIRequestUpdate setWhitelistedFbUsers (String whitelistedFbUsers) {
+      this.setParam("whitelisted_fb_users", whitelistedFbUsers);
+      return this;
+    }
+
+    public APIRequestUpdate setWhitelistedIgUsers (List<String> whitelistedIgUsers) {
+      this.setParam("whitelisted_ig_users", whitelistedIgUsers);
+      return this;
+    }
+    public APIRequestUpdate setWhitelistedIgUsers (String whitelistedIgUsers) {
+      this.setParam("whitelisted_ig_users", whitelistedIgUsers);
+      return this;
+    }
+
+    public APIRequestUpdate setAppendExcludedOwnershipSegments (Boolean appendExcludedOwnershipSegments) {
+      this.setParam("append_excluded_ownership_segments", appendExcludedOwnershipSegments);
+      return this;
+    }
+    public APIRequestUpdate setAppendExcludedOwnershipSegments (String appendExcludedOwnershipSegments) {
+      this.setParam("append_excluded_ownership_segments", appendExcludedOwnershipSegments);
+      return this;
+    }
+
+    public APIRequestUpdate setExcludedOwnershipSegments (List<Object> excludedOwnershipSegments) {
+      this.setParam("excluded_ownership_segments", excludedOwnershipSegments);
+      return this;
+    }
+    public APIRequestUpdate setExcludedOwnershipSegments (String excludedOwnershipSegments) {
+      this.setParam("excluded_ownership_segments", excludedOwnershipSegments);
+      return this;
+    }
+
+    public APIRequestUpdate requestAllFields () {
+      return this.requestAllFields(true);
+    }
+
+    public APIRequestUpdate requestAllFields (boolean value) {
+      for (String field : FIELDS) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestUpdate requestFields (List<String> fields) {
+      return this.requestFields(fields, true);
+    }
+
+    @Override
+    public APIRequestUpdate requestFields (List<String> fields, boolean value) {
+      for (String field : fields) {
+        this.requestField(field, value);
+      }
+      return this;
+    }
+
+    @Override
+    public APIRequestUpdate requestField (String field) {
+      this.requestField(field, true);
+      return this;
+    }
+
+    @Override
+    public APIRequestUpdate requestField (String field, boolean value) {
+      this.requestFieldInternal(field, value);
+      return this;
+    }
+
+  }
+
+  public static enum EnumUpdateSource {
+      @SerializedName("edit_reference_dialog")
+      VALUE_EDIT_REFERENCE_DIALOG("edit_reference_dialog"),
+      @SerializedName("ddex")
+      VALUE_DDEX("ddex"),
+      @SerializedName("reference_conflict_dialog")
+      VALUE_REFERENCE_CONFLICT_DIALOG("reference_conflict_dialog"),
+      NULL(null);
+
+      private String value;
+
+      private EnumUpdateSource(String value) {
+        this.value = value;
+      }
+
+      @Override
+      public String toString() {
+        return value;
+      }
+  }
+
 
   synchronized /*package*/ static Gson getGson() {
     if (gson != null) {
@@ -580,8 +775,8 @@ public class AudioCopyright extends APINode {
 
   public static APIRequest.ResponseParser<AudioCopyright> getParser() {
     return new APIRequest.ResponseParser<AudioCopyright>() {
-      public APINodeList<AudioCopyright> parseResponse(String response, APIContext context, APIRequest<AudioCopyright> request) throws MalformedResponseException {
-        return AudioCopyright.parseResponse(response, context, request);
+      public APINodeList<AudioCopyright> parseResponse(String response, APIContext context, APIRequest<AudioCopyright> request, String header) throws MalformedResponseException {
+        return AudioCopyright.parseResponse(response, context, request, header);
       }
     };
   }

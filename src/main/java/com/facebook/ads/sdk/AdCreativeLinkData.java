@@ -78,7 +78,7 @@ public class AdCreativeLinkData extends APINode {
   @SerializedName("custom_overlay_spec")
   private AdCreativeLinkDataCustomOverlaySpec mCustomOverlaySpec = null;
   @SerializedName("customization_rules_spec")
-  private List<Object> mCustomizationRulesSpec = null;
+  private List<AdCustomizationRuleSpec> mCustomizationRulesSpec = null;
   @SerializedName("description")
   private String mDescription = null;
   @SerializedName("event_id")
@@ -91,6 +91,8 @@ public class AdCreativeLinkData extends APINode {
   private AdsImageCrops mImageCrops = null;
   @SerializedName("image_hash")
   private String mImageHash = null;
+  @SerializedName("image_layer_specs")
+  private List<AdCreativeLinkDataImageLayerSpec> mImageLayerSpecs = null;
   @SerializedName("image_overlay_spec")
   private AdCreativeLinkDataImageOverlaySpec mImageOverlaySpec = null;
   @SerializedName("link")
@@ -117,17 +119,23 @@ public class AdCreativeLinkData extends APINode {
   private List<String> mRetailerItemIds = null;
   @SerializedName("show_multiple_images")
   private Boolean mShowMultipleImages = null;
+  @SerializedName("sponsorship_info")
+  private AdCreativeLinkDataSponsorshipInfoSpec mSponsorshipInfo = null;
   @SerializedName("static_fallback_spec")
-  private Object mStaticFallbackSpec = null;
+  private AdCreativeStaticFallbackSpec mStaticFallbackSpec = null;
+  @SerializedName("use_flexible_image_aspect_ratio")
+  private Boolean mUseFlexibleImageAspectRatio = null;
+  @SerializedName("id")
+  private String mId = null;
   protected static Gson gson = null;
 
   public AdCreativeLinkData() {
   }
 
   public String getId() {
-    return null;
+    return getFieldId().toString();
   }
-  public static AdCreativeLinkData loadJSON(String json, APIContext context) {
+  public static AdCreativeLinkData loadJSON(String json, APIContext context, String header) {
     AdCreativeLinkData adCreativeLinkData = getGson().fromJson(json, AdCreativeLinkData.class);
     if (context.isDebug()) {
       JsonParser parser = new JsonParser();
@@ -144,11 +152,12 @@ public class AdCreativeLinkData extends APINode {
     }
     adCreativeLinkData.context = context;
     adCreativeLinkData.rawValue = json;
+    adCreativeLinkData.header = header;
     return adCreativeLinkData;
   }
 
-  public static APINodeList<AdCreativeLinkData> parseResponse(String json, APIContext context, APIRequest request) throws MalformedResponseException {
-    APINodeList<AdCreativeLinkData> adCreativeLinkDatas = new APINodeList<AdCreativeLinkData>(request, json);
+  public static APINodeList<AdCreativeLinkData> parseResponse(String json, APIContext context, APIRequest request, String header) throws MalformedResponseException {
+    APINodeList<AdCreativeLinkData> adCreativeLinkDatas = new APINodeList<AdCreativeLinkData>(request, json, header);
     JsonArray arr;
     JsonObject obj;
     JsonParser parser = new JsonParser();
@@ -159,7 +168,7 @@ public class AdCreativeLinkData extends APINode {
         // First, check if it's a pure JSON Array
         arr = result.getAsJsonArray();
         for (int i = 0; i < arr.size(); i++) {
-          adCreativeLinkDatas.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+          adCreativeLinkDatas.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
         };
         return adCreativeLinkDatas;
       } else if (result.isJsonObject()) {
@@ -184,7 +193,7 @@ public class AdCreativeLinkData extends APINode {
             // Second, check if it's a JSON array with "data"
             arr = obj.get("data").getAsJsonArray();
             for (int i = 0; i < arr.size(); i++) {
-              adCreativeLinkDatas.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context));
+              adCreativeLinkDatas.add(loadJSON(arr.get(i).getAsJsonObject().toString(), context, header));
             };
           } else if (obj.get("data").isJsonObject()) {
             // Third, check if it's a JSON object with "data"
@@ -195,13 +204,13 @@ public class AdCreativeLinkData extends APINode {
                 isRedownload = true;
                 obj = obj.getAsJsonObject(s);
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                  adCreativeLinkDatas.add(loadJSON(entry.getValue().toString(), context));
+                  adCreativeLinkDatas.add(loadJSON(entry.getValue().toString(), context, header));
                 }
                 break;
               }
             }
             if (!isRedownload) {
-              adCreativeLinkDatas.add(loadJSON(obj.toString(), context));
+              adCreativeLinkDatas.add(loadJSON(obj.toString(), context, header));
             }
           }
           return adCreativeLinkDatas;
@@ -209,7 +218,7 @@ public class AdCreativeLinkData extends APINode {
           // Fourth, check if it's a map of image objects
           obj = obj.get("images").getAsJsonObject();
           for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-              adCreativeLinkDatas.add(loadJSON(entry.getValue().toString(), context));
+              adCreativeLinkDatas.add(loadJSON(entry.getValue().toString(), context, header));
           }
           return adCreativeLinkDatas;
         } else {
@@ -228,7 +237,7 @@ public class AdCreativeLinkData extends APINode {
               value.getAsJsonObject().get("id") != null &&
               value.getAsJsonObject().get("id").getAsString().equals(key)
             ) {
-              adCreativeLinkDatas.add(loadJSON(value.toString(), context));
+              adCreativeLinkDatas.add(loadJSON(value.toString(), context, header));
             } else {
               isIdIndexedArray = false;
               break;
@@ -240,7 +249,7 @@ public class AdCreativeLinkData extends APINode {
 
           // Sixth, check if it's pure JsonObject
           adCreativeLinkDatas.clear();
-          adCreativeLinkDatas.add(loadJSON(json, context));
+          adCreativeLinkDatas.add(loadJSON(json, context, header));
           return adCreativeLinkDatas;
         }
       }
@@ -393,15 +402,20 @@ public class AdCreativeLinkData extends APINode {
     this.mCustomOverlaySpec = AdCreativeLinkDataCustomOverlaySpec.getGson().fromJson(value, type);
     return this;
   }
-  public List<Object> getFieldCustomizationRulesSpec() {
+  public List<AdCustomizationRuleSpec> getFieldCustomizationRulesSpec() {
     return mCustomizationRulesSpec;
   }
 
-  public AdCreativeLinkData setFieldCustomizationRulesSpec(List<Object> value) {
+  public AdCreativeLinkData setFieldCustomizationRulesSpec(List<AdCustomizationRuleSpec> value) {
     this.mCustomizationRulesSpec = value;
     return this;
   }
 
+  public AdCreativeLinkData setFieldCustomizationRulesSpec(String value) {
+    Type type = new TypeToken<List<AdCustomizationRuleSpec>>(){}.getType();
+    this.mCustomizationRulesSpec = AdCustomizationRuleSpec.getGson().fromJson(value, type);
+    return this;
+  }
   public String getFieldDescription() {
     return mDescription;
   }
@@ -461,6 +475,20 @@ public class AdCreativeLinkData extends APINode {
     return this;
   }
 
+  public List<AdCreativeLinkDataImageLayerSpec> getFieldImageLayerSpecs() {
+    return mImageLayerSpecs;
+  }
+
+  public AdCreativeLinkData setFieldImageLayerSpecs(List<AdCreativeLinkDataImageLayerSpec> value) {
+    this.mImageLayerSpecs = value;
+    return this;
+  }
+
+  public AdCreativeLinkData setFieldImageLayerSpecs(String value) {
+    Type type = new TypeToken<List<AdCreativeLinkDataImageLayerSpec>>(){}.getType();
+    this.mImageLayerSpecs = AdCreativeLinkDataImageLayerSpec.getGson().fromJson(value, type);
+    return this;
+  }
   public AdCreativeLinkDataImageOverlaySpec getFieldImageOverlaySpec() {
     return mImageOverlaySpec;
   }
@@ -588,12 +616,49 @@ public class AdCreativeLinkData extends APINode {
     return this;
   }
 
-  public Object getFieldStaticFallbackSpec() {
+  public AdCreativeLinkDataSponsorshipInfoSpec getFieldSponsorshipInfo() {
+    return mSponsorshipInfo;
+  }
+
+  public AdCreativeLinkData setFieldSponsorshipInfo(AdCreativeLinkDataSponsorshipInfoSpec value) {
+    this.mSponsorshipInfo = value;
+    return this;
+  }
+
+  public AdCreativeLinkData setFieldSponsorshipInfo(String value) {
+    Type type = new TypeToken<AdCreativeLinkDataSponsorshipInfoSpec>(){}.getType();
+    this.mSponsorshipInfo = AdCreativeLinkDataSponsorshipInfoSpec.getGson().fromJson(value, type);
+    return this;
+  }
+  public AdCreativeStaticFallbackSpec getFieldStaticFallbackSpec() {
     return mStaticFallbackSpec;
   }
 
-  public AdCreativeLinkData setFieldStaticFallbackSpec(Object value) {
+  public AdCreativeLinkData setFieldStaticFallbackSpec(AdCreativeStaticFallbackSpec value) {
     this.mStaticFallbackSpec = value;
+    return this;
+  }
+
+  public AdCreativeLinkData setFieldStaticFallbackSpec(String value) {
+    Type type = new TypeToken<AdCreativeStaticFallbackSpec>(){}.getType();
+    this.mStaticFallbackSpec = AdCreativeStaticFallbackSpec.getGson().fromJson(value, type);
+    return this;
+  }
+  public Boolean getFieldUseFlexibleImageAspectRatio() {
+    return mUseFlexibleImageAspectRatio;
+  }
+
+  public AdCreativeLinkData setFieldUseFlexibleImageAspectRatio(Boolean value) {
+    this.mUseFlexibleImageAspectRatio = value;
+    return this;
+  }
+
+  public String getFieldId() {
+    return mId;
+  }
+
+  public AdCreativeLinkData setFieldId(String value) {
+    this.mId = value;
     return this;
   }
 
@@ -674,6 +739,7 @@ public class AdCreativeLinkData extends APINode {
     this.mFormatOption = instance.mFormatOption;
     this.mImageCrops = instance.mImageCrops;
     this.mImageHash = instance.mImageHash;
+    this.mImageLayerSpecs = instance.mImageLayerSpecs;
     this.mImageOverlaySpec = instance.mImageOverlaySpec;
     this.mLink = instance.mLink;
     this.mMessage = instance.mMessage;
@@ -687,7 +753,10 @@ public class AdCreativeLinkData extends APINode {
     this.mPreferredImageTags = instance.mPreferredImageTags;
     this.mRetailerItemIds = instance.mRetailerItemIds;
     this.mShowMultipleImages = instance.mShowMultipleImages;
+    this.mSponsorshipInfo = instance.mSponsorshipInfo;
     this.mStaticFallbackSpec = instance.mStaticFallbackSpec;
+    this.mUseFlexibleImageAspectRatio = instance.mUseFlexibleImageAspectRatio;
+    this.mId = instance.mId;
     this.context = instance.context;
     this.rawValue = instance.rawValue;
     return this;
@@ -695,8 +764,8 @@ public class AdCreativeLinkData extends APINode {
 
   public static APIRequest.ResponseParser<AdCreativeLinkData> getParser() {
     return new APIRequest.ResponseParser<AdCreativeLinkData>() {
-      public APINodeList<AdCreativeLinkData> parseResponse(String response, APIContext context, APIRequest<AdCreativeLinkData> request) throws MalformedResponseException {
-        return AdCreativeLinkData.parseResponse(response, context, request);
+      public APINodeList<AdCreativeLinkData> parseResponse(String response, APIContext context, APIRequest<AdCreativeLinkData> request, String header) throws MalformedResponseException {
+        return AdCreativeLinkData.parseResponse(response, context, request, header);
       }
     };
   }
